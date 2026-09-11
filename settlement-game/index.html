@@ -1591,7 +1591,31 @@ function stopSpeech(){
 function getPreRenderedAudioTrack(){
   const s = state.screen;
   if(s === "intro") return "audio/intro.wav";
-  if(s === "arch" && state.completed.length === 0) return "audio/arch_start.wav";
+  if(s === "arch"){
+    if(state.completed.length === 0) return "audio/arch_start.wav";
+    if(state.completed.length === 1) return "audio/arch_done1.wav";
+    return "audio/arch_done2.wav";
+  }
+  if(s === "island"){
+    const isl = currentIsland();
+    if(!isl) return null;
+    if(!state.openSite) return `audio/${isl.id}_scout_general.wav`;
+    const site = siteById(isl, state.openSite);
+    if(site && site.letter) return `audio/${isl.id}_site_${site.letter.toLowerCase()}.wav`;
+    return null;
+  }
+  if(s === "predict") return "audio/predict_prompt.wav";
+  if(s === "year"){
+    const isl = currentIsland();
+    if(!isl || !state.run) return null;
+    if(state.run.cardChoice === null || state.run.cardChoice === undefined){
+      return `audio/${isl.id}_y${state.run.yearIndex + 1}.wav`;
+    }
+    return null;
+  }
+  if(s === "maps"){
+    return `audio/map_q${state.mapStep + 1}.wav`;
+  }
   if(s === "australia") return "audio/australia.wav";
   if(s === "pattern") return "audio/pattern.wav";
   if(s === "write") return "audio/write.wav";
