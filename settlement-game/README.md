@@ -97,6 +97,10 @@ consistently — but their choices genuinely matter.
 ## Reading support
 
 - Everything is written in short phrases — most notes are 3–6 words.
+- Heat, humidity and plants are shown the same way everywhere — filled/hollow dots plus a
+  couple of words — so the four islands can be compared at a glance without reading prose.
+  An island's rating is the rounded average of its own three sites, so a card can never
+  disagree with the scout reports underneath it.
 - A **🔊 Read to me** button sits on every screen and uses the browser's own voice.
   No software to install; it works offline on iPads. It reads long pages in chunks so it
   does not cut out. If a device has no voice, the button simply does not appear.

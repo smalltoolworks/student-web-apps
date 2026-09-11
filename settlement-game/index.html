@@ -66,6 +66,12 @@ ul.things{list-style:none;margin:14px 0 0;padding:0}
 ul.things li{display:flex;gap:13px;align-items:flex-start;margin:0 0 12px;font-size:1.06rem}
 ul.things li:last-child{margin-bottom:0}
 ul.things .ic{font-size:1.5rem;line-height:1.15;flex:0 0 auto;width:1.4em;text-align:center}
+ul.cscores{list-style:none;margin:12px 0 0;padding:0}
+ul.cscores li{display:flex;align-items:center;gap:9px;margin:0 0 7px;font-size:.97rem;font-weight:600}
+ul.cscores li:last-child{margin-bottom:0}
+ul.cscores .ic{font-size:1.1rem;width:1.3em;text-align:center;flex:0 0 auto}
+ul.cscores .dots{flex:0 0 auto}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* Always 2x2, so the four islands read as one set to compare, not 3 + 1. */
 .isles{display:grid;gap:16px;grid-template-columns:1fr 1fr;align-items:stretch}
 @media (max-width:620px){.isles{grid-template-columns:1fr}}
@@ -332,7 +338,8 @@ const ISLANDS = Object.freeze([
   /* ---------------- TROPICAL ---------------- */
   {id:"palm", name:"Palm Island", flag:"🌴", zone:"Tropical", like:"like Darwin",
    climate:{temperature:"Hot all year", humidity:"Very wet, sticky air",
-            vegetation:"Rainforest and mangroves", summary:"Two seasons: The Wet and The Dry. Cyclones."},
+            vegetation:"Rainforest and mangroves", summary:"Two seasons: The Wet and The Dry. Cyclones.",
+            short:{temp:"Hot all year",humidity:"Wet, sticky air",plants:"Rainforest"}},
    map:["~~~~~~~~~~~~","~~~..,,.~~~~","~~.,RRnR,.~~","~.,RRn=RRn.~","~.,RR,=Rn,.~",
         "~.,RR,=RRm.~","~..R,,=,mm.~","~~.,,m=mm.~~","~~~..~=~..~~"],
    sites:[
@@ -368,7 +375,8 @@ const ISLANDS = Object.freeze([
   /* ---------------- DESERT ---------------- */
   {id:"red", name:"Red Island", flag:"🏜️", zone:"Desert", like:"like Alice Springs",
    climate:{temperature:"Baking days, freezing nights", humidity:"Very dry air",
-            vegetation:"Spinifex and saltbush", summary:"Almost no rain. Hot days, cold nights."},
+            vegetation:"Spinifex and saltbush", summary:"Almost no rain. Hot days, cold nights.",
+            short:{temp:"Baking days, cold nights",humidity:"Very dry",plants:"Spinifex"}},
    map:["~~~~~~~~~~~~","~~~.ddd.~~~~","~~.dSSkSd.~~","~.dSSkOkSd.~","~.dSskSkSd.~",
         "~.dSssSSSd.~","~..dSsSSdd.~","~~.ddSSdd.~~","~~~.dd..~~~~"],
    sites:[
@@ -404,7 +412,8 @@ const ISLANDS = Object.freeze([
   /* ---------------- GRASSLAND ---------------- */
   {id:"gold", name:"Gold Island", flag:"🌾", zone:"Grassland", like:"like Broken Hill",
    climate:{temperature:"Hot summers, cool winters", humidity:"Dry most of the year",
-            vegetation:"Golden grass and scrub", summary:"Some rain, then long dry spells."},
+            vegetation:"Golden grass and scrub", summary:"Some rain, then long dry spells.",
+            short:{temp:"Hot summers",humidity:"Dry",plants:"Golden grass"}},
    map:["~~~~~~~~~~~~","~~~..,,,.~~~","~~.,GGnG,.~~","~.,GG=nGG,.~","~.,GS=SnGG.~",
         "~.,GG=GGGS.~","~..GG=GGG,.~","~~.,G=SSG.~~","~~~..=~..~~~"],
    sites:[
@@ -440,7 +449,8 @@ const ISLANDS = Object.freeze([
   /* ---------------- TEMPERATE ---------------- */
   {id:"green", name:"Green Island", flag:"🌳", zone:"Temperate", like:"like Sydney",
    climate:{temperature:"Mild. Warm summers, cool winters.", humidity:"Comfy. Rain all year.",
-            vegetation:"Gum trees and grassy flats", summary:"Four gentle seasons. Rain all year."},
+            vegetation:"Gum trees and grassy flats", summary:"Four gentle seasons. Rain all year.",
+            short:{temp:"Mild",humidity:"Rain all year",plants:"Gum trees"}},
    map:["~~~~~~~~~~~~","~~~.,,,,.~~~","~~.,,T=T,.~~","~.,TTn=nTA.~","~.,,Tn=,T,.~",
         "~.,,,,=,TO.~","~..,,,=,,,.~","~~.,,,=,,.~~","~~~..~=~..~~"],
    sites:[
@@ -550,6 +560,12 @@ function simulate(scores, island, cardDelta){
     if(pop===0) break;
   }
   return out;
+}
+/* An island's climate rating is the rounded average of its three sites, so a
+   card can never disagree with the scout reports underneath it. */
+function islandClimate(isl){
+  const avg = k => Math.round(isl.sites.reduce((a,st)=>a+st.scores[k],0)/isl.sites.length);
+  return {temp:avg("temp"), humidity:avg("humidity"), plants:avg("plants")};
 }
 const outcomeFor = p => OUTCOMES.find(o=>p>=o.min);
 const roomFor    = p => ROOMS.find(o=>p>=o.min);
@@ -709,12 +725,24 @@ function meters(pop){
       <p class="mword">${rm.word}</p><p class="mnote">${esc(rm.note)}</p></div>
   </div>`;
 }
+/* emoji + dots + a couple of words, matching the scout reports */
+function climateScores(isl, long){
+  const c = islandClimate(isl);
+  const rows = [["temp","🌡️"],["humidity","💨"],["plants","🌿"]].map(([k,ic])=>{
+    const f = FACTORS.find(x=>x.key===k), n = c[k];
+    const words = long
+      ? {temp:isl.climate.temperature, humidity:isl.climate.humidity, plants:isl.climate.vegetation}[k]
+      : isl.climate.short[k];
+    return `<li class="s${n}"><span class="ic" aria-hidden="true">${ic}</span>${dots(n)}
+      <span>${esc(words)}</span><span class="sr">${f.words[n]}</span></li>`;
+  }).join("");
+  return `<ul class="cscores">${rows}</ul>`;
+}
+
 function climateBox(isl){
-  return `<div class="climate"><dl>
-    <dt>Climate</dt><dd><span class="zone z-${isl.zone}">${isl.zone}</span> ${esc(isl.like)}</dd>
-    <dt>🌡️ Heat</dt><dd>${esc(isl.climate.temperature)}</dd>
-    <dt>💨 Humidity</dt><dd>${esc(isl.climate.humidity)}</dd>
-    <dt>🌿 Plants</dt><dd>${esc(isl.climate.vegetation)}</dd></dl></div>`;
+  return `<div class="climate">
+    <p style="margin:0 0 6px;font-weight:700"><span class="zone z-${isl.zone}">${isl.zone}</span> ${esc(isl.like)}</p>
+    ${climateScores(isl,true)}</div>`;
 }
 const reflectBtn = () => canReflect()
   ? `<button class="btn big warmbtn" data-action="go" data-screen="australia">I'm ready to think →</button>` : "";
@@ -747,9 +775,7 @@ function screenArch(){
       <span class="flag">${isl.flag}</span><span class="zone z-${isl.zone}">${isl.zone}</span>
       <h3>${esc(isl.name)}</h3>
       <p class="muted" style="margin:0">${esc(isl.climate.summary)}</p>
-      <dl><dt>🌡️</dt><dd>${esc(isl.climate.temperature)}</dd>
-          <dt>💨</dt><dd>${esc(isl.climate.humidity)}</dd>
-          <dt>🌿</dt><dd>${esc(isl.climate.vegetation)}</dd></dl></button>`;
+      ${climateScores(isl,false)}</button>`;
   }).join("");
   const n = state.completed.length;
   const note = n===0 ? `Settle any <strong>two</strong> islands. Do more if you want to.`
