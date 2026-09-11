@@ -55,8 +55,10 @@ button{font:inherit;color:inherit}
 #speakbar{position:fixed;right:16px;bottom:16px;z-index:50}
 #speakbtn{display:flex;align-items:center;gap:8px;min-height:56px;padding:12px 20px;border-radius:999px;
   background:#fff;color:var(--teal);border:3px solid var(--teal);font-weight:800;font-size:1rem;
-  cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.18)}
-#speakbtn.on{background:var(--teal);color:#fff}
+  cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.18);transition:all .15s ease}
+#speakbtn.on{background:var(--teal);color:#fff;box-shadow:0 4px 14px rgba(29,122,140,.45)}
+#speakbtn.on .spk-icon{display:inline-block;animation:spkpulse 1s infinite alternate ease-in-out}
+@keyframes spkpulse{0%{transform:scale(1)}100%{transform:scale(1.25)}}
 
 /* islands */
 ol.steps{margin:0;padding:0 0 0 1.5em}
@@ -1123,50 +1125,287 @@ function render(){
 }
 
 /* ============================================================
-   6. READ ALOUD  (browser's own voice; no library, works offline)
+   6. READ ALOUD  (curated teacher audio guide; offline browser voice)
    ============================================================ */
 const SPEECH = typeof window.speechSynthesis!=="undefined" && typeof window.SpeechSynthesisUtterance!=="undefined";
 let speaking=false, chunks=[], chunkAt=0;
+window._activeSpeechUtterance = null;
+
 if(SPEECH && speechSynthesis.onvoiceschanged !== undefined){
-  speechSynthesis.onvoiceschanged = ()=>{};   // just nudges some browsers to load voices
+  speechSynthesis.onvoiceschanged = ()=>{};
 }
+
+function cleanSpeechChunk(str){
+  if(!str) return "";
+  return String(str)
+    .replace(/<[^>]+>/g, " ")
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F1E6}-\u{1F1FF}\uFE0F\uFE0E\u200D]/gu, "")
+    .replace(/[●○★☆→←✓•·✕]/g, "")
+    .replace(/\bmm\b/g, "millimetres")
+    .replace(/°C/g, " degrees")
+    .replace(/&amp;/g, "and")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getScreenSpeechText(){
+  const s = state.screen;
+  if(s==="intro"){
+    return [
+      "The Sunrise Islands. Where would you live?",
+      "Four imaginary islands, four different climates. Nobody lives on them yet.",
+      "You are the scout for 20 settlers. Settle at least two islands, then decide where you would live.",
+      "Every place gives you two things to weigh up. People: how many can live there. And Room: how much space you have to live and play.",
+      "A crowded place has small blocks and busy streets. An open place has lots of room to play. You cannot have both!",
+      "Climate is the weather a place usually gets. Watch three things: how hot it is, how humid it is, and what plants grow."
+    ];
+  }
+  if(s==="arch"){
+    const n = state.completed.length;
+    const guide = n === 0
+      ? "Pick an island. Settle any two islands. Do more if you want to."
+      : (n === 1
+          ? "One island done! Settle one more, then you can go and think about Australia."
+          : `${n} islands settled! Settle more, or tap I am ready to think.`);
+    const list = ISLANDS.map(isl=>{
+      const done = state.completed.find(r=>r.islandId===isl.id);
+      if(done){
+        const rm = roomFor(done.final);
+        return `${isl.name}, settled. ${done.final} people, ${rm.word}.`;
+      }
+      return `${isl.name}. ${isl.zone} climate. ${isl.climate.summary}. ${isl.climate.rainWord}.`;
+    });
+    return [guide, ...list];
+  }
+  if(s==="island"){
+    const isl = currentIsland();
+    if(!isl) return ["Pick an island."];
+    const n = scoutedOn(isl), t = isl.sites.length, enough = n >= t;
+    if(state.terrainNote){
+      return [state.terrainNote.name + ".", state.terrainNote.note, "Tap a letter to scout a place."];
+    }
+    const site = state.openSite ? siteById(isl, state.openSite) : null;
+    if(!site){
+      return [
+        `${isl.name}. ${isl.zone} climate, ${isl.like}.`,
+        `${isl.climate.summary}. ${isl.climate.rainWord}, about ${isl.climate.rainMm.toLocaleString()} millimetres.`,
+        "Tap a letter on the map to scout a place for your settlers."
+      ];
+    }
+    const text = [
+      `${isl.name}. Place ${site.letter}: ${site.name}.`,
+      site.blurb,
+      `Water: ${site.notes.water}.`,
+      `Heat: ${site.notes.temp}.`,
+      `Humidity: ${site.notes.humidity}.`,
+      `Plants: ${site.notes.plants}.`,
+      `Shelter: ${site.notes.shelter}.`
+    ];
+    if(enough){
+      text.push("All places are scouted! Tap Settle here to start.");
+    } else {
+      text.push(`Scouted ${n} of ${t}. Tap the other letters on the map to scout them first.`);
+    }
+    return text;
+  }
+  if(s==="predict"){
+    const isl = currentIsland();
+    if(!isl || !state.run) return ["Guess how many people will live here in 3 years."];
+    const site = siteById(isl, state.run.siteId);
+    const siteName = site ? site.name : "this place";
+    return [
+      `Guess first! 20 settlers are moving to ${siteName}.`,
+      "How many people do you think will live here in 3 years?",
+      "There is no wrong guess. About 5, about 20, about 40, or about 60?"
+    ];
+  }
+  if(s==="year"){
+    const isl = currentIsland();
+    if(!isl || !state.run) return [];
+    const site = siteById(isl, state.run.siteId);
+    const siteName = site ? site.name : "";
+    const i = state.run.yearIndex, y = isl.years[i], card = isl.cards[i], pick = state.run.cardChoice;
+    const popNow = state.run.history.length ? state.run.history[state.run.history.length-1].after : START_POP;
+    if(pick === null || pick === undefined){
+      return [
+        `${isl.name}${siteName ? ", " + siteName : ""}. Year ${y.n} of ${isl.years.length}. Current population: ${popNow} people.`,
+        `${y.title}. ${y.headline}`,
+        card.q,
+        "Think about the climate here.",
+        `Choice 1: ${card.opts[0].t}.`,
+        `Choice 2: ${card.opts[1].t}.`,
+        `Choice 3: ${card.opts[2].t}.`
+      ];
+    }
+    const rec = state.run.history[state.run.history.length-1];
+    const chosen = card.opts[pick];
+    return [
+      `Year ${y.n}: ${y.title}.`,
+      `You chose: ${chosen.t}.`,
+      chosen.why,
+      `Population changed from ${rec.before} to ${rec.after} people.`,
+      rec.after === 0 ? "The last people have moved on." : "Tap Next Year to continue."
+    ];
+  }
+  if(s==="result"){
+    if(!state.completed || !state.completed.length) return ["Results are ready."];
+    const done = state.completed[state.completed.length-1];
+    const isl = islandById(done.islandId);
+    if(!isl) return ["Results are ready."];
+    const site = siteById(isl, done.siteId);
+    const siteName = site ? site.name : (done.siteName || "Settlement");
+    const out = outcomeFor(done.final), rm = roomFor(done.final);
+    const scored = site ? FACTORS.map(f=>({f,v:site.scores[f.key]})) : [];
+    const worst = scored.length ? scored.slice().sort((a,b)=>a.v-b.v)[0].f : null;
+    const best = scored.length ? scored.slice().sort((a,b)=>b.v-a.v)[0].f : null;
+    const text = [
+      `${isl.name}: ${siteName}, 3 years on.`,
+      `Final population: ${done.final} people. ${out.label}! ${out.line}`,
+      `Room and space: ${rm.word}. ${rm.note}`
+    ];
+    if(best && worst){
+      text.push(`Best thing: ${best.label}. Hardest thing: ${worst.label}.`);
+    }
+    if(isl.echo){
+      text.push(`${isl.echo.title}. ${isl.echo.text}`);
+    }
+    if(done.prediction != null){
+      text.push(`You guessed ${done.prediction}, and ended with ${done.final}.`);
+    }
+    return text;
+  }
+  if(s==="australia"){
+    return [
+      "Now look at Australia.",
+      "Australia has all four of those climates too.",
+      "Start with how hot it gets. The north and middle are hot, while the south and Tasmania are much cooler.",
+      "Coast or inland? Most Australians live on the mild coast. But some choose inland for open space, big backyards, farms and mining jobs."
+    ];
+  }
+  if(s==="maps"){
+    const i = state.mapStep, item = MAP_LOOKS[i], pick = state.mapPicks[i];
+    if(!item) return [];
+    const answered = pick !== undefined && pick !== null;
+    const text = [
+      "Look at both maps. One map shows rain. The other shows where people live.",
+      `Question ${i+1}: ${item.q}`
+    ];
+    if(!answered){
+      text.push(`Option 1: ${item.a[0].t}.`);
+      text.push(`Option 2: ${item.a[1].t}.`);
+    } else {
+      text.push(item.why);
+    }
+    return text;
+  }
+  if(s==="pattern"){
+    return [
+      "The pattern: Rain and people go together.",
+      "Put the two maps on top of each other and you see it: Where it rains, people live. Where it does not rain, almost nobody does.",
+      "That is why most Australians live near the coast. The coast gets the rain, and it is not too hot.",
+      "But look closer! Out in the dry inland, people live in towns with lots of open space, room for big backyards, and jobs in farming and mining.",
+      "So there is no single right answer. It is a trade-off: crowded and mild, or roomy and hard."
+    ];
+  }
+  if(s==="write"){
+    return [
+      "What do you think? Write in your own words. Tap any word in the word bank to add it.",
+      "Question 1: Most Australians live near the coast. Why?",
+      "Question 2: Some Australians live far inland. Why did people move inland in the past, or live there today?",
+      "Question 3: Where would you live, and why?"
+    ];
+  }
+  if(s==="report"){
+    const R = state.reflection;
+    const text = ["My Island Report."];
+    state.completed.forEach(r=>{
+      const isl = islandById(r.islandId), rm = roomFor(r.final);
+      text.push(`${isl.name}, ${r.siteName}: ${r.final} people, ${rm.word}.`);
+    });
+    if(R.q1 && R.q1.trim()) text.push(`Question 1: Most Australians live near the coast because ${R.q1}.`);
+    if(R.q2 && R.q2.trim()) text.push(`Question 2: People live inland because ${R.q2}.`);
+    if(R.q3 && R.q3.trim()) text.push(`Question 3: I would live ${R.q3}.`);
+    text.push(COPY.closing1);
+    text.push(COPY.closing2);
+    return text;
+  }
+  return [];
+}
+
+function fallbackSpeechText(){
+  const app = document.getElementById("app");
+  if(!app) return [];
+  const clone = app.cloneNode(true);
+  clone.querySelectorAll("svg, button, details.key, figcaption, .denskey, .sr, .missingnote").forEach(el=>el.remove());
+  const text = (clone.innerText||"").replace(/\s+/g," ").trim();
+  return text ? text.split(/(?<=[.!?:])\s+/) : [];
+}
+
 function pickVoice(){
-  const v = speechSynthesis.getVoices() || [];
-  return v.find(x=>/en[-_]AU/i.test(x.lang)) || v.find(x=>/en[-_]GB/i.test(x.lang))
-      || v.find(x=>/^en/i.test(x.lang)) || null;
+  const voices = speechSynthesis.getVoices() || [];
+  return voices.find(x=>/en[-_]AU/i.test(x.lang))
+      || voices.find(x=>/en[-_]GB/i.test(x.lang))
+      || voices.find(x=>/^en/i.test(x.lang))
+      || null;
 }
+
 function stopSpeech(){
   if(!SPEECH) return;
+  speaking=false;
+  chunks=[];
+  chunkAt=0;
+  window._activeSpeechUtterance=null;
   try{ speechSynthesis.cancel(); }catch(e){}
-  speaking=false; chunks=[]; chunkAt=0; renderSpeakBtn();
+  renderSpeakBtn();
 }
+
 function speakNext(){
-  if(chunkAt >= chunks.length){ speaking=false; renderSpeakBtn(); return; }
-  const u = new SpeechSynthesisUtterance(chunks[chunkAt++]);
-  u.rate=0.92; u.pitch=1;
-  const v=pickVoice(); if(v) u.voice=v;
+  if(!speaking) return;
+  if(chunkAt >= chunks.length){
+    speaking=false;
+    window._activeSpeechUtterance=null;
+    renderSpeakBtn();
+    return;
+  }
+  const text = chunks[chunkAt++];
+  const u = new SpeechSynthesisUtterance(text);
+  window._activeSpeechUtterance = u; // Prevents WebKit/Blink garbage-collection cut-out
+  u.rate = 0.95;
+  u.pitch = 1.0;
+  const v = pickVoice();
+  if(v) u.voice = v;
   u.onend = ()=>{ if(speaking) speakNext(); };
-  u.onerror = ()=>{ speaking=false; renderSpeakBtn(); };
+  u.onerror = (err)=>{
+    if(err && err.error === "canceled") return;
+    if(speaking) speakNext();
+  };
   try{ speechSynthesis.speak(u); }catch(e){ speaking=false; renderSpeakBtn(); }
 }
+
 function startSpeech(){
-  const text = (document.getElementById("app").innerText||"").replace(/\s+/g," ").trim();
-  if(!text) return;
-  /* Long utterances get cut off in some browsers, so read it in pieces. */
-  chunks=[]; let buf="";
-  text.split(/(?<=[.!?:])\s+/).forEach(sent=>{
-    if((buf+" "+sent).trim().length > 180){ if(buf) chunks.push(buf.trim()); buf=sent; }
-    else buf = (buf+" "+sent).trim();
-  });
-  if(buf) chunks.push(buf);
-  chunkAt=0; speaking=true; renderSpeakBtn(); speakNext();
+  if(!SPEECH) return;
+  stopSpeech();
+  const raw = getScreenSpeechText();
+  chunks = (raw && raw.length ? raw : fallbackSpeechText())
+    .map(c=>cleanSpeechChunk(c))
+    .filter(Boolean);
+  if(!chunks.length) return;
+  chunkAt=0;
+  speaking=true;
+  renderSpeakBtn();
+  setTimeout(()=>{ if(speaking) speakNext(); }, 60);
 }
+
 function renderSpeakBtn(){
   const bar=document.getElementById("speakbar");
   if(!SPEECH){ bar.innerHTML=""; return; }
   bar.innerHTML = `<button id="speakbtn" class="${speaking?"on":""}" data-speak="1"
-    aria-label="${speaking?"Stop reading":"Read this page aloud"}">${speaking?"⏹ Stop":"🔊 Read to me"}</button>`;
+    aria-label="${speaking?"Stop reading aloud":"Read this page aloud"}">
+    <span class="spk-icon" aria-hidden="true">${speaking?"⏹":"🔊"}</span>
+    <span>${speaking?"Stop reading":"Read to me"}</span>
+  </button>`;
 }
+
 document.getElementById("speakbar").addEventListener("click",()=>{
   if(speaking) stopSpeech(); else startSpeech();
 });
