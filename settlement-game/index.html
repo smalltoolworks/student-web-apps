@@ -373,8 +373,8 @@ textarea:focus{border-color:var(--teal);outline:none}
       <div class="form-group">
         <label for="gemini_model_select"><strong>Gemini Model</strong></label>
         <select id="gemini_model_select">
-          <option value="gemini-2.5-flash">gemini-2.5-flash (Latest & high quality)</option>
-          <option value="gemini-2.0-flash">gemini-2.0-flash (Fast & stable)</option>
+          <option value="gemini-2.5-flash-preview-tts">gemini-2.5-flash-preview-tts (Recommended)</option>
+          <option value="gemini-3.1-flash-tts-preview">gemini-3.1-flash-tts-preview (Latest Preview)</option>
         </select>
       </div>
 
@@ -1240,8 +1240,8 @@ const GEMINI_CONFIG = {
   },
   get voice(){ return localStorage.getItem("sunrise_gemini_voice")||"Aoede"; },
   set voice(v){ localStorage.setItem("sunrise_gemini_voice", v||"Aoede"); },
-  get model(){ return localStorage.getItem("sunrise_gemini_model")||"gemini-2.5-flash"; },
-  set model(v){ localStorage.setItem("sunrise_gemini_model", v||"gemini-2.5-flash"); },
+  get model(){ return localStorage.getItem("sunrise_gemini_model")||"gemini-2.5-flash-preview-tts"; },
+  set model(v){ localStorage.setItem("sunrise_gemini_model", v||"gemini-2.5-flash-preview-tts"); },
   hasKey(){ return !!this.key; }
 };
 
@@ -1521,7 +1521,7 @@ function inlineDataToAudioBlob(inlineData){
 
 async function fetchGeminiAudio(textToSpeak, voiceName, modelName, apiKey){
   const prompt = "Read this clearly, warmly, and at a steady, engaging pace for Year 3 Australian primary students (ages 8-9):\n\n" + textToSpeak;
-  const model = modelName || "gemini-2.5-flash";
+  const model = modelName || "gemini-2.5-flash-preview-tts";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
@@ -1588,6 +1588,16 @@ function stopSpeech(){
   renderSpeakBtn();
 }
 
+function getPreRenderedAudioTrack(){
+  const s = state.screen;
+  if(s === "intro") return "audio/intro.wav";
+  if(s === "arch" && state.completed.length === 0) return "audio/arch_start.wav";
+  if(s === "australia") return "audio/australia.wav";
+  if(s === "pattern") return "audio/pattern.wav";
+  if(s === "write") return "audio/write.wav";
+  return null;
+}
+
 async function startSpeech(){
   stopSpeech();
   const raw = getScreenSpeechText();
@@ -1597,47 +1607,70 @@ async function startSpeech(){
   if(!textArray.length) return;
   const fullText = textArray.join(" ");
 
-  // If Gemini API Key is configured, use Gemini Voice
-  if(GEMINI_CONFIG.hasKey()){
-    geminiLoading = true;
+  // 1. Try pre-rendered studio Gemini voice file first (instant, 0 latency, 0 quota)
+  const preTrack = getPreRenderedAudioTrack();
+  if(preTrack){
     speakingMode = "gemini";
     renderSpeakBtn();
-
-    const cacheKey = `${state.screen}:${state.islandId||""}:${state.run?.yearIndex??state.mapStep??0}:${fullText.slice(0, 50)}:${GEMINI_CONFIG.voice}:${GEMINI_CONFIG.model}`;
+    geminiAudioEl = new Audio(preTrack);
+    geminiAudioEl.onended = ()=>{ stopSpeech(); };
+    geminiAudioEl.onerror = ()=>{
+      geminiAudioEl = null;
+      proceedLiveOrBrowser();
+    };
     try {
-      let audioUrl = geminiAudioCache.get(cacheKey);
-      if(!audioUrl){
-        const blob = await fetchGeminiAudio(fullText, GEMINI_CONFIG.voice, GEMINI_CONFIG.model, GEMINI_CONFIG.key);
-        audioUrl = URL.createObjectURL(blob);
-        geminiAudioCache.set(cacheKey, audioUrl);
-      }
-
-      if(speakingMode !== "gemini") return; // stopped while loading
-
-      geminiLoading = false;
-      geminiAudioEl = new Audio(audioUrl);
-      geminiAudioEl.onended = ()=>{
-        stopSpeech();
-      };
-      geminiAudioEl.onerror = ()=>{
-        console.warn("Gemini audio playback error, falling back to browser voice");
-        stopSpeech();
-        startBrowserSpeech(textArray);
-      };
-      renderSpeakBtn();
       await geminiAudioEl.play();
       return;
-    } catch(err) {
-      console.warn("Gemini speech failed:", err);
-      showAudioToast("Gemini voice: " + (err.message || "check key") + ". Using browser voice.");
-      stopSpeech();
-      startBrowserSpeech(textArray);
-      return;
+    } catch(e){
+      geminiAudioEl = null;
     }
   }
 
-  // Fallback to local browser voice
-  startBrowserSpeech(textArray);
+  proceedLiveOrBrowser();
+
+  async function proceedLiveOrBrowser(){
+    // 2. If Gemini API Key is configured, synthesize live with Gemini TTS
+    if(GEMINI_CONFIG.hasKey()){
+      geminiLoading = true;
+      speakingMode = "gemini";
+      renderSpeakBtn();
+
+      const cacheKey = `${state.screen}:${state.islandId||""}:${state.run?.yearIndex??state.mapStep??0}:${fullText.slice(0, 50)}:${GEMINI_CONFIG.voice}:${GEMINI_CONFIG.model}`;
+      try {
+        let audioUrl = geminiAudioCache.get(cacheKey);
+        if(!audioUrl){
+          const blob = await fetchGeminiAudio(fullText, GEMINI_CONFIG.voice, GEMINI_CONFIG.model, GEMINI_CONFIG.key);
+          audioUrl = URL.createObjectURL(blob);
+          geminiAudioCache.set(cacheKey, audioUrl);
+        }
+
+        if(speakingMode !== "gemini") return; // stopped while loading
+
+        geminiLoading = false;
+        geminiAudioEl = new Audio(audioUrl);
+        geminiAudioEl.onended = ()=>{
+          stopSpeech();
+        };
+        geminiAudioEl.onerror = ()=>{
+          console.warn("Gemini audio playback error, falling back to browser voice");
+          stopSpeech();
+          startBrowserSpeech(textArray);
+        };
+        renderSpeakBtn();
+        await geminiAudioEl.play();
+        return;
+      } catch(err) {
+        console.warn("Gemini speech failed:", err);
+        showAudioToast("Gemini voice: " + (err.message || "check key") + ". Using browser voice.");
+        stopSpeech();
+        startBrowserSpeech(textArray);
+        return;
+      }
+    }
+
+    // 3. Fallback to local browser voice
+    startBrowserSpeech(textArray);
+  }
 }
 
 function startBrowserSpeech(textArray){
@@ -1674,7 +1707,8 @@ function speakNext(){
 function renderSpeakBtn(){
   const bar = document.getElementById("speakbar");
   if(!bar) return;
-  const isGeminiActive = GEMINI_CONFIG.hasKey();
+  const hasPre = !!getPreRenderedAudioTrack();
+  const isGeminiActive = GEMINI_CONFIG.hasKey() || hasPre;
   const isPlaying = speakingMode !== null;
 
   let label = "Read to me";
@@ -1686,7 +1720,8 @@ function renderSpeakBtn(){
     label = isGeminiActive ? "Stop AI voice" : "Stop reading";
     icon = "⏹";
   } else if(isGeminiActive){
-    label = `Read to me (${GEMINI_CONFIG.voice})`;
+    const vName = GEMINI_CONFIG.hasKey() ? GEMINI_CONFIG.voice : "Aoede";
+    label = `Read to me (${vName})`;
     icon = "✨";
   }
 
@@ -1741,7 +1776,7 @@ async function testGeminiVoice(){
   const rawKey = (keyInput ? keyInput.value : "").trim() || GEMINI_CONFIG.key;
   const key = rawKey.replace(/^["']+|["']+$/g, "");
   const voice = (voiceSelect ? voiceSelect.value : "") || "Aoede";
-  const model = (modelSelect ? modelSelect.value : "") || "gemini-2.5-flash";
+  const model = (modelSelect ? modelSelect.value : "") || "gemini-2.5-flash-preview-tts";
 
   if(!key){
     if(statusEl){
@@ -1796,7 +1831,7 @@ function saveTeacherSettings(){
 
   const key = (keyInput ? keyInput.value : "").trim().replace(/^["']+|["']+$/g, "");
   const voice = voiceSelect ? voiceSelect.value : "Aoede";
-  const model = modelSelect ? modelSelect.value : "gemini-2.5-flash";
+  const model = modelSelect ? modelSelect.value : "gemini-2.5-flash-preview-tts";
 
   GEMINI_CONFIG.key = key;
   GEMINI_CONFIG.voice = voice;

@@ -13,7 +13,7 @@ const path = require("path");
 const args = process.argv.slice(2);
 let apiKey = (process.env.GEMINI_API_KEY || "").trim();
 let voice = (process.env.GEMINI_VOICE || "Aoede").trim();
-let model = (process.env.GEMINI_MODEL || "gemini-2.5-flash").trim();
+let model = (process.env.GEMINI_MODEL || "gemini-2.5-flash-preview-tts").trim();
 
 for (const arg of args) {
   if (arg.startsWith("--key=")) apiKey = arg.slice(6).trim();
