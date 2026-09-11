@@ -52,13 +52,24 @@ button{font:inherit;color:inherit}
 .step{font-size:.85rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--ink-soft);margin:0 0 4px}
 
 /* read aloud */
-#speakbar{position:fixed;right:16px;bottom:16px;z-index:50}
+#speakbar{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;align-items:center;gap:8px}
 #speakbtn{display:flex;align-items:center;gap:8px;min-height:56px;padding:12px 20px;border-radius:999px;
   background:#fff;color:var(--teal);border:3px solid var(--teal);font-weight:800;font-size:1rem;
   cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.18);transition:all .15s ease}
 #speakbtn.on{background:var(--teal);color:#fff;box-shadow:0 4px 14px rgba(29,122,140,.45)}
+#speakbtn.gemini{border-color:#7c3aed;color:#6d28d9}
+#speakbtn.gemini.on{background:#7c3aed;color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.45)}
 #speakbtn.on .spk-icon{display:inline-block;animation:spkpulse 1s infinite alternate ease-in-out}
 @keyframes spkpulse{0%{transform:scale(1)}100%{transform:scale(1.25)}}
+.speak-cog-btn{width:48px;height:48px;border-radius:50%;background:#fff;border:3px solid var(--line);
+  font-size:1.25rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 10px rgba(0,0,0,.15);transition:all .15s ease}
+.speak-cog-btn:hover{border-color:var(--teal);background:#f3f8fb;transform:scale(1.06)}
+.speak-cog-btn.has-key{border-color:#7c3aed;background:#faf5ff;box-shadow:0 3px 10px rgba(124,58,237,.25)}
+#audiotoast{position:fixed;bottom:80px;right:16px;z-index:60;background:#1e293b;color:#fff;
+  padding:12px 18px;border-radius:8px;font-size:.92rem;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.3);
+  opacity:0;pointer-events:none;transform:translateY(8px);transition:all .25s ease;max-width:340px}
+#audiotoast.show{opacity:1;pointer-events:auto;transform:translateY(0)}
 
 /* islands */
 ol.steps{margin:0;padding:0 0 0 1.5em}
@@ -284,8 +295,40 @@ textarea:focus{border-color:var(--teal);outline:none}
 .echo-card h2{margin:0 0 8px;font-size:1.18rem;color:var(--teal);display:flex;align-items:center;gap:8px}
 .echo-card p{margin:0;font-size:1.02rem;line-height:1.55}
 
+/* teacher voice modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(14,24,31,.78);display:flex;align-items:center;
+  justify-content:center;z-index:100;padding:16px;backdrop-filter:blur(3px)}
+.modal-overlay[hidden]{display:none}
+.modal-card{background:#fff;border-radius:var(--r);width:100%;max-width:540px;box-shadow:0 14px 40px rgba(0,0,0,.35);
+  border:3px solid var(--line);overflow:hidden;max-height:92vh;display:flex;flex-direction:column}
+.modal-header{padding:18px 22px;background:var(--card);border-bottom:2px solid var(--line);
+  display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{margin:0;font-size:1.22rem;display:flex;align-items:center;gap:10px}
+.badge-teacher{background:#7c3aed;color:#fff;font-size:.72rem;padding:3px 8px;border-radius:999px;font-weight:800;letter-spacing:.05em}
+.modal-close{background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 8px;font-weight:800;color:var(--ink-soft);line-height:1}
+.modal-close:hover{color:var(--ink)}
+.modal-body{padding:20px 22px;overflow-y:auto;display:grid;gap:15px}
+.modal-intro{margin:0;font-size:.95rem;color:var(--ink-soft);line-height:1.45}
+.form-group{display:grid;gap:6px}
+.form-group label{font-size:.95rem;color:var(--ink)}
+.input-row{display:flex;gap:8px}
+.input-row input{flex:1;padding:10px 14px;border:2px solid var(--line);border-radius:var(--r);font-family:monospace;font-size:.95rem}
+.input-row input:focus{border-color:#7c3aed;outline:none}
+.btn-subtle{padding:0 12px;background:var(--card);border:2px solid var(--line);border-radius:var(--r);cursor:pointer;font-size:1.1rem}
+.btn-subtle:hover{border-color:var(--ink);background:#eee}
+.form-group select{padding:10px 14px;border:2px solid var(--line);border-radius:var(--r);font-size:1rem;background:#fff;font-family:inherit}
+.form-group select:focus{border-color:#7c3aed;outline:none}
+.hint-text{font-size:.82rem;color:var(--ink-soft);line-height:1.4}
+.hint-text a{color:var(--teal);font-weight:700;text-decoration:underline}
+.modal-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.test-status{min-height:22px;font-size:.92rem;font-weight:700}
+.test-status.ok{color:var(--good)}
+.test-status.err{color:var(--bad)}
+.test-status.loading{color:#7c3aed}
+.offline-note{font-size:.85rem;color:var(--ink-soft);border-top:1px dashed var(--line);padding-top:12px;margin-top:4px;line-height:1.4}
+
 @media print{
-  #speakbar,#lightbox,.actions,.btn,.bank,details.key{display:none!important}
+  #speakbar,#lightbox,#teachermodal,#audiotoast,.actions,.btn,.bank,details.key{display:none!important}
   body{background:#fff;padding:0}
   .card{break-inside:avoid;border-color:#999}
   textarea{border:1px solid #999;min-height:0}
@@ -296,6 +339,59 @@ textarea:focus{border-color:var(--teal);outline:none}
 <main id="app" aria-live="polite"></main>
 <div id="speakbar"></div>
 <div id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Full size map"></div>
+<div id="teachermodal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-label="Gemini Voice Settings">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>⚙️ Gemini Voice Settings <span class="badge-teacher">Teacher Mode</span></h2>
+      <button class="modal-close" data-close-teacher="1" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-intro">
+        Unlock Google's natural Gemini AI voice for classroom narration. Your API key is stored <strong>only in this browser</strong> (never sent to GitHub or saved in code).
+      </p>
+      
+      <div class="form-group">
+        <label for="gemini_key_input"><strong>Google Gemini API Key</strong></label>
+        <div class="input-row">
+          <input type="password" id="gemini_key_input" placeholder="AIzaSy..." autocomplete="off" spellcheck="false">
+          <button type="button" id="toggle_key_vis" class="btn-subtle" title="Show or Hide Key">👁️</button>
+        </div>
+        <small class="hint-text">Get a free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>. Masked so students cannot see it.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="gemini_voice_select"><strong>Voice Character</strong></label>
+        <select id="gemini_voice_select">
+          <option value="Aoede">Aoede (Warm & expressive — recommended)</option>
+          <option value="Puck">Puck (Energetic & friendly)</option>
+          <option value="Kore">Kore (Calm & soothing)</option>
+          <option value="Charon">Charon (Clear & informative)</option>
+          <option value="Fenrir">Fenrir (Deep & steady)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="gemini_model_select"><strong>Gemini Model</strong></label>
+        <select id="gemini_model_select">
+          <option value="gemini-2.5-flash">gemini-2.5-flash (Latest & high quality)</option>
+          <option value="gemini-2.0-flash">gemini-2.0-flash (Fast & stable)</option>
+        </select>
+      </div>
+
+      <div id="voice_test_status" class="test-status" aria-live="polite"></div>
+
+      <div class="modal-actions">
+        <button type="button" id="btn_test_voice" class="btn secondary">▶ Test Voice</button>
+        <button type="button" id="btn_save_key" class="btn primary">✓ Save Settings</button>
+        <button type="button" id="btn_clear_key" class="btn danger">Remove Key</button>
+      </div>
+
+      <div class="offline-note">
+        <em>If no API key is set or the device goes offline, the game automatically uses the browser voice with zero interruptions.</em>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 "use strict";
@@ -1125,11 +1221,25 @@ function render(){
 }
 
 /* ============================================================
-   6. READ ALOUD  (curated teacher audio guide; offline browser voice)
+   6. READ ALOUD  (Gemini AI voice + curated offline browser guide)
    ============================================================ */
 const SPEECH = typeof window.speechSynthesis!=="undefined" && typeof window.SpeechSynthesisUtterance!=="undefined";
 let speaking=false, chunks=[], chunkAt=0;
+let speakingMode = null; // null | "gemini" | "browser"
+let geminiLoading = false;
+let geminiAudioEl = null;
+const geminiAudioCache = new Map();
 window._activeSpeechUtterance = null;
+
+const GEMINI_CONFIG = {
+  get key(){ return (localStorage.getItem("sunrise_gemini_key")||"").trim(); },
+  set key(v){ if(v) localStorage.setItem("sunrise_gemini_key", v.trim()); else localStorage.removeItem("sunrise_gemini_key"); },
+  get voice(){ return localStorage.getItem("sunrise_gemini_voice")||"Aoede"; },
+  set voice(v){ localStorage.setItem("sunrise_gemini_voice", v||"Aoede"); },
+  get model(){ return localStorage.getItem("sunrise_gemini_model")||"gemini-2.5-flash"; },
+  set model(v){ localStorage.setItem("sunrise_gemini_model", v||"gemini-2.5-flash"); },
+  hasKey(){ return !!this.key; }
+};
 
 if(SPEECH && speechSynthesis.onvoiceschanged !== undefined){
   speechSynthesis.onvoiceschanged = ()=>{};
@@ -1349,65 +1459,402 @@ function pickVoice(){
       || null;
 }
 
+function pcmBase64ToWavBlob(base64Str, sampleRate = 24000){
+  const binaryStr = atob(base64Str);
+  const len = binaryStr.length;
+  const pcmBytes = new Uint8Array(len);
+  for(let i=0; i<len; i++) pcmBytes[i] = binaryStr.charCodeAt(i);
+
+  const numChannels = 1;
+  const bitsPerSample = 16;
+  const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
+  const blockAlign = numChannels * (bitsPerSample / 8);
+  const dataSize = pcmBytes.length;
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+
+  function writeStr(offset, str){
+    for(let i=0; i<str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+  }
+
+  // RIFF header
+  writeStr(0, "RIFF");
+  view.setUint32(4, 36 + dataSize, true);
+  writeStr(8, "WAVE");
+
+  // "fmt " chunk
+  writeStr(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, byteRate, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, bitsPerSample, true);
+
+  // "data" chunk
+  writeStr(36, "data");
+  view.setUint32(40, dataSize, true);
+
+  new Uint8Array(buffer, 44).set(pcmBytes);
+  return new Blob([buffer], { type: "audio/wav" });
+}
+
+function inlineDataToAudioBlob(inlineData){
+  const mime = (inlineData.mimeType || "").toLowerCase();
+  const rawBase64 = inlineData.data;
+  if(mime.includes("wav") || mime.includes("mp3") || mime.includes("ogg")){
+    const binaryStr = atob(rawBase64);
+    const bytes = new Uint8Array(binaryStr.length);
+    for(let i=0; i<bytes.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+    return new Blob([bytes], { type: mime || "audio/wav" });
+  }
+  let rate = 24000;
+  const match = mime.match(/rate=(\d+)/);
+  if(match && match[1]) rate = parseInt(match[1], 10);
+  return pcmBase64ToWavBlob(rawBase64, rate);
+}
+
+async function fetchGeminiAudio(textToSpeak, voiceName, modelName, apiKey){
+  const prompt = "Read this clearly, warmly, and at a steady, engaging pace for Year 3 Australian primary students (ages 8-9):\n\n" + textToSpeak;
+  const model = modelName || "gemini-2.5-flash";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      responseModalities: ["AUDIO"],
+      speechConfig: {
+        voiceConfig: {
+          prebuiltVoiceConfig: {
+            voiceName: voiceName || "Aoede"
+          }
+        }
+      }
+    }
+  };
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    const errText = await res.text();
+    let msg = "Gemini API error (" + res.status + ")";
+    try{
+      const j = JSON.parse(errText);
+      if(j.error && j.error.message) msg = j.error.message;
+    }catch(e){}
+    throw new Error(msg);
+  }
+  const data = await res.json();
+  const part = data.candidates?.[0]?.content?.parts?.[0];
+  if(!part || !part.inlineData || !part.inlineData.data){
+    throw new Error("No audio returned from Gemini");
+  }
+  return inlineDataToAudioBlob(part.inlineData);
+}
+
+function showAudioToast(msg){
+  let t = document.getElementById("audiotoast");
+  if(!t){
+    t = document.createElement("div");
+    t.id = "audiotoast";
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(window._toastTimeout);
+  window._toastTimeout = setTimeout(()=>{ t.classList.remove("show"); }, 3800);
+}
+
 function stopSpeech(){
-  if(!SPEECH) return;
-  speaking=false;
-  chunks=[];
-  chunkAt=0;
-  window._activeSpeechUtterance=null;
-  try{ speechSynthesis.cancel(); }catch(e){}
+  if(geminiAudioEl){
+    try{ geminiAudioEl.pause(); geminiAudioEl.currentTime = 0; }catch(e){}
+    geminiAudioEl = null;
+  }
+  geminiLoading = false;
+  speakingMode = null;
+  speaking = false;
+  chunks = [];
+  chunkAt = 0;
+  window._activeSpeechUtterance = null;
+  if(SPEECH){
+    try{ speechSynthesis.cancel(); }catch(e){}
+  }
   renderSpeakBtn();
 }
 
-function speakNext(){
-  if(!speaking) return;
-  if(chunkAt >= chunks.length){
-    speaking=false;
-    window._activeSpeechUtterance=null;
+async function startSpeech(){
+  stopSpeech();
+  const raw = getScreenSpeechText();
+  const textArray = (raw && raw.length ? raw : fallbackSpeechText())
+    .map(c=>cleanSpeechChunk(c))
+    .filter(Boolean);
+  if(!textArray.length) return;
+  const fullText = textArray.join(" ");
+
+  // If Gemini API Key is configured, use Gemini Voice
+  if(GEMINI_CONFIG.hasKey()){
+    geminiLoading = true;
+    speakingMode = "gemini";
     renderSpeakBtn();
+
+    const cacheKey = `${state.screen}:${state.islandId||""}:${state.run?.yearIndex??state.mapStep??0}:${fullText.slice(0, 50)}:${GEMINI_CONFIG.voice}:${GEMINI_CONFIG.model}`;
+    try {
+      let audioUrl = geminiAudioCache.get(cacheKey);
+      if(!audioUrl){
+        const blob = await fetchGeminiAudio(fullText, GEMINI_CONFIG.voice, GEMINI_CONFIG.model, GEMINI_CONFIG.key);
+        audioUrl = URL.createObjectURL(blob);
+        geminiAudioCache.set(cacheKey, audioUrl);
+      }
+
+      if(speakingMode !== "gemini") return; // stopped while loading
+
+      geminiLoading = false;
+      geminiAudioEl = new Audio(audioUrl);
+      geminiAudioEl.onended = ()=>{
+        stopSpeech();
+      };
+      geminiAudioEl.onerror = ()=>{
+        console.warn("Gemini audio playback error, falling back to browser voice");
+        stopSpeech();
+        startBrowserSpeech(textArray);
+      };
+      renderSpeakBtn();
+      await geminiAudioEl.play();
+      return;
+    } catch(err) {
+      console.warn("Gemini speech failed:", err);
+      showAudioToast("Gemini voice: " + (err.message || "check key") + ". Using browser voice.");
+      stopSpeech();
+      startBrowserSpeech(textArray);
+      return;
+    }
+  }
+
+  // Fallback to local browser voice
+  startBrowserSpeech(textArray);
+}
+
+function startBrowserSpeech(textArray){
+  if(!SPEECH) return;
+  chunks = textArray;
+  chunkAt = 0;
+  speaking = true;
+  speakingMode = "browser";
+  renderSpeakBtn();
+  setTimeout(()=>{ if(speaking && speakingMode==="browser") speakNext(); }, 60);
+}
+
+function speakNext(){
+  if(!speaking || speakingMode!=="browser") return;
+  if(chunkAt >= chunks.length){
+    stopSpeech();
     return;
   }
   const text = chunks[chunkAt++];
   const u = new SpeechSynthesisUtterance(text);
-  window._activeSpeechUtterance = u; // Prevents WebKit/Blink garbage-collection cut-out
+  window._activeSpeechUtterance = u;
   u.rate = 0.95;
   u.pitch = 1.0;
   const v = pickVoice();
   if(v) u.voice = v;
-  u.onend = ()=>{ if(speaking) speakNext(); };
+  u.onend = ()=>{ if(speaking && speakingMode==="browser") speakNext(); };
   u.onerror = (err)=>{
     if(err && err.error === "canceled") return;
-    if(speaking) speakNext();
+    if(speaking && speakingMode==="browser") speakNext();
   };
-  try{ speechSynthesis.speak(u); }catch(e){ speaking=false; renderSpeakBtn(); }
-}
-
-function startSpeech(){
-  if(!SPEECH) return;
-  stopSpeech();
-  const raw = getScreenSpeechText();
-  chunks = (raw && raw.length ? raw : fallbackSpeechText())
-    .map(c=>cleanSpeechChunk(c))
-    .filter(Boolean);
-  if(!chunks.length) return;
-  chunkAt=0;
-  speaking=true;
-  renderSpeakBtn();
-  setTimeout(()=>{ if(speaking) speakNext(); }, 60);
+  try{ speechSynthesis.speak(u); }catch(e){ stopSpeech(); }
 }
 
 function renderSpeakBtn(){
-  const bar=document.getElementById("speakbar");
-  if(!SPEECH){ bar.innerHTML=""; return; }
-  bar.innerHTML = `<button id="speakbtn" class="${speaking?"on":""}" data-speak="1"
-    aria-label="${speaking?"Stop reading aloud":"Read this page aloud"}">
-    <span class="spk-icon" aria-hidden="true">${speaking?"⏹":"🔊"}</span>
-    <span>${speaking?"Stop reading":"Read to me"}</span>
-  </button>`;
+  const bar = document.getElementById("speakbar");
+  if(!bar) return;
+  const isGeminiActive = GEMINI_CONFIG.hasKey();
+  const isPlaying = speakingMode !== null;
+
+  let label = "Read to me";
+  let icon = "🔊";
+  if(geminiLoading){
+    label = "Loading AI voice...";
+    icon = "⏳";
+  } else if(isPlaying){
+    label = isGeminiActive ? "Stop AI voice" : "Stop reading";
+    icon = "⏹";
+  } else if(isGeminiActive){
+    label = `Read to me (${GEMINI_CONFIG.voice})`;
+    icon = "✨";
+  }
+
+  bar.innerHTML = `
+    <button id="speakbtn" class="${isPlaying ? "on" : ""} ${isGeminiActive ? "gemini" : ""}" data-speak="1"
+      aria-label="${isPlaying ? "Stop reading aloud" : "Read this page aloud"}">
+      <span class="spk-icon" aria-hidden="true">${icon}</span>
+      <span>${label}</span>
+    </button>
+    <button id="teachercogbtn" class="speak-cog-btn ${isGeminiActive ? "has-key" : ""}"
+      aria-label="Teacher Gemini Voice Settings" title="${isGeminiActive ? "Gemini AI Voice Active (" + GEMINI_CONFIG.voice + ") — tap to change" : "Configure Gemini Voice (Teacher Mode)"}">
+      ⚙️
+    </button>
+  `;
 }
 
-document.getElementById("speakbar").addEventListener("click",()=>{
-  if(speaking) stopSpeech(); else startSpeech();
+function openTeacherModal(){
+  stopSpeech();
+  const m = document.getElementById("teachermodal");
+  if(!m) return;
+  const keyInput = document.getElementById("gemini_key_input");
+  const voiceSelect = document.getElementById("gemini_voice_select");
+  const modelSelect = document.getElementById("gemini_model_select");
+  const statusEl = document.getElementById("voice_test_status");
+
+  if(keyInput) keyInput.value = GEMINI_CONFIG.key;
+  if(voiceSelect) voiceSelect.value = GEMINI_CONFIG.voice;
+  if(modelSelect) modelSelect.value = GEMINI_CONFIG.model;
+  if(statusEl){
+    statusEl.className = "test-status";
+    statusEl.textContent = GEMINI_CONFIG.hasKey()
+      ? "✓ Gemini AI voice is active (" + GEMINI_CONFIG.voice + ")."
+      : "No API key configured (using local browser voice).";
+  }
+  m.hidden = false;
+  if(keyInput) keyInput.focus();
+}
+
+function closeTeacherModal(){
+  const m = document.getElementById("teachermodal");
+  if(m) m.hidden = true;
+}
+
+let testAudioEl = null;
+async function testGeminiVoice(){
+  const keyInput = document.getElementById("gemini_key_input");
+  const voiceSelect = document.getElementById("gemini_voice_select");
+  const modelSelect = document.getElementById("gemini_model_select");
+  const statusEl = document.getElementById("voice_test_status");
+  const testBtn = document.getElementById("btn_test_voice");
+
+  const key = (keyInput ? keyInput.value : "").trim() || GEMINI_CONFIG.key;
+  const voice = (voiceSelect ? voiceSelect.value : "") || "Aoede";
+  const model = (modelSelect ? modelSelect.value : "") || "gemini-2.5-flash";
+
+  if(!key){
+    if(statusEl){
+      statusEl.className = "test-status err";
+      statusEl.textContent = "Please enter an API key to test.";
+    }
+    return;
+  }
+
+  if(testAudioEl){
+    try{ testAudioEl.pause(); }catch(e){}
+    testAudioEl = null;
+  }
+
+  if(statusEl){
+    statusEl.className = "test-status loading";
+    statusEl.textContent = "Connecting to Gemini (" + voice + ")...";
+  }
+  if(testBtn) testBtn.disabled = true;
+
+  try {
+    const testPhrase = "G'day! Welcome to the Sunrise Islands. Ready to scout some land?";
+    const blob = await fetchGeminiAudio(testPhrase, voice, model, key);
+    const url = URL.createObjectURL(blob);
+    testAudioEl = new Audio(url);
+    if(statusEl){
+      statusEl.className = "test-status ok";
+      statusEl.textContent = "✓ Connected! Playing sample audio...";
+    }
+    testAudioEl.onended = ()=>{
+      if(statusEl){
+        statusEl.className = "test-status ok";
+        statusEl.textContent = "✓ Gemini voice verified successfully!";
+      }
+    };
+    await testAudioEl.play();
+  } catch(err){
+    console.error("Gemini test voice error:", err);
+    if(statusEl){
+      statusEl.className = "test-status err";
+      statusEl.textContent = "Error: " + (err.message || "Failed to generate audio");
+    }
+  } finally {
+    if(testBtn) testBtn.disabled = false;
+  }
+}
+
+function saveTeacherSettings(){
+  const keyInput = document.getElementById("gemini_key_input");
+  const voiceSelect = document.getElementById("gemini_voice_select");
+  const modelSelect = document.getElementById("gemini_model_select");
+
+  const key = (keyInput ? keyInput.value : "").trim();
+  const voice = voiceSelect ? voiceSelect.value : "Aoede";
+  const model = modelSelect ? modelSelect.value : "gemini-2.5-flash";
+
+  GEMINI_CONFIG.key = key;
+  GEMINI_CONFIG.voice = voice;
+  GEMINI_CONFIG.model = model;
+
+  renderSpeakBtn();
+  showAudioToast(key ? `✓ Gemini Voice saved (${voice})!` : "Using browser voice.");
+  closeTeacherModal();
+}
+
+function clearTeacherSettings(){
+  GEMINI_CONFIG.key = "";
+  const keyInput = document.getElementById("gemini_key_input");
+  if(keyInput) keyInput.value = "";
+  const statusEl = document.getElementById("voice_test_status");
+  if(statusEl){
+    statusEl.className = "test-status";
+    statusEl.textContent = "Key removed. Using local browser voice.";
+  }
+  renderSpeakBtn();
+  showAudioToast("API key removed. Using browser voice.");
+  closeTeacherModal();
+}
+
+document.getElementById("speakbar").addEventListener("click", (e)=>{
+  const cog = e.target.closest("#teachercogbtn");
+  if(cog){
+    openTeacherModal();
+    return;
+  }
+  const btn = e.target.closest("#speakbtn");
+  if(btn){
+    if(speakingMode !== null || speaking || geminiLoading) stopSpeech();
+    else startSpeech();
+  }
+});
+
+document.getElementById("teachermodal").addEventListener("click", (e)=>{
+  if(e.target.id === "teachermodal" || e.target.dataset.closeTeacher){
+    closeTeacherModal();
+  }
+});
+
+document.getElementById("btn_test_voice").addEventListener("click", testGeminiVoice);
+document.getElementById("btn_save_key").addEventListener("click", saveTeacherSettings);
+document.getElementById("btn_clear_key").addEventListener("click", clearTeacherSettings);
+
+document.getElementById("toggle_key_vis").addEventListener("click", ()=>{
+  const input = document.getElementById("gemini_key_input");
+  if(input){
+    input.type = input.type === "password" ? "text" : "password";
+  }
+});
+
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape"){
+    closeLightbox();
+    closeTeacherModal();
+  }
+  if((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "V" || e.key === "v")){
+    e.preventDefault();
+    openTeacherModal();
+  }
 });
 
 function openLightbox(src,label){

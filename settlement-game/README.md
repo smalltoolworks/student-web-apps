@@ -161,6 +161,27 @@ to answer. Measured on the live site:
 
 On every size, tapping a map opens it full size.
 
+## Read Aloud & Gemini AI Voice
+The game includes teacher audio narration for all 11 screens, accessible via the **Read to me** button in the bottom-right corner.
+
+### Dual Audio Modes
+1. **Local Browser Voice (Default):**
+   * Works completely offline with zero configuration and zero API keys.
+   * Curated narration script avoids reading raw SVGs or buttons.
+2. **Gemini AI Voice (Teacher Mode):**
+   * Unlocks Google's natural Gemini 2.5 voice models (*Aoede*, *Puck*, *Kore*, *Charon*, *Fenrir*).
+   * **Setup:** Tap the **⚙️** cog button beside "Read to me" (or press `Ctrl/Cmd + Shift + V`), paste your free Gemini API key, and choose your preferred voice.
+   * **Security:** The key is stored **only in that device's local browser storage (`localStorage`)** and is never sent to GitHub or saved in repository code.
+   * **Offline / Error Grace:** If the key expires, network drops, or no key is present, the app automatically falls back to the clean browser voice.
+
+### Pre-generating Audio for 30 Classroom iPads (Offline & Zero-Quota)
+If you want ultra-fast, offline playback for an entire classroom of iPads without entering an API key on each device:
+```bash
+export GEMINI_API_KEY="AIzaSy..."
+node scripts/generate_audio.js
+```
+This saves WAV audio assets directly to `settlement-game/audio/` using your selected Gemini voice.
+
 ## Accessibility
 
 Keyboard playable throughout; map pins take Enter/Space and focus moves to the heading on every
