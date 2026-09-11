@@ -59,6 +59,13 @@ button{font:inherit;color:inherit}
 #speakbtn.on{background:var(--teal);color:#fff}
 
 /* islands */
+ol.steps{margin:0;padding:0 0 0 1.5em}
+ol.steps li{margin:0 0 .6em;padding-left:.25em;font-size:1.08rem}
+ol.steps li::marker{font-weight:800;color:var(--teal)}
+ul.things{list-style:none;margin:14px 0 0;padding:0}
+ul.things li{display:flex;gap:13px;align-items:flex-start;margin:0 0 12px;font-size:1.06rem}
+ul.things li:last-child{margin-bottom:0}
+ul.things .ic{font-size:1.5rem;line-height:1.15;flex:0 0 auto;width:1.4em;text-align:center}
 .isles{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
 .isle{display:block;width:100%;text-align:left;background:#fff;border:3px solid var(--line);
   border-radius:var(--r);padding:16px 18px;cursor:pointer;min-height:56px}
@@ -180,11 +187,6 @@ table.rank .stars{color:var(--warm);font-weight:800;white-space:nowrap}
 .tablescroll{overflow-x:auto}
 
 /* australia */
-.aus{background:#dceaf2;border:3px solid #bcd8e6;border-radius:var(--r);padding:8px;line-height:0}
-svg.ausmap{width:100%;height:auto;display:block}
-.zonekey{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 0 0;padding:0;list-style:none}
-.zonekey li{display:flex;gap:8px;align-items:center;font-size:.92rem;font-weight:600}
-.zonekey .sw{width:20px;height:20px;border-radius:5px;border:1px solid rgba(0,0,0,.2);flex:0 0 auto}
 .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:6px 16px;margin:10px 0 0;padding:0;list-style:none}
 .legend li{display:flex;gap:8px;align-items:flex-start;font-size:.92rem}
 .legend .sw{width:20px;height:20px;border-radius:5px;border:1px solid rgba(0,0,0,.2);flex:0 0 auto;margin-top:2px}
@@ -229,6 +231,7 @@ textarea:focus{border-color:var(--teal);outline:none}
   .mapgrid{grid-template-columns:1fr 1fr;gap:12px}
   .realmap{padding:10px}
   .realmap h3{font-size:.92rem;margin:0 0 5px}
+  .realmap.solo img{max-height:46vh}
   .realmap img{max-height:30vh;width:auto;max-width:100%;margin:0 auto;object-fit:contain}
   .zoomhint{display:block;font-size:.74rem;margin:4px 0 0}
   .realmap figcaption{font-size:.66rem;margin-top:5px}
@@ -469,27 +472,6 @@ const ISLANDS = Object.freeze([
        {t:"Flat roofs to catch the rain", d:-2, why:"Flat roofs pool water and leak."}]}]},
 ]);
 
-/* ---------------- Australia ---------------- */
-const AUS_ZONES = Object.freeze([
-  {key:"Tropical",  colour:"#2f8f5b", desc:"hot, big wet season"},
-  {key:"Grassland", colour:"#b08d1e", desc:"dry, grass and scrub"},
-  {key:"Desert",    colour:"#c4643a", desc:"very hot, very dry"},
-  {key:"Temperate", colour:"#3f7fae", desc:"mild, rain all year"},
-]);
-/* Positions projected from real latitude and longitude.
-   Populations in millions, rounded (2021 census, approximate). */
-const AUS_CITIES = Object.freeze([
-  {name:"Darwin",        x:44.0, y:11.0, pop:0.15},
-  {name:"Cairns",        x:72.5, y:19.5, pop:0.16},
-  {name:"Alice Springs", x:49.8, y:34.1, pop:0.03},
-  {name:"Brisbane",      x:85.0, y:42.5, pop:2.7},
-  {name:"Broken Hill",   x:65.0, y:52.3, pop:0.02},
-  {name:"Perth",         x:15.0, y:52.4, pop:2.3},
-  {name:"Sydney",        x:82.5, y:56.6, pop:5.3},
-  {name:"Adelaide",      x:59.0, y:57.5, pop:1.4, anchor:"end"},
-  {name:"Melbourne",     x:71.5, y:65.0, pop:5.2},
-  {name:"Hobart",        x:76.6, y:76.4, pop:0.25},
-]);
 /* The inland trade-off, in real numbers. */
 const AUS_COMPARE = Object.freeze([
   {city:"Sydney",        where:"Temperate coast", people:"5.3 million", room:"Tiny blocks. Dearest houses in Australia.", stars:1},
@@ -521,8 +503,17 @@ const COPY = Object.freeze({
   title:"The Sunrise Islands",
   sub:"Where would you live?",
   introP1:"Four islands. Four different climates. Nobody lives on them yet.",
-  introP2:"You are the <strong>scout</strong> for 20 settlers. Settle <strong>at least two islands</strong>, then decide where <em>you</em> would live.",
-  climateP:"<strong>Climate</strong> is the weather a place usually gets. Watch three things: how <strong>hot</strong> it is, how <strong>humid</strong> (how wet the air is), and what <strong>plants</strong> grow.",
+  steps:[
+    "You are the <strong>scout</strong> for 20 settlers.",
+    "Settle <strong>at least two islands</strong>.",
+    "Then decide where <em>you</em> would live.",
+  ],
+  climateLead:"<strong>Climate</strong> is the weather a place usually gets. Watch three things:",
+  climateThings:[
+    {ic:"🌡️", t:"How <strong>hot</strong> it is"},
+    {ic:"💨", t:"How <strong>humid</strong> it is — how wet the air is"},
+    {ic:"🌿", t:"What <strong>plants</strong> grow"},
+  ],
   twoThings:"Every place gives you <strong>two</strong> things to weigh up:",
   peopleDesc:"how many can live there",
   roomDesc:"how much space, and how cheap",
@@ -680,38 +671,7 @@ function mapKey(isl){
     `</ul></details>`;
 }
 
-const AUS_PATH = "M67 5.5 L65.8 9.7 L63.6 20.5 L54.6 17.4 L55.6 8.8 L48 12 L43.6 9.5 "
-  + "L38.2 16.1 L26.4 21.6 L19.2 26.7 L9.4 36.8 L11.2 45.4 L13.4 52.4 L12.2 57.7 "
-  + "L17.8 59 L25.8 56.6 L42 51.5 L49.4 52.6 L59.2 58.8 L65.2 66.3 L74.8 68 "
-  + "L81.8 63.6 L84.4 56.6 L88 42.5 L83.6 33.5 L75.6 24.5 L72.6 16.1 Z";
-const TAS_PATH = "M71.4 71.5 L78.6 71.5 L78 77.7 L73 77.7 Z";
-const TROPIC_PATH = "M0 0 H108 V24 C80 32, 60 22, 40 26 C25 29, 12 24, 0 27 Z";
-const zoneColour = k => AUS_ZONES.find(z=>z.key===k).colour;
 
-function ausSVG(){
-  const dots = AUS_CITIES.map(ct=>{
-    const r = Math.max(0.85, 1.85*Math.sqrt(ct.pop));
-    const big = ct.pop>=1, end = ct.anchor==="end";
-    const tx = end ? ct.x-r-1.4 : ct.x+r+1.4;
-    return `<g><circle cx="${ct.x}" cy="${ct.y}" r="${r.toFixed(2)}" fill="#16242e" fill-opacity=".85" stroke="#fff" stroke-width=".5"/>
-      <text x="${tx.toFixed(1)}" y="${(ct.y+1.1).toFixed(1)}" text-anchor="${end?"end":"start"}"
-        font-size="${big?3.2:2.5}" font-weight="${big?800:600}" fill="#16242e"
-        stroke="#dceaf2" stroke-width=".9" paint-order="stroke">${ct.name}</text></g>`;
-  }).join("");
-  return `<svg class="ausmap" viewBox="0 0 108 88" role="img"
-      aria-label="A simple map of Australia with four climate zones. The biggest dots, the biggest cities, are all in the temperate zone near the coast. Alice Springs and Broken Hill, inland, are tiny dots.">
-    <defs><clipPath id="clipAus"><path d="${AUS_PATH}"/></clipPath><clipPath id="clipTas"><path d="${TAS_PATH}"/></clipPath></defs>
-    <g clip-path="url(#clipAus)">
-      <rect x="0" y="0" width="108" height="88" fill="${zoneColour('Temperate')}"/>
-      <ellipse cx="44" cy="40" rx="34" ry="18" fill="${zoneColour('Grassland')}"/>
-      <ellipse cx="38" cy="38" rx="26" ry="12" fill="${zoneColour('Desert')}"/>
-      <path d="${TROPIC_PATH}" fill="${zoneColour('Tropical')}"/>
-    </g>
-    <g clip-path="url(#clipTas)"><rect x="0" y="0" width="108" height="88" fill="${zoneColour('Temperate')}"/></g>
-    <path d="${AUS_PATH}" fill="none" stroke="#16242e" stroke-width=".9" stroke-linejoin="round"/>
-    <path d="${TAS_PATH}" fill="none" stroke="#16242e" stroke-width=".9" stroke-linejoin="round"/>
-    ${dots}</svg>`;
-}
 
 /* ============================================================
    5. RENDER
@@ -761,11 +721,13 @@ const reflectBtn = () => canReflect()
 function screenIntro(){
   return `<h1 tabindex="-1">${COPY.title}</h1>
   <p class="lede">${COPY.sub}</p>
-  <div class="card"><p class="lede">${COPY.introP1}</p><p>${COPY.introP2}</p></div>
+  <div class="card"><p class="lede">${COPY.introP1}</p>
+    <ol class="steps">${COPY.steps.map(t=>`<li>${t}</li>`).join("")}</ol></div>
   <div class="card"><h2>Two things to weigh up</h2><p>${COPY.twoThings}</p>${meters(38)}
     <p class="muted" style="margin-top:12px">A crowded place has little room and dear houses.
        An empty place has heaps of room and cheap houses. You cannot have both!</p></div>
-  <div class="card"><h2>What is climate?</h2><p>${COPY.climateP}</p></div>
+  <div class="card"><h2>What is climate?</h2><p>${COPY.climateLead}</p>
+    <ul class="things">${COPY.climateThings.map(x=>`<li><span class="ic" aria-hidden="true">${x.ic}</span><span>${x.t}</span></li>`).join("")}</ul></div>
   <div class="actions"><button class="btn big" data-action="go" data-screen="arch">Start →</button></div>`;
 }
 
@@ -919,7 +881,6 @@ function screenAustralia(){
       <td class="num">${r.final}</td>
       <td class="stars">${stars(rm.stars)} <span class="muted" style="font-weight:600">${rm.word}</span></td></tr>`;
   }).join("");
-  const key = AUS_ZONES.map(z=>`<li><span class="sw" style="background:${z.colour}"></span>${z.key} — <span class="muted">${z.desc}</span></li>`).join("");
   const cmp = AUS_COMPARE.map(c=>`<tr><td><strong>${c.city}</strong><br><span class="muted">${c.where}</span></td>
     <td class="num">${c.people}</td><td class="stars">${stars(c.stars)}<br><span class="muted" style="font-weight:600">${esc(c.room)}</span></td></tr>`).join("");
   return `<p class="step">The real world</p>
@@ -928,16 +889,24 @@ function screenAustralia(){
       <div class="tablescroll"><table class="rank">
         <thead><tr><th>Island</th><th>Climate</th><th style="text-align:right">People</th><th>Room &amp; cost</th></tr></thead>
         <tbody>${mine}</tbody></table></div></div>
-    <p class="lede">Australia has the same four climates. Big dot = lots of people.</p>
-    <div class="aus">${ausSVG()}</div>
-    <ul class="zonekey">${key}</ul>
-    <div class="card" style="margin-top:16px"><h2 style="margin-top:0">Coast or inland?</h2>
+    <p class="lede">Australia has all four of those climates too. Start with how <strong>hot</strong> it gets.</p>
+    <figure class="realmap solo"><h3>🌡️ How hot it gets</h3>
+      <button class="mapbtn" data-action="zoom" data-src="images/temperature-annual.png"
+          data-label="🌡️ How hot it gets" aria-label="Enlarge the temperature map">
+        <img src="images/temperature-annual.png" alt="Map of Australia showing the average yearly top temperature. The north and the middle are orange, about 33 to 39 degrees. The south coast and Tasmania are pale green and yellow, about 15 to 24 degrees. It gets cooler the further south you go."
+          onerror="this.closest('.realmap').classList.add('missing')">
+      </button>
+      <div class="missingnote">Map image not added yet — save it as <code>images/temperature-annual.png</code></div>
+      <p class="zoomhint">Tap the map to see it big</p>
+      <figcaption>Average annual maximum temperature, 1991–2020.
+        © Commonwealth of Australia, Bureau of Meteorology, 2024. bom.gov.au</figcaption></figure>
+    <div class="card"><h2 style="margin-top:0">Coast or inland?</h2>
       <div class="tablescroll"><table class="rank">
         <thead><tr><th>Place</th><th style="text-align:right">People</th><th>Room &amp; cost</th></tr></thead>
         <tbody>${cmp}</tbody></table></div>
       <p style="margin-top:14px">Most Australians live on the mild coast. But some choose inland —
          for space, cheaper houses, farms and mines.</p></div>
-    <div class="actions"><button class="btn big" data-action="go" data-screen="maps">Now two real maps →</button></div>`;
+    <div class="actions"><button class="btn big" data-action="go" data-screen="maps">Now two more maps →</button></div>`;
 }
 
 function screenMaps(){
@@ -956,7 +925,7 @@ function screenMaps(){
        Look at both to answer.</p>
     <div class="mapgrid">
       <figure class="realmap"><h3>🌧️ Where the rain falls</h3>
-        <button class="mapbtn" data-action="zoom" data-src="images/rainfall-january.png" data-label="rain" aria-label="Enlarge the rain map">
+        <button class="mapbtn" data-action="zoom" data-src="images/rainfall-january.png" data-label="🌧️ Where the rain falls" aria-label="Enlarge the rainfall map">
           <img src="images/rainfall-january.png" alt="Map of Australia showing median January rainfall. The north is blue and purple for heavy rain. The middle is orange and white for almost no rain. The east and south coasts are green."
           onerror="this.closest('.realmap').classList.add('missing')">
         </button>
@@ -966,7 +935,7 @@ function screenMaps(){
         <figcaption>Median rainfall, 1–31 January. © Commonwealth of Australia,
           Bureau of Meteorology. bom.gov.au/climate</figcaption></figure>
       <figure class="realmap"><h3>👥 Where the people live</h3>
-        <button class="mapbtn" data-action="zoom" data-src="images/population-density.jpg" data-label="people" aria-label="Enlarge the people map">
+        <button class="mapbtn" data-action="zoom" data-src="images/population-density.jpg" data-label="👥 Where the people live" aria-label="Enlarge the population map">
           <img src="images/population-density.jpg" alt="Map of Australia showing how many people live in each area. Almost the whole country is grey, meaning no people at all. Yellow and orange specks crowd along the east coast, the south-east corner and a small patch in the south-west near Perth. The huge middle of the country is completely grey."
           onerror="this.closest('.realmap').classList.add('missing')">
         </button>
@@ -1126,7 +1095,7 @@ document.getElementById("speakbar").addEventListener("click",()=>{
 function openLightbox(src,label){
   stopSpeech();
   const lb=document.getElementById("lightbox");
-  lb.innerHTML = `<p>${label==="rain"?"🌧️ Where the rain falls":"👥 Where the people live"}</p>
+  lb.innerHTML = `<p>${label}</p>
     <img src="${src}" alt=""><button class="lbclose" data-lbclose="1">Close ✕</button>`;
   lb.hidden=false;
   const b=lb.querySelector(".lbclose"); if(b) b.focus();
