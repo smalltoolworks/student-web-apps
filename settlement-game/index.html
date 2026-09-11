@@ -278,6 +278,9 @@ textarea:focus{border-color:var(--teal);outline:none}
 #lightbox .lbclose{min-height:56px;padding:12px 28px;border-radius:999px;border:none;background:#fff;
   color:var(--teal);font-weight:800;font-size:1.05rem;cursor:pointer}
 .lookbox{background:#fffdf6;border:3px solid var(--warm);border-radius:var(--r);padding:20px;margin:0 0 18px}
+.echo-card{background:#f0f8fa;border:2px solid var(--teal);border-radius:var(--r);padding:18px 20px;margin:0 0 18px}
+.echo-card h2{margin:0 0 8px;font-size:1.18rem;color:var(--teal);display:flex;align-items:center;gap:8px}
+.echo-card p{margin:0;font-size:1.02rem;line-height:1.55}
 
 @media print{
   #speakbar,#lightbox,.actions,.btn,.bank,details.key{display:none!important}
@@ -335,27 +338,29 @@ const CONTRIB = Object.freeze({
 
 const OUTCOMES = Object.freeze([
   {min:45, label:"Busy Town",         line:"Lots of people made a home here."},
-  {min:28, label:"Growing Village",   line:"Plenty of people made a home here."},
+  {min:28, label:"Growing Village",   line:"Many people made a home here."},
   {min:15, label:"Small Settlement",  line:"A few people made a home here."},
-  {min:1,  label:"Tiny Outpost",      line:"Only a handful stayed."},
+  {min:1,  label:"Tiny Outpost",      line:"Only a few people stayed."},
   {min:0,  label:"Everyone moved on", line:"Everyone left to find a better place. Now you know something about this climate."},
 ]);
 
 /* Room & Cost falls straight out of population — you cannot have both.
    Below 15 it is NOT a virtue: an empty place is empty, not cheap and roomy. */
 const ROOMS = Object.freeze([
-  {min:45, stars:1, word:"Crowded",       note:"Small blocks. Houses cost a lot."},
-  {min:28, stars:2, word:"Room to spread",note:"Big blocks. Room for a farm."},
-  {min:15, stars:3, word:"Wide open",     note:"Miles of space. Land is cheap."},
-  {min:1,  stars:0, word:"Almost empty",  note:"Hardly anyone stayed."},
+  {min:45, stars:1, word:"Crowded",       note:"Apartments, small yards, busy roads."},
+  {min:28, stars:2, word:"Room to spread",note:"Big backyards, room for pets, quiet streets."},
+  {min:15, stars:3, word:"Wide open",     note:"Huge paddocks, lots of room to play, miles of quiet space."},
+  {min:1,  stars:0, word:"Almost empty",  note:"Very few people stayed."},
   {min:0,  stars:0, word:"—",             note:"Nobody lives here."},
 ]);
 
 const ISLANDS = Object.freeze([
   /* ---------------- TROPICAL ---------------- */
   {id:"palm", name:"Palm Island", flag:"🌴", zone:"Tropical", like:"like Darwin",
+   echo:{title:"Real Australia: The Tropical North",
+         text:"In Darwin and tropical Queensland, traditional homes were built high on tall timber stilts (‘Queenslanders’) to let floodwaters pass underneath and catch cool sea breezes."},
    climate:{temperature:"Hot all year", humidity:"Very wet, sticky air",
-            vegetation:"Rainforest and mangroves", summary:"Two seasons: The Wet and The Dry. Cyclones.", rainMm:1730, rainWord:"Heaps of rain",
+            vegetation:"Rainforest and mangroves", summary:"Two seasons: The Wet and The Dry. Cyclones.", rainMm:1730, rainWord:"Heavy rain",
             short:{temp:"Hot all year",humidity:"Wet, sticky air",plants:"Rainforest"}},
    map:["~~~~~~~~~~~~","~~~..,,.~~~~","~~.,RRnR,.~~","~.,RRn=RRn.~","~.,RR,=Rn,.~",
         "~.,RR,=RRm.~","~..R,,=,mm.~","~~.,,m=mm.~~","~~~..~=~..~~"],
@@ -377,13 +382,13 @@ const ISLANDS = Object.freeze([
           {n:3,title:"Cyclone!",doubles:"shelter",headline:"A cyclone hits. Shelter counts twice."}],
    cards:[
      {q:"How should we build our houses?", opts:[
-       {t:"On stilts, off the wet ground", d:3, why:"Stilts keep homes above the flood. Darwin houses do this."},
        {t:"Thick mud walls", d:1, why:"Helps with heat, but holds the damp in."},
+       {t:"On stilts, off the wet ground", d:3, why:"Stilts keep homes above the flood. Darwin houses do this."},
        {t:"Low on the ground", d:-2, why:"The wet season runs straight through them."}]},
      {q:"Six weeks of rain. The food is going mouldy.", opts:[
-       {t:"Lift the store up and dry food by the fire", d:3, why:"In wet air, food must stay up high and dry."},
        {t:"Cover it with palm leaves", d:1, why:"Keeps rain off. The air is still wet."},
-       {t:"Bury it to keep it cool", d:-2, why:"Warm wet ground rots food even faster."}]},
+       {t:"Bury it to keep it cool", d:-2, why:"Warm wet ground rots food even faster."},
+       {t:"Lift the store up and dry food by the fire", d:3, why:"In wet air, food must stay up high and dry."}]},
      {q:"A cyclone is coming!", opts:[
        {t:"Shelter in the rock cave", d:3, why:"Solid rock, above the flood. The safest place."},
        {t:"Tie the roofs down and stay", d:1, why:"Cyclone winds still rip roofs off."},
@@ -391,8 +396,10 @@ const ISLANDS = Object.freeze([
 
   /* ---------------- DESERT ---------------- */
   {id:"red", name:"Red Island", flag:"🏜️", zone:"Desert", like:"like Alice Springs",
+   echo:{title:"Real Australia: The Desert Outback",
+         text:"Desert towns like Alice Springs were founded around permanent waterholes. In Coober Pedy, summer gets over 45°C, so people live in cool underground dugouts!"},
    climate:{temperature:"Baking days, freezing nights", humidity:"Very dry air",
-            vegetation:"Spinifex and saltbush", summary:"Almost no rain. Hot days, cold nights.", rainMm:280,  rainWord:"Hardly any rain",
+            vegetation:"Spinifex and saltbush", summary:"Almost no rain. Hot days, cold nights.", rainMm:280,  rainWord:"Very little rain",
             short:{temp:"Baking days, cold nights",humidity:"Very dry",plants:"Spinifex"}},
    map:["~~~~~~~~~~~~","~~~.ddd.~~~~","~~.dSSkSd.~~","~.dSSkOkSd.~","~.dSskSkSd.~",
         "~.dSssSSSd.~","~..dSsSSdd.~","~~.ddSSdd.~~","~~~.dd..~~~~"],
@@ -414,22 +421,24 @@ const ISLANDS = Object.freeze([
           {n:3,title:"The Long Dry",doubles:"water",headline:"A whole year with no rain. Water counts twice."}],
    cards:[
      {q:"Hot days, freezing nights. What do we build with?", opts:[
-       {t:"Thick mud bricks", d:3, why:"Thick walls stay cool by day and warm at night."},
        {t:"A light shade shelter", d:1, why:"Good by day. Freezing by morning."},
-       {t:"Timber huts", d:-2, why:"There are no trees in a desert."}]},
+       {t:"Timber huts", d:-2, why:"There are no trees in a desert."},
+       {t:"Thick mud bricks", d:3, why:"Thick walls stay cool by day and warm at night."}]},
      {q:"45°C for two weeks!", opts:[
-       {t:"Dig cool rooms into the rock", d:3, why:"Underground stays cool. Coober Pedy really does this."},
        {t:"Work at dawn, rest at midday", d:1, why:"Smart. But the shade is still 45°C."},
+       {t:"Dig cool rooms into the rock", d:3, why:"Underground stays cool. Coober Pedy really does this."},
        {t:"Keep working all day", d:-2, why:"People collapse in that heat."}]},
      {q:"No rain for a year. The waterhole is shrinking.", opts:[
-       {t:"Dig a deep well", d:3, why:"Water underground lasts longest. Bores keep inland towns alive."},
+       {t:"Dig a deep well", d:3, why:"Water underground lasts longest. Deep water wells keep inland towns alive."},
        {t:"Carry water from the hills", d:1, why:"It works, but it takes all day."},
        {t:"Wait for rain", d:-2, why:"Rain may not come for another year."}]}]},
 
   /* ---------------- GRASSLAND ---------------- */
   {id:"gold", name:"Gold Island", flag:"🌾", zone:"Grassland", like:"like Dubbo",
+   echo:{title:"Real Australia: The Inland Plains",
+         text:"In the 1800s, settlers moved inland for sheep and cattle farms. Later, finding gold, silver, and copper turned quiet camps into bustling towns like Bathurst and Broken Hill."},
    climate:{temperature:"Hot summers, cool winters", humidity:"Dry most of the year",
-            vegetation:"Golden grass and scrub", summary:"Some rain, then long dry spells.", rainMm:580,  rainWord:"Not much rain",
+            vegetation:"Golden grass and scrub", summary:"Some rain, then long dry spells.", rainMm:580,  rainWord:"Low rain",
             short:{temp:"Hot summers",humidity:"Dry",plants:"Golden grass"}},
    map:["~~~~~~~~~~~~","~~~..,,,.~~~","~~.,GGnG,.~~","~.,GG=nGG,.~","~.,GS=SnGG.~",
         "~.,GG=GGGS.~","~..GG=GGG,.~","~~.,G=SSG.~~","~~~..=~..~~~"],
@@ -440,7 +449,7 @@ const ISLANDS = Object.freeze([
              plants:"Thick grass. Good soil.", shelter:"Creek bank breaks the wind"}},
      {id:"stonyrise", letter:"B", name:"Stony Rise", c:7, r:4, blurb:"Rocky rise over the plains.",
       scores:{water:2,temp:2,humidity:1,plants:1,shelter:3},
-      notes:{water:"Creek 2 tiles away", temp:"Breezy up here", humidity:"Dry. The soak dries out.",
+      notes:{water:"Creek 2 tiles away", temp:"Breezy up here", humidity:"Dry air. Water dries up fast.",
              plants:"Thin, stony soil", shelter:"Best shelter. Safe from fire."}},
      {id:"openplain", letter:"C", name:"Open Plain", c:8, r:5, blurb:"Flat grass to the horizon.",
       scores:{water:1,temp:2,humidity:1,plants:2,shelter:1},
@@ -451,21 +460,22 @@ const ISLANDS = Object.freeze([
           {n:3,title:"Grass Fire!",doubles:"shelter",headline:"Dry grass and hot wind. Shelter counts twice."}],
    cards:[
      {q:"Grass everywhere. What do we do with it?", opts:[
-       {t:"Graze sheep and cattle", d:3, why:"Too dry for thirsty crops, but grass feeds animals. That is why inland Australia runs sheep and cattle."},
        {t:"Fish instead", d:1, why:"There are fish. The real riches are on the plains."},
-       {t:"Plough it for thirsty crops", d:-2, why:"Not enough rain. They wither."}]},
+       {t:"Graze sheep and cattle", d:3, why:"Too dry for thirsty crops, but grass feeds animals. That is why inland Australia runs sheep and cattle."},
+       {t:"Plough it for thirsty crops", d:-2, why:"Not enough rain. They dry up and die."}]},
      {q:"The creek is low and summer has months to go.", opts:[
        {t:"Build a dam to store water", d:3, why:"Save water in the wet, use it in the dry. Farm dams dot inland Australia."},
-       {t:"Dig a soak in the creek bed", d:1, why:"Finds a little, then dries out."},
-       {t:"Wait for rain", d:-2, why:"The dry spell can last for months."}]},
+       {t:"Wait for rain", d:-2, why:"The dry spell can last for months."},{t:"Dig for water in the dry creek", d:1, why:"Finds a little water, then dries out."}]},
      {q:"Smoke on the horizon!", opts:[
-       {t:"Burn small patches early", d:3, why:"Small cool fires stop one big fire. Aboriginal peoples have done this for thousands of years."},
        {t:"Clear a bare strip", d:1, why:"It helps, but embers blow across."},
-       {t:"Fight it when it comes", d:-2, why:"A grass fire moves faster than you can run."}]}]},
+       {t:"Fight it when it comes", d:-2, why:"A grass fire moves faster than you can run."},
+       {t:"Burn small patches early", d:3, why:"Small cool fires stop one big fire. Aboriginal peoples have done this for thousands of years."}]}]},
 
   /* ---------------- TEMPERATE ---------------- */
   {id:"green", name:"Green Island", flag:"🌳", zone:"Temperate", like:"like Sydney",
-   climate:{temperature:"Mild. Warm summers, cool winters.", humidity:"Comfy. Rain all year.",
+   echo:{title:"Real Australia: Early Sydney",
+         text:"In 1788, the First Fleet landed at Botany Bay, but the water was swampy. Governor Phillip moved to Sydney Cove for a freshwater stream, then grew food on the rich river flats at Parramatta — just like your choice!"},
+   climate:{temperature:"Mild. Warm summers, cool winters.", humidity:"Pleasant. Rain all year.",
             vegetation:"Gum trees and grassy flats", summary:"Four gentle seasons. Rain all year.", rainMm:1210, rainWord:"Good rain",
             short:{temp:"Mild",humidity:"Rain all year",plants:"Gum trees"}},
    map:["~~~~~~~~~~~~","~~~.,,,,.~~~","~~.,,T=T,.~~","~.,TTn=nTA.~","~.,,Tn=,T,.~",
@@ -473,11 +483,11 @@ const ISLANDS = Object.freeze([
    sites:[
      {id:"riverflats", letter:"A", name:"River Flats", c:5, r:6, blurb:"Flat green land by the river.",
       scores:{water:3,temp:3,humidity:3,plants:3,shelter:2},
-      notes:{water:"River here. Flows all year.", temp:"Comfy nearly every day", humidity:"Just right",
+      notes:{water:"River here. Flows all year.", temp:"Pleasant nearly every day", humidity:"Just right",
              plants:"Rich soil. Grow anything.", shelter:"The river can flood"}},
      {id:"woodhill", letter:"B", name:"Woodland Hill", c:4, r:4, blurb:"Clearing in the gum trees.",
       scores:{water:2,temp:3,humidity:3,plants:2,shelter:3},
-      notes:{water:"River 2 tiles downhill", temp:"Mild and pleasant", humidity:"Comfy all year",
+      notes:{water:"River 2 tiles downhill", temp:"Mild and pleasant", humidity:"Pleasant all year",
              plants:"Lots of wood. Must clear trees.", shelter:"High and dry. Never floods."}},
      {id:"windypoint", letter:"C", name:"Windy Point", c:9, r:2, blurb:"Bare headland in the sea.",
       scores:{water:1,temp:2,humidity:2,plants:1,shelter:1},
@@ -488,50 +498,51 @@ const ISLANDS = Object.freeze([
           {n:3,title:"Winter Rain",doubles:"shelter",headline:"Rain all winter. Shelter counts twice."}],
    cards:[
      {q:"Where do the houses go?", opts:[
-       {t:"Near the river, above the flood line", d:3, why:"Water close by, and safe from winter floods."},
        {t:"High on the windy hill", d:1, why:"Safe and dry, but a long walk to water."},
-       {t:"Right on the riverbank", d:-2, why:"Winter rain lifts the river over the bank."}]},
+       {t:"Right on the riverbank", d:-2, why:"Winter rain lifts the river over the bank."},
+       {t:"Near the river, above the flood line", d:3, why:"Water close by, and safe from winter floods."}]},
      {q:"A long, warm summer.", opts:[
        {t:"Plant grain and vegetables", d:3, why:"A long growing season. Temperate Australia grows most of our food."},
-       {t:"Plant fruit trees only", d:1, why:"They do well, but take years to fruit."},
-       {t:"Plant nothing yet", d:-2, why:"A whole growing season wasted."}]},
+       {t:"Plant nothing yet", d:-2, why:"A whole growing season wasted."},
+       {t:"Plant fruit trees only", d:1, why:"They do well, but take years to fruit."}]},
      {q:"Rain all winter.", opts:[
+       {t:"Flat roofs to catch the rain", d:-2, why:"Flat roofs pool water and leak."},
        {t:"Sloped roofs and drains", d:3, why:"Steady rain needs somewhere to run."},
-       {t:"Do nothing", d:1, why:"Gentle rain, but weeks of it soaks in."},
-       {t:"Flat roofs to catch the rain", d:-2, why:"Flat roofs pool water and leak."}]}]},
+       {t:"Do nothing", d:1, why:"Gentle rain, but weeks of it soaks in."}]}]},
 ]);
 
 /* The inland trade-off, in real numbers. */
 const AUS_COMPARE = Object.freeze([
-  {city:"Sydney",        where:"Temperate coast", people:"5.3 million", room:"Tiny blocks. Dearest houses in Australia.", stars:1},
-  {city:"Perth",         where:"Temperate coast", people:"2.3 million", room:"Small blocks. Houses cost a lot.",          stars:1},
-  {city:"Broken Hill",   where:"Grassland inland",people:"17,000",      room:"Big blocks. Cheap houses. Mining jobs.",    stars:3},
-  {city:"Alice Springs", where:"Desert inland",   people:"25,000",      room:"Huge blocks. Cheap houses. Lots of space.", stars:3},
+  {city:"Sydney",        where:"Temperate coast", people:"5.3 million", room:"Apartments & small yards. Busy city traffic.", stars:1},
+  {city:"Perth",         where:"Temperate coast", people:"2.3 million", room:"Small blocks. Busy suburbs near beaches.",   stars:1},
+  {city:"Broken Hill",   where:"Grassland inland",people:"17,000",      room:"Big yards. Lots of open space. Mining jobs.", stars:3},
+  {city:"Alice Springs", where:"Desert inland",   people:"25,000",      room:"Huge blocks. Lots of space to play.",         stars:3},
 ]);
 
 /* Guided map-reading. Students must look at BOTH maps to answer. */
 const MAP_LOOKS = Object.freeze([
   {q:"Look at the MIDDLE of Australia on the rain map. It is orange and white. What does that mean?",
-   a:[{t:"Almost no rain falls there",ok:true},{t:"Rain falls there every day",ok:false}],
+   a:[{t:"Rain falls there every day",ok:false},{t:"Almost no rain falls there",ok:true}],
    why:"White and orange mean less than 10 mm of rain. The middle of Australia is desert."},
   {q:"Now find the MIDDLE on the people map. What colour is it?",
    a:[{t:"Grey — almost nobody lives there",ok:true},{t:"Bright yellow — packed with people",ok:false}],
    why:"Grey means no people at all. The same place that gets no rain has almost nobody living in it."},
   {q:"Now look at the EAST COAST on both maps. What do you notice?",
-   a:[{t:"Green and blue rain, and lots of yellow people",ok:true},
-      {t:"Orange rain, and grey with nobody",ok:false}],
+   a:[{t:"Orange rain, and grey with nobody",ok:false},
+      {t:"Green and blue rain, and lots of yellow people",ok:true}],
    why:"Where the rain is, the people are. That is the pattern across the whole country."},
 ]);
 
 const WORD_BANK = Object.freeze([
-  "fresh water","not too hot","too dry","too wet","cyclones","food can grow",
-  "shelter","near the sea","space","cheaper","crowded","jobs","farms","mining","quiet"
+  "fresh water","fertile soil","not too hot","cool sea breezes","food can grow",
+  "near the sea","big backyards","room for pets","space to play","farming & cattle",
+  "gold & mining","too dry","too hot","cyclones & floods","crowded cities","quiet & peaceful"
 ]);
 
 const COPY = Object.freeze({
   title:"The Sunrise Islands",
   sub:"Where would you live?",
-  introP1:"Four islands. Four different climates. Nobody lives on them yet.",
+  introP1:"Four imaginary islands. Four different climates. Nobody lives on them yet.",
   steps:[
     "You are the <strong>scout</strong> for 20 settlers.",
     "Settle <strong>at least two islands</strong>.",
@@ -545,12 +556,12 @@ const COPY = Object.freeze({
   ],
   twoThings:"Every place gives you <strong>two</strong> things to weigh up:",
   peopleDesc:"how many can live there",
-  roomDesc:"how much space, and how cheap",
+  roomDesc:"how much space you have to live and play",
   archH:"Pick an island",
   gateNote:"Scout all three places first.",
   /* TEACHER: please check this wording before class. */
-  closing1:"People everywhere pick a home for the reasons you used: water, climate, plants, shelter — and space and cost.",
-  closing2:"Aboriginal and Torres Strait Islander Peoples have lived on and cared for Country in every one of these climates for more than 65,000 years.",
+  closing1:"People pick a home for the reasons you explored: fresh water, climate, good soil, shelter — and space to live and play.",
+  closing2:"In real Australia, Aboriginal and Torres Strait Islander Peoples have lived on, cared for, and deeply understood Country in every one of these climates for more than 65,000 years.",
 });
 
 /* ============================================================
@@ -795,8 +806,8 @@ function screenIntro(){
   <div class="card"><p class="lede">${COPY.introP1}</p>
     <ol class="steps">${COPY.steps.map(t=>`<li>${t}</li>`).join("")}</ol></div>
   <div class="card"><h2>Two things to weigh up</h2><p>${COPY.twoThings}</p>${meters(38)}
-    <p class="muted" style="margin-top:12px">A crowded place has little room and dear houses.
-       An empty place has heaps of room and cheap houses. You cannot have both!</p></div>
+    <p class="muted" style="margin-top:12px">A crowded place has small blocks and busy streets.
+       An open place has lots of room to play. You cannot have both!</p></div>
   <div class="card"><h2>What is climate?</h2><p>${COPY.climateLead}</p>
     <ul class="things">${COPY.climateThings.map(x=>`<li><span class="ic" aria-hidden="true">${x.ic}</span><span>${x.t}</span></li>`).join("")}</ul></div>
   <div class="actions"><button class="btn big" data-action="go" data-screen="arch">Start →</button></div>`;
@@ -933,6 +944,7 @@ function screenResult(){
     <div class="card">${meters(done.final)}
       ${graph(done.pops)}<p class="center">${out.line}</p>${pred}
       <p class="center muted">Your choices changed this by <strong>${done.cardTotal>0?"+":""}${done.cardTotal}</strong>.</p></div>
+    ${isl.echo ? `<div class="echo-card"><h2>🇦🇺 ${esc(isl.echo.title)}</h2><p>${esc(isl.echo.text)}</p></div>` : ""}
     <div class="card"><h2 style="margin-top:0">Why</h2>
       <p>Best thing: <strong>${best.label.toLowerCase()}</strong>.
          Hardest thing: <strong>${worst.label.toLowerCase()}</strong>.</p>
@@ -1010,13 +1022,11 @@ function screenMaps(){
         </button>
         <div class="missingnote">Map image not added yet — save it as
           <code>images/population-density.jpg</code></div>
-        <ul class="denskey"><li class="t">People per square kilometre</li>
-          <li><span class="sw" style="background:#67000d"></span>8000+</li>
-          <li><span class="sw" style="background:#a63603"></span>5000–8000</li>
-          <li><span class="sw" style="background:#e6550d"></span>2000–5000</li>
-          <li><span class="sw" style="background:#fd8d3c"></span>500–2000</li>
-          <li><span class="sw" style="background:#fee08b"></span>under 500</li>
-          <li><span class="sw" style="background:#8c8c8c"></span>nobody lives here</li></ul>
+        <ul class="denskey"><li class="t">Where Australians live</li>
+          <li><span class="sw" style="background:#67000d"></span>8000+ (Crowded cities)</li>
+          <li><span class="sw" style="background:#e6550d"></span>2000–5000 (Suburbs &amp; towns)</li>
+          <li><span class="sw" style="background:#fee08b"></span>Under 500 (Country &amp; farms)</li>
+          <li><span class="sw" style="background:#8c8c8c"></span>Nobody lives here (bush/desert)</li></ul>
         <p class="zoomhint">Tap the map to see it big</p>
         <figcaption>Estimated resident population density, June 2018.
           © Commonwealth of Australia, Australian Bureau of Statistics, 2019.</figcaption></figure>
@@ -1042,8 +1052,8 @@ function screenPattern(){
     <div class="card"><h2 style="margin-top:0">But look closer 🔍</h2>
       <p>Go back to the people map. Out in the grey middle there are tiny yellow specks.
          People <em>do</em> live inland.</p>
-      <p>Think about Red Island. It had few people — but heaps of room, and cheap land.
-         Inland towns have <strong>space</strong>, <strong>cheap houses</strong>,
+      <p>Think about Red Island. It had few people — but lots of open space.
+         Inland towns have <strong>open space</strong>, <strong>room for big backyards</strong>,
          and <strong>jobs</strong> in farming and mining.</p>
       <p class="muted">So there is no single right answer. There is a swap: crowded and mild,
          or roomy and hard.</p></div>
@@ -1065,7 +1075,7 @@ function screenWrite(){
     <div class="card"><p class="step" style="margin:0 0 8px">Word bank — tap to add</p>
       <div class="bank">${WORD_BANK.map(w=>`<button class="word" data-action="word" data-w="${esc(w)}">${esc(w)}</button>`).join("")}</div></div>
     ${q("q1","1. Most Australians live near the coast. Why?","Most Australians live near the coast because",R.q1)}
-    ${q("q2","2. Some Australians live far inland. Why would they?","Some people live inland because",R.q2)}
+    ${q("q2","2. Some Australians live far inland. Why did people move inland in the past, or live there today?","People live inland because",R.q2)}
     ${q("q3","3. Where would YOU live? Why?","I would live",R.q3)}
     <div class="actions"><button class="btn big" data-action="go" data-screen="report">See my report →</button></div>`;
 }
@@ -1086,7 +1096,7 @@ function screenReport(){
         <tbody>${rows}</tbody></table></div></div>
     <div class="card"><h2 style="margin-top:0">What I think</h2>
       ${said("Most Australians live near the coast because…",R.q1)}
-      ${said("Some people live inland because…",R.q2)}
+      ${said("People live inland because…",R.q2)}
       ${said("I would live…",R.q3)}</div>
     <div class="card"><h2 style="margin-top:0">One last thing</h2>
       <p>${COPY.closing1}</p><p>${COPY.closing2}</p></div>
@@ -1205,7 +1215,7 @@ function copyWriting(){
     + state.completed.map(r=>{const i=islandById(r.islandId),m=roomFor(r.final);
         return `${i.name} (${i.zone}) — ${r.final} people, ${m.word}`;}).join("\n")
     + `\n\nMost Australians live near the coast because ${R.q1||"..."}`
-    + `\n\nSome people live inland because ${R.q2||"..."}`
+    + `\n\nPeople live inland because ${R.q2||"..."}`
     + `\n\nI would live ${R.q3||"..."}\n`;
   const done = ok => {
     const b=document.querySelector('[data-action="copy"]');
