@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+Icon?
+.Spotlight-V100
+.Trashes
+
+# OneDrive / Windows
+desktop.ini
+Thumbs.db
+
+# Office lock files
+~$*
+*.tmp
