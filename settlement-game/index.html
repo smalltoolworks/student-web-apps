@@ -66,6 +66,23 @@ ul.things{list-style:none;margin:14px 0 0;padding:0}
 ul.things li{display:flex;gap:13px;align-items:flex-start;margin:0 0 12px;font-size:1.06rem}
 ul.things li:last-child{margin-bottom:0}
 ul.things .ic{font-size:1.5rem;line-height:1.15;flex:0 0 auto;width:1.4em;text-align:center}
+/* Rainfall is an AMOUNT, not a rating, so it must not look like the green
+   rating dots - otherwise "most rain" would read as "best island". */
+.rainrow{display:flex;align-items:center;gap:9px;margin:12px 0 0;font-size:.97rem;font-weight:600}
+.rainrow .ic{font-size:1.1rem;width:1.3em;text-align:center;flex:0 0 auto}
+.bar{display:inline-flex;gap:2px;flex:0 0 auto}
+.bar i{width:9px;height:15px;border-radius:2px;background:#d3e2ea;display:block}
+.bar i.on{background:#3f8fbf}
+.mm{font-variant-numeric:tabular-nums;white-space:nowrap}
+/* Water and shelter swing wildly between spots on the same island, so a single
+   island number would lie. Show the spread instead - that IS the lesson. */
+.vhead{border-top:1px dashed var(--line);margin:11px 0 7px;padding:9px 0 0;font-size:.76rem;
+  text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:var(--ink-soft)}
+ul.varies{list-style:none;margin:0;padding:0}
+ul.varies li{display:flex;align-items:center;gap:9px;font-size:.9rem;margin:0 0 5px;font-weight:600}
+ul.varies li:last-child{margin-bottom:0}
+ul.varies .ic{font-size:1.05rem;width:1.3em;text-align:center;flex:0 0 auto}
+ul.varies .rng{color:var(--teal)}
 ul.cscores{list-style:none;margin:12px 0 0;padding:0}
 ul.cscores li{display:flex;align-items:center;gap:9px;margin:0 0 7px;font-size:.97rem;font-weight:600}
 ul.cscores li:last-child{margin-bottom:0}
@@ -338,7 +355,7 @@ const ISLANDS = Object.freeze([
   /* ---------------- TROPICAL ---------------- */
   {id:"palm", name:"Palm Island", flag:"🌴", zone:"Tropical", like:"like Darwin",
    climate:{temperature:"Hot all year", humidity:"Very wet, sticky air",
-            vegetation:"Rainforest and mangroves", summary:"Two seasons: The Wet and The Dry. Cyclones.",
+            vegetation:"Rainforest and mangroves", summary:"Two seasons: The Wet and The Dry. Cyclones.", rainMm:1730, rainWord:"Heaps of rain",
             short:{temp:"Hot all year",humidity:"Wet, sticky air",plants:"Rainforest"}},
    map:["~~~~~~~~~~~~","~~~..,,.~~~~","~~.,RRnR,.~~","~.,RRn=RRn.~","~.,RR,=Rn,.~",
         "~.,RR,=RRm.~","~..R,,=,mm.~","~~.,,m=mm.~~","~~~..~=~..~~"],
@@ -375,7 +392,7 @@ const ISLANDS = Object.freeze([
   /* ---------------- DESERT ---------------- */
   {id:"red", name:"Red Island", flag:"🏜️", zone:"Desert", like:"like Alice Springs",
    climate:{temperature:"Baking days, freezing nights", humidity:"Very dry air",
-            vegetation:"Spinifex and saltbush", summary:"Almost no rain. Hot days, cold nights.",
+            vegetation:"Spinifex and saltbush", summary:"Almost no rain. Hot days, cold nights.", rainMm:280,  rainWord:"Hardly any rain",
             short:{temp:"Baking days, cold nights",humidity:"Very dry",plants:"Spinifex"}},
    map:["~~~~~~~~~~~~","~~~.ddd.~~~~","~~.dSSkSd.~~","~.dSSkOkSd.~","~.dSskSkSd.~",
         "~.dSssSSSd.~","~..dSsSSdd.~","~~.ddSSdd.~~","~~~.dd..~~~~"],
@@ -410,9 +427,9 @@ const ISLANDS = Object.freeze([
        {t:"Wait for rain", d:-2, why:"Rain may not come for another year."}]}]},
 
   /* ---------------- GRASSLAND ---------------- */
-  {id:"gold", name:"Gold Island", flag:"🌾", zone:"Grassland", like:"like Broken Hill",
+  {id:"gold", name:"Gold Island", flag:"🌾", zone:"Grassland", like:"like Dubbo",
    climate:{temperature:"Hot summers, cool winters", humidity:"Dry most of the year",
-            vegetation:"Golden grass and scrub", summary:"Some rain, then long dry spells.",
+            vegetation:"Golden grass and scrub", summary:"Some rain, then long dry spells.", rainMm:580,  rainWord:"Not much rain",
             short:{temp:"Hot summers",humidity:"Dry",plants:"Golden grass"}},
    map:["~~~~~~~~~~~~","~~~..,,,.~~~","~~.,GGnG,.~~","~.,GG=nGG,.~","~.,GS=SnGG.~",
         "~.,GG=GGGS.~","~..GG=GGG,.~","~~.,G=SSG.~~","~~~..=~..~~~"],
@@ -449,7 +466,7 @@ const ISLANDS = Object.freeze([
   /* ---------------- TEMPERATE ---------------- */
   {id:"green", name:"Green Island", flag:"🌳", zone:"Temperate", like:"like Sydney",
    climate:{temperature:"Mild. Warm summers, cool winters.", humidity:"Comfy. Rain all year.",
-            vegetation:"Gum trees and grassy flats", summary:"Four gentle seasons. Rain all year.",
+            vegetation:"Gum trees and grassy flats", summary:"Four gentle seasons. Rain all year.", rainMm:1210, rainWord:"Good rain",
             short:{temp:"Mild",humidity:"Rain all year",plants:"Gum trees"}},
    map:["~~~~~~~~~~~~","~~~.,,,,.~~~","~~.,,T=T,.~~","~.,TTn=nTA.~","~.,,Tn=,T,.~",
         "~.,,,,=,TO.~","~..,,,=,,,.~","~~.,,,=,,.~~","~~~..~=~..~~"],
@@ -725,6 +742,30 @@ function meters(pop){
       <p class="mword">${rm.word}</p><p class="mnote">${esc(rm.note)}</p></div>
   </div>`;
 }
+function rainBar(mm){
+  const n = Math.max(1, Math.min(4, Math.ceil(mm/500)));
+  let out=""; for(let i=0;i<4;i++) out += `<i class="${i<n?"on":""}"></i>`;
+  return `<span class="bar" aria-hidden="true">${out}</span>`;
+}
+function rainRow(isl){
+  const c=isl.climate;
+  return `<p class="rainrow"><span class="ic" aria-hidden="true">🌧️</span>${rainBar(c.rainMm)}
+    <span class="mm">${c.rainMm.toLocaleString()} mm</span><span>${esc(c.rainWord)}</span></p>`;
+}
+/* Computed from the island's own sites, so it cannot drift from the reports. */
+function variesRows(isl){
+  const rows = [["water","💧"],["shelter","🛖"]].map(([k,ic])=>{
+    const f=FACTORS.find(x=>x.key===k);
+    const vals=isl.sites.map(st=>st.scores[k]);
+    const lo=Math.min(...vals), hi=Math.max(...vals);
+    const body = lo===hi
+      ? `<span class="muted">${esc(f.words[lo].toLowerCase())} just about everywhere</span>`
+      : `<span class="rng">${esc(f.words[lo].toLowerCase())} → ${esc(f.words[hi].toLowerCase())}</span>`;
+    return `<li><span class="ic" aria-hidden="true">${ic}</span>${body}</li>`;
+  }).join("");
+  return `<p class="vhead">Depends where you settle</p><ul class="varies">${rows}</ul>`;
+}
+
 /* emoji + dots + a couple of words, matching the scout reports */
 function climateScores(isl, long){
   const c = islandClimate(isl);
@@ -742,7 +783,7 @@ function climateScores(isl, long){
 function climateBox(isl){
   return `<div class="climate">
     <p style="margin:0 0 6px;font-weight:700"><span class="zone z-${isl.zone}">${isl.zone}</span> ${esc(isl.like)}</p>
-    ${climateScores(isl,true)}</div>`;
+    ${rainRow(isl)}${climateScores(isl,true)}</div>`;
 }
 const reflectBtn = () => canReflect()
   ? `<button class="btn big warmbtn" data-action="go" data-screen="australia">I'm ready to think →</button>` : "";
@@ -775,7 +816,7 @@ function screenArch(){
       <span class="flag">${isl.flag}</span><span class="zone z-${isl.zone}">${isl.zone}</span>
       <h3>${esc(isl.name)}</h3>
       <p class="muted" style="margin:0">${esc(isl.climate.summary)}</p>
-      ${climateScores(isl,false)}</button>`;
+      ${rainRow(isl)}${climateScores(isl,false)}${variesRows(isl)}</button>`;
   }).join("");
   const n = state.completed.length;
   const note = n===0 ? `Settle any <strong>two</strong> islands. Do more if you want to.`
