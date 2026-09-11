@@ -66,7 +66,7 @@ rewarded for being roomy.
 4. **Now look at Australia** — their island results beside a simple climate-zone map and a
    coast-vs-inland table (Sydney and Perth against Broken Hill and Alice Springs).
 5. **Two real maps** — rainfall and population side by side, with three guided questions that
-   force students to read *both* maps.
+   force students to read *both* maps. Tapping a map opens it full size.
 6. **The pattern** — where it rains, people live. Then *"But look closer"*: the tiny specks
    inland, and why people choose them.
 7. **Write** — three scaffolded questions with sentence starters and a tap-to-add word bank.
@@ -116,6 +116,11 @@ Islands: `palm`, `red`, `gold`, `green`.
 1. Push this folder (including `images/`) to a repository.
 2. **Settings → Pages → Source: Deploy from a branch**, `main`, folder `/ (root)`.
 3. Students open `https://<username>.github.io/<repo>/settlement-game/`
+   The repo root lists all your activities, so `https://<username>.github.io/<repo>/`
+   works too.
+
+**This repo is already live:**
+<https://smalltoolworks.github.io/student-web-apps/settlement-game/>
 
 Writing and progress are kept in `sessionStorage` only, so shared iPads never carry one
 student's work over to the next. Remind students to **print or copy** before they close the tab.
@@ -139,9 +144,24 @@ The game **checks itself on load**: it recalculates every site's water score fro
 distance to fresh water on that island's map and warns in the console if the data no longer
 matches, so moving a river cannot silently make a scout report lie. Run `?debug=1` after any change.
 
+## On different screens
+
+The two-map screen is the one that had to be got right, since students must read both maps
+to answer. Measured on the live site:
+
+| Screen | Layout | Result |
+|---|---|---|
+| Laptop (1280px) | Side by side, 424px each | Comfortable |
+| **iPad portrait (768px)** | Side by side, 334px each | Both maps **and** the question fit on screen — no scrolling |
+| Phone (390px) | Stacked, ~300px wide | Readable, but you scroll. Two maps plus a question cannot fit a phone. |
+
+On every size, tapping a map opens it full size.
+
 ## Accessibility
 
 Keyboard playable throughout; map pins take Enter/Space and focus moves to the heading on every
 screen. Scores show three ways — filled/hollow dots, a word, and a number — so colour is never
 the only signal. Both real maps carry full alt text describing what they show. Tap targets 56px+.
 Honours `prefers-reduced-motion`. No sound except the read-aloud button. No network requests.
+Each map is a real button, so it enlarges from the keyboard as well as by tapping, and Escape
+closes the enlarged view.
