@@ -219,10 +219,25 @@ textarea:focus{border-color:var(--teal);outline:none}
 .denskey li{display:flex;gap:6px;align-items:center;font-weight:600}
 .denskey .sw{width:16px;height:16px;border-radius:3px;border:1px solid rgba(0,0,0,.25);flex:0 0 auto}
 .denskey .t{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);width:100%;margin:0 0 2px}
+.mapbtn{display:block;width:100%;padding:0;border:none;background:none;cursor:zoom-in}
+.mapbtn:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:8px}
+.zoomhint{display:none;font-size:.8rem;color:var(--teal);font-weight:700;margin:6px 0 0}
+/* Narrow screens: keep BOTH maps and the question on screen together. */
+@media (max-width:820px){
+  .realmap img{max-height:34vh;width:auto;max-width:100%;margin:0 auto;object-fit:contain}
+  .zoomhint{display:block}
+}
+#lightbox{position:fixed;inset:0;z-index:100;background:rgba(14,24,31,.94);display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px}
+#lightbox[hidden]{display:none}
+#lightbox img{max-width:100%;max-height:80vh;object-fit:contain;background:#fff;border-radius:10px}
+#lightbox p{color:#fff;margin:0;font-weight:800;text-align:center;font-size:1.05rem}
+#lightbox .lbclose{min-height:56px;padding:12px 28px;border-radius:999px;border:none;background:#fff;
+  color:var(--teal);font-weight:800;font-size:1.05rem;cursor:pointer}
 .lookbox{background:#fffdf6;border:3px solid var(--warm);border-radius:var(--r);padding:20px;margin:0 0 18px}
 
 @media print{
-  #speakbar,.actions,.btn,.bank,details.key{display:none!important}
+  #speakbar,#lightbox,.actions,.btn,.bank,details.key{display:none!important}
   body{background:#fff;padding:0}
   .card{break-inside:avoid;border-color:#999}
   textarea{border:1px solid #999;min-height:0}
@@ -232,6 +247,7 @@ textarea:focus{border-color:var(--teal);outline:none}
 <body>
 <main id="app" aria-live="polite"></main>
 <div id="speakbar"></div>
+<div id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Full size map"></div>
 
 <script>
 "use strict";
@@ -925,15 +941,20 @@ function screenMaps(){
        Look at both to answer.</p>
     <div class="mapgrid">
       <figure class="realmap"><h3>🌧️ Where the rain falls</h3>
-        <img src="images/rainfall-january.png" alt="Map of Australia showing median January rainfall. The north is blue and purple for heavy rain. The middle is orange and white for almost no rain. The east and south coasts are green."
+        <button class="mapbtn" data-action="zoom" data-src="images/rainfall-january.png" data-label="rain" aria-label="Enlarge the rain map">
+          <img src="images/rainfall-january.png" alt="Map of Australia showing median January rainfall. The north is blue and purple for heavy rain. The middle is orange and white for almost no rain. The east and south coasts are green."
           onerror="this.closest('.realmap').classList.add('missing')">
+        </button>
         <div class="missingnote">Map image not added yet — save it as
           <code>images/rainfall-january.png</code></div>
+        <p class="zoomhint">Tap the map to see it big</p>
         <figcaption>Median rainfall, 1–31 January. © Commonwealth of Australia,
           Bureau of Meteorology. bom.gov.au/climate</figcaption></figure>
       <figure class="realmap"><h3>👥 Where the people live</h3>
-        <img src="images/population-density.jpg" alt="Map of Australia showing how many people live in each area. Almost the whole country is grey, meaning no people at all. Yellow and orange specks crowd along the east coast, the south-east corner and a small patch in the south-west near Perth. The huge middle of the country is completely grey."
+        <button class="mapbtn" data-action="zoom" data-src="images/population-density.jpg" data-label="people" aria-label="Enlarge the people map">
+          <img src="images/population-density.jpg" alt="Map of Australia showing how many people live in each area. Almost the whole country is grey, meaning no people at all. Yellow and orange specks crowd along the east coast, the south-east corner and a small patch in the south-west near Perth. The huge middle of the country is completely grey."
           onerror="this.closest('.realmap').classList.add('missing')">
+        </button>
         <div class="missingnote">Map image not added yet — save it as
           <code>images/population-density.jpg</code></div>
         <ul class="denskey"><li class="t">People per square kilometre</li>
@@ -943,6 +964,7 @@ function screenMaps(){
           <li><span class="sw" style="background:#fd8d3c"></span>500–2000</li>
           <li><span class="sw" style="background:#fee08b"></span>under 500</li>
           <li><span class="sw" style="background:#8c8c8c"></span>nobody lives here</li></ul>
+        <p class="zoomhint">Tap the map to see it big</p>
         <figcaption>Estimated resident population density, June 2018.
           © Commonwealth of Australia, Australian Bureau of Statistics, 2019.</figcaption></figure>
     </div>
@@ -1028,7 +1050,7 @@ const SCREENS = {intro:screenIntro, arch:screenArch, island:screenIsland, predic
   pattern:screenPattern, write:screenWrite, report:screenReport};
 
 function render(){
-  stopSpeech();
+  stopSpeech(); closeLightbox();
   const app=document.getElementById("app");
   app.innerHTML = (SCREENS[state.screen]||screenIntro)();
   const h=app.querySelector("h1"); if(h) h.focus({preventScroll:true});
@@ -1085,6 +1107,23 @@ function renderSpeakBtn(){
 document.getElementById("speakbar").addEventListener("click",()=>{
   if(speaking) stopSpeech(); else startSpeech();
 });
+
+function openLightbox(src,label){
+  stopSpeech();
+  const lb=document.getElementById("lightbox");
+  lb.innerHTML = `<p>${label==="rain"?"🌧️ Where the rain falls":"👥 Where the people live"}</p>
+    <img src="${src}" alt=""><button class="lbclose" data-lbclose="1">Close ✕</button>`;
+  lb.hidden=false;
+  const b=lb.querySelector(".lbclose"); if(b) b.focus();
+}
+function closeLightbox(){
+  const lb=document.getElementById("lightbox");
+  if(lb && !lb.hidden){ lb.hidden=true; lb.innerHTML=""; }
+}
+document.getElementById("lightbox").addEventListener("click",e=>{
+  if(e.target.id==="lightbox" || e.target.dataset.lbclose) closeLightbox();
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeLightbox(); });
 
 /* ============================================================
    7. EVENTS
@@ -1156,6 +1195,7 @@ function handle(el){
   if(a==="card")     return chooseCard(+el.dataset.i);
   if(a==="nextyear") return setState({run:{...state.run,yearIndex:state.run.yearIndex+1,cardChoice:null}});
   if(a==="finish")   return finishRun();
+  if(a==="zoom") return openLightbox(el.dataset.src, el.dataset.label);
   if(a==="maplook"){
     const picks=state.mapPicks.slice(); picks[state.mapStep]=+el.dataset.i;
     return setState({mapPicks:picks});
