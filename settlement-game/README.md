@@ -18,10 +18,10 @@ these exact names:
 | File | What it is | Where to get it |
 |---|---|---|
 | `images/rainfall-january.png` | BoM median rainfall, 1–31 January | bom.gov.au/climate |
-| `images/population-density.png` | ABS estimated resident population density grid, 2018 | abs.gov.au |
+| `images/population-density.jpg` | ABS estimated resident population density grid, 2018 | abs.gov.au |
 
-Until they are added, the page shows a friendly "not added yet" note in their place, so the
-game still runs. Attribution for both is already printed under each map.
+Both are already in place. The ABS export has no legend burned into it, so the colour key is
+drawn in HTML beside the map. If you ever swap an image out, keep the same filename.
 
 > **Licence check:** both maps are Commonwealth material (Bureau of Meteorology; Australian
 > Bureau of Statistics). Australian Government material is usually released under

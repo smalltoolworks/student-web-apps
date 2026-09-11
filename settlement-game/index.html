@@ -215,6 +215,10 @@ textarea:focus{border-color:var(--teal);outline:none}
   border-radius:8px;font-weight:600;font-size:.95rem}
 .realmap.missing img{display:none}
 .realmap.missing .missingnote{display:block}
+.denskey{display:flex;flex-wrap:wrap;gap:5px 14px;margin:10px 0 0;padding:0;list-style:none;font-size:.82rem}
+.denskey li{display:flex;gap:6px;align-items:center;font-weight:600}
+.denskey .sw{width:16px;height:16px;border-radius:3px;border:1px solid rgba(0,0,0,.25);flex:0 0 auto}
+.denskey .t{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);width:100%;margin:0 0 2px}
 .lookbox{background:#fffdf6;border:3px solid var(--warm);border-radius:var(--r);padding:20px;margin:0 0 18px}
 
 @media print{
@@ -928,10 +932,17 @@ function screenMaps(){
         <figcaption>Median rainfall, 1–31 January. © Commonwealth of Australia,
           Bureau of Meteorology. bom.gov.au/climate</figcaption></figure>
       <figure class="realmap"><h3>👥 Where the people live</h3>
-        <img src="images/population-density.png" alt="Map of Australia showing population density. Almost the whole country is grey, meaning no people. Yellow and orange dots crowd along the east, south-east and south-west coasts."
+        <img src="images/population-density.jpg" alt="Map of Australia showing how many people live in each area. Almost the whole country is grey, meaning no people at all. Yellow and orange specks crowd along the east coast, the south-east corner and a small patch in the south-west near Perth. The huge middle of the country is completely grey."
           onerror="this.closest('.realmap').classList.add('missing')">
         <div class="missingnote">Map image not added yet — save it as
-          <code>images/population-density.png</code></div>
+          <code>images/population-density.jpg</code></div>
+        <ul class="denskey"><li class="t">People per square kilometre</li>
+          <li><span class="sw" style="background:#67000d"></span>8000+</li>
+          <li><span class="sw" style="background:#a63603"></span>5000–8000</li>
+          <li><span class="sw" style="background:#e6550d"></span>2000–5000</li>
+          <li><span class="sw" style="background:#fd8d3c"></span>500–2000</li>
+          <li><span class="sw" style="background:#fee08b"></span>under 500</li>
+          <li><span class="sw" style="background:#8c8c8c"></span>nobody lives here</li></ul>
         <figcaption>Estimated resident population density, June 2018.
           © Commonwealth of Australia, Australian Bureau of Statistics, 2019.</figcaption></figure>
     </div>
