@@ -11,15 +11,19 @@ const fs = require("fs");
 const path = require("path");
 
 const args = process.argv.slice(2);
-let apiKey = process.env.GEMINI_API_KEY || "";
-let voice = process.env.GEMINI_VOICE || "Aoede";
-let model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+let apiKey = (process.env.GEMINI_API_KEY || "").trim();
+let voice = (process.env.GEMINI_VOICE || "Aoede").trim();
+let model = (process.env.GEMINI_MODEL || "gemini-2.5-flash").trim();
 
 for (const arg of args) {
-  if (arg.startsWith("--key=")) apiKey = arg.split("=")[1];
-  if (arg.startsWith("--voice=")) voice = arg.split("=")[1];
-  if (arg.startsWith("--model=")) model = arg.split("=")[1];
+  if (arg.startsWith("--key=")) apiKey = arg.slice(6).trim();
+  if (arg.startsWith("--voice=")) voice = arg.slice(8).trim();
+  if (arg.startsWith("--model=")) model = arg.slice(8).trim();
 }
+
+apiKey = apiKey.replace(/^["']+|["']+$/g, "").trim();
+voice = voice.replace(/^["']+|["']+$/g, "").trim();
+model = model.replace(/^["']+|["']+$/g, "").trim();
 
 if (!apiKey) {
   console.log(`

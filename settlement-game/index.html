@@ -1232,8 +1232,12 @@ const geminiAudioCache = new Map();
 window._activeSpeechUtterance = null;
 
 const GEMINI_CONFIG = {
-  get key(){ return (localStorage.getItem("sunrise_gemini_key")||"").trim(); },
-  set key(v){ if(v) localStorage.setItem("sunrise_gemini_key", v.trim()); else localStorage.removeItem("sunrise_gemini_key"); },
+  get key(){ return (localStorage.getItem("sunrise_gemini_key")||"").trim().replace(/^["']+|["']+$/g, ""); },
+  set key(v){
+    const clean = (v||"").trim().replace(/^["']+|["']+$/g, "");
+    if(clean) localStorage.setItem("sunrise_gemini_key", clean);
+    else localStorage.removeItem("sunrise_gemini_key");
+  },
   get voice(){ return localStorage.getItem("sunrise_gemini_voice")||"Aoede"; },
   set voice(v){ localStorage.setItem("sunrise_gemini_voice", v||"Aoede"); },
   get model(){ return localStorage.getItem("sunrise_gemini_model")||"gemini-2.5-flash"; },
@@ -1734,7 +1738,8 @@ async function testGeminiVoice(){
   const statusEl = document.getElementById("voice_test_status");
   const testBtn = document.getElementById("btn_test_voice");
 
-  const key = (keyInput ? keyInput.value : "").trim() || GEMINI_CONFIG.key;
+  const rawKey = (keyInput ? keyInput.value : "").trim() || GEMINI_CONFIG.key;
+  const key = rawKey.replace(/^["']+|["']+$/g, "");
   const voice = (voiceSelect ? voiceSelect.value : "") || "Aoede";
   const model = (modelSelect ? modelSelect.value : "") || "gemini-2.5-flash";
 
@@ -1789,7 +1794,7 @@ function saveTeacherSettings(){
   const voiceSelect = document.getElementById("gemini_voice_select");
   const modelSelect = document.getElementById("gemini_model_select");
 
-  const key = (keyInput ? keyInput.value : "").trim();
+  const key = (keyInput ? keyInput.value : "").trim().replace(/^["']+|["']+$/g, "");
   const voice = voiceSelect ? voiceSelect.value : "Aoede";
   const model = modelSelect ? modelSelect.value : "gemini-2.5-flash";
 
