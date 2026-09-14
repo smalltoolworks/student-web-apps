@@ -20,50 +20,51 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{background:var(--paper);color:var(--ink);
-  font:400 18px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  -webkit-text-size-adjust:100%;padding:0 0 90px}
-#app{max-width:960px;margin:0 auto;padding:20px 18px}
-h1{font-size:1.9rem;line-height:1.2;margin:0 0 .4em;letter-spacing:-.01em}
+  font:400 17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-text-size-adjust:100%;padding:0 0 clamp(40px, 6vh, 60px)}
+#app{max-width:min(1220px, 96vw);margin:0 auto;padding:clamp(10px, 2vh, 20px) clamp(12px, 2.5vw, 24px)}
+h1{font-size:clamp(1.4rem, 2.5vw, 1.85rem);line-height:1.2;margin:0 0 .25em;letter-spacing:-.01em}
 h1:focus{outline:none}
 h1:focus-visible{outline:3px solid var(--focus);outline-offset:6px;border-radius:6px}
-h2{font-size:1.3rem;margin:1.3em 0 .5em}
-h3{font-size:1.08rem;margin:0 0 .3em}
-p{margin:0 0 .9em;max-width:60ch}
-.lede{font-size:1.15rem}
+h2{font-size:clamp(1.15rem, 1.8vw, 1.3rem);margin:1em 0 .4em}
+h3{font-size:1.05rem;margin:0 0 .25em}
+p{margin:0 0 .7em;max-width:65ch}
+.lede{font-size:clamp(.98rem, 1.35vw, 1.15rem);margin:0 0 .5em}
 .muted{color:var(--ink-soft)}
 .center{text-align:center}
 
 button{font:inherit;color:inherit}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-height:56px;
-  padding:14px 28px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);
-  font-size:1.1rem;font-weight:700;cursor:pointer;box-shadow:0 3px 0 #145c6a;
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-height:52px;
+  padding:12px 24px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);
+  font-size:1.05rem;font-weight:700;cursor:pointer;box-shadow:0 3px 0 #145c6a;
   -webkit-tap-highlight-color:transparent}
 .btn:hover{filter:brightness(1.08)}
 .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #145c6a}
 .btn[disabled]{background:#c3cdd2;box-shadow:0 3px 0 #a9b5bb;color:#5d6a70;cursor:not-allowed;transform:none}
 .btn.secondary{background:#fff;color:var(--teal);border:2px solid var(--teal);box-shadow:0 3px 0 #cfe2e6}
 .btn.warmbtn{background:var(--warm);box-shadow:0 3px 0 #a8641c}
-.btn.big{font-size:1.25rem;min-height:64px;padding:16px 34px}
+.btn.big{font-size:1.2rem;min-height:58px;padding:14px 30px}
 :focus-visible{outline:3px solid var(--focus);outline-offset:3px}
-.actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:24px;align-items:center}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px;align-items:center}
 
-.card{background:var(--card);border:2px solid var(--line);border-radius:var(--r);padding:20px 22px;margin:0 0 18px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:var(--r);
+  padding:clamp(12px, 1.8vh, 18px) clamp(14px, 2vw, 22px);margin:0 0 clamp(10px, 1.6vh, 16px)}
 .card h2{margin-top:0}
 .step{font-size:.85rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--ink-soft);margin:0 0 4px}
 
 /* read aloud */
 #speakbar{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;align-items:center;gap:8px}
-#speakbtn{display:flex;align-items:center;gap:8px;min-height:56px;padding:12px 20px;border-radius:999px;
-  background:#fff;color:var(--teal);border:3px solid var(--teal);font-weight:800;font-size:1rem;
-  cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.18);transition:all .15s ease}
+#speakbtn{display:flex;align-items:center;gap:8px;min-height:46px;padding:8px 16px;border-radius:999px;
+  background:#fff;color:var(--teal);border:2.5px solid var(--teal);font-weight:800;font-size:.92rem;
+  cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.15);transition:all .15s ease}
 #speakbtn.on{background:var(--teal);color:#fff;box-shadow:0 4px 14px rgba(29,122,140,.45)}
 #speakbtn.gemini{border-color:#7c3aed;color:#6d28d9}
 #speakbtn.gemini.on{background:#7c3aed;color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.45)}
 #speakbtn.on .spk-icon{display:inline-block;animation:spkpulse 1s infinite alternate ease-in-out}
 @keyframes spkpulse{0%{transform:scale(1)}100%{transform:scale(1.25)}}
-.speak-cog-btn{width:48px;height:48px;border-radius:50%;background:#fff;border:3px solid var(--line);
-  font-size:1.25rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 3px 10px rgba(0,0,0,.15);transition:all .15s ease}
+.speak-cog-btn{width:42px;height:42px;border-radius:50%;background:#fff;border:2.5px solid var(--line);
+  font-size:1.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 10px rgba(0,0,0,.12);transition:all .15s ease}
 .speak-cog-btn:hover{border-color:var(--teal);background:#f3f8fb;transform:scale(1.06)}
 .speak-cog-btn.has-key{border-color:#7c3aed;background:#faf5ff;box-shadow:0 3px 10px rgba(124,58,237,.25)}
 #audiotoast{position:fixed;bottom:80px;right:16px;z-index:60;background:#1e293b;color:#fff;
@@ -72,62 +73,104 @@ button{font:inherit;color:inherit}
 #audiotoast.show{opacity:1;pointer-events:auto;transform:translateY(0)}
 
 /* islands */
+.climate-hint{display:flex;gap:10px;align-items:flex-start;background:#fffdf6;border:2px solid var(--warm);
+  border-radius:var(--r);padding:clamp(8px, 1.4vh, 12px) clamp(12px, 2vw, 16px);
+  margin-bottom:clamp(10px, 1.6vh, 14px);font-size:clamp(.88rem, 1.2vw, .95rem);line-height:1.45}
+.climate-hint .hint-ic{font-size:1.2rem;line-height:1.2;flex:0 0 auto}
+.climate-hint p{margin:0;max-width:none}
+.done-tag{display:inline-block;background:#dff2e6;color:#1d5c39;border:1.5px solid var(--good);border-radius:999px;
+  padding:2px 10px;font-size:.78rem;font-weight:800;margin:4px 0 8px;align-self:flex-start}
+
 /* Rainfall is an AMOUNT, not a rating, so it must not look like the green
    rating dots - otherwise "most rain" would read as "best island". */
-.rainrow{display:flex;align-items:center;gap:9px;margin:12px 0 0;font-size:.97rem;font-weight:600}
-.rainrow .ic{font-size:1.1rem;width:1.3em;text-align:center;flex:0 0 auto}
+.rainrow{display:flex;align-items:center;gap:7px;margin:8px 0 0;font-size:.88rem;font-weight:600}
+.rainrow .ic{font-size:1rem;width:1.2em;text-align:center;flex:0 0 auto}
 .bar{display:inline-flex;gap:2px;flex:0 0 auto}
-.bar i{width:9px;height:15px;border-radius:2px;background:#d3e2ea;display:block}
+.bar i{width:7px;height:13px;border-radius:2px;background:#d3e2ea;display:block}
 .bar i.on{background:#3f8fbf}
 .mm{font-variant-numeric:tabular-nums;white-space:nowrap}
 /* Water and shelter swing wildly between spots on the same island, so a single
    island number would lie. Show the spread instead - that IS the lesson. */
-.vhead{border-top:1px dashed var(--line);margin:11px 0 7px;padding:9px 0 0;font-size:.76rem;
+.vhead{border-top:1px dashed var(--line);margin:8px 0 4px;padding:5px 0 0;font-size:.72rem;
   text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:var(--ink-soft)}
 ul.varies{list-style:none;margin:0;padding:0}
-ul.varies li{display:flex;align-items:center;gap:9px;font-size:.9rem;margin:0 0 5px;font-weight:600}
+ul.varies li{display:flex;align-items:center;gap:7px;font-size:.85rem;margin:0 0 3px;font-weight:600}
 ul.varies li:last-child{margin-bottom:0}
-ul.varies .ic{font-size:1.05rem;width:1.3em;text-align:center;flex:0 0 auto}
+ul.varies .ic{font-size:.95rem;width:1.2em;text-align:center;flex:0 0 auto}
 ul.varies .rng{color:var(--teal)}
-ul.cscores{list-style:none;margin:12px 0 0;padding:0}
-ul.cscores li{display:flex;align-items:center;gap:9px;margin:0 0 7px;font-size:.97rem;font-weight:600}
+ul.cscores{list-style:none;margin:8px 0 0;padding:0}
+ul.cscores li{display:flex;align-items:center;gap:7px;margin:0 0 3px;font-size:.88rem;font-weight:600}
 ul.cscores li:last-child{margin-bottom:0}
-ul.cscores .ic{font-size:1.1rem;width:1.3em;text-align:center;flex:0 0 auto}
+ul.cscores .ic{font-size:1rem;width:1.2em;text-align:center;flex:0 0 auto}
 ul.cscores .dots{flex:0 0 auto}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-/* Always 2x2, so the four islands read as one set to compare, not 3 + 1. */
-.isles{display:grid;gap:16px;grid-template-columns:1fr 1fr;align-items:stretch}
-@media (max-width:620px){.isles{grid-template-columns:1fr}}
-.isle{display:block;width:100%;text-align:left;background:#fff;border:3px solid var(--line);
-  border-radius:var(--r);padding:16px 18px;cursor:pointer;min-height:56px}
-.isle:hover{border-color:var(--teal);background:#f4fbfc}
-.isle .flag{font-size:2.2rem;line-height:1;display:block;margin-bottom:4px}
-.isle h3{margin:4px 0 6px;font-size:1.2rem}
-.isle dl{margin:10px 0 0;display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:.95rem}
+
+/* Island cards: 4 columns across on desktop/laptop/landscape screens so all 4 fit on one screen without scrolling.
+   2x2 on tablets, stacking on phones. */
+.isles{display:grid;gap:clamp(8px, 1.2vw, 14px);grid-template-columns:repeat(4, 1fr);align-items:stretch}
+@media (max-width:880px){.isles{grid-template-columns:repeat(2, 1fr)}}
+@media (max-width:520px){.isles{grid-template-columns:1fr}}
+
+.isle{display:flex;flex-direction:column;width:100%;text-align:left;background:#fff;border:3px solid var(--line);
+  border-radius:var(--r);padding:clamp(10px, 1.4vh, 14px) clamp(10px, 1.2vw, 14px);cursor:pointer;min-height:56px;
+  transition:border-color .15s, transform .12s, box-shadow .15s}
+.isle:hover{border-color:var(--teal);background:#f4fbfc;transform:translateY(-2px);box-shadow:0 4px 12px rgba(29,122,140,.12)}
+.isle-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.isle .flag{font-size:clamp(1.6rem, 2.2vw, 2rem);line-height:1;margin:0}
+.isle h3{margin:2px 0 4px;font-size:clamp(1.05rem, 1.4vw, 1.2rem)}
+.isle-summary{margin:0 0 4px;font-size:clamp(.82rem, 1.1vw, .9rem);line-height:1.3;min-height:2.6em}
+.isle dl{margin:8px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:.92rem}
 .isle dt{color:var(--ink-soft)}
 .isle dd{margin:0;font-weight:600}
-.isle.done{opacity:.7;border-style:dashed;background:#f6f4ee}
-.zone{display:inline-block;color:#fff;border-radius:999px;padding:3px 13px;font-size:.8rem;font-weight:800}
+.isle.done{opacity:.85;border-style:dashed;background:#f6f4ee}
+.zone{display:inline-block;color:#fff;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:800;letter-spacing:.02em}
 .z-Tropical{background:var(--trop)} .z-Desert{background:var(--desert)}
 .z-Grassland{background:var(--grass)} .z-Temperate{background:var(--temp)}
 
 /* map */
-.maplayout{display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start}
+.island-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;flex-wrap:wrap}
+.island-topbar .progress{margin-bottom:0}
+.maplayout{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
 @media (max-width:880px){.maplayout{grid-template-columns:1fr}}
 .mapwrap{background:#2e7ba8;border:3px solid #245f83;border-radius:var(--r);overflow:hidden;line-height:0}
-svg.map{width:100%;height:auto;display:block;touch-action:manipulation}
+svg.map{width:100%;max-height:min(390px, 48vh);height:auto;display:block;touch-action:manipulation}
 .tile{cursor:pointer}
 .pin{cursor:pointer}
 .pin circle.hit{fill:transparent}
 .pin:focus{outline:none}
 .pin:focus-visible circle.ring{stroke:#0b6fb8;stroke-width:2.2}
-.climate{background:#f3f8fb;border:2px solid #bcd8e6;border-radius:var(--r);padding:12px 16px;margin:0 0 14px}
-.climate dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:.98rem}
+.climate{background:#f3f8fb;border:2px solid #bcd8e6;border-radius:var(--r);padding:10px 14px;margin:0 0 12px}
+.climate dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.92rem}
 .climate dt{color:var(--ink-soft);white-space:nowrap}
 .climate dd{margin:0;font-weight:600}
 .progress{display:inline-block;background:#fff3d6;border:2px solid var(--warm);border-radius:999px;
-  padding:6px 16px;font-weight:700;font-size:.95rem;margin-bottom:12px}
+  padding:5px 14px;font-weight:700;font-size:.92rem;margin-bottom:10px}
 .progress.done{background:#dff2e6;border-color:var(--good);color:#1d5c39}
+
+/* results */
+.resultlayout{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+@media (max-width:768px){.resultlayout{grid-template-columns:1fr}}
+
+/* Screen height responsiveness */
+@media (max-height: 760px) {
+  body{padding-bottom:clamp(30px, 5vh, 48px)}
+  #app{padding-top:8px;padding-bottom:10px}
+  h1{font-size:1.45rem;margin-bottom:.15em}
+  .lede{font-size:.95rem;margin-bottom:.3em}
+  .climate-hint{padding:6px 12px;margin-bottom:8px;font-size:.85rem}
+  .isle{padding:8px 10px}
+  .isle .flag{font-size:1.6rem}
+  .isle h3{font-size:1.05rem;margin-bottom:2px}
+  .isle-summary{margin-bottom:2px;font-size:.82rem;min-height:2.4em}
+  .rainrow{margin-top:5px;font-size:.82rem}
+  ul.cscores{margin-top:5px}
+  ul.cscores li{margin-bottom:2px;font-size:.82rem}
+  .vhead{margin:5px 0 3px;padding-top:4px;font-size:.68rem}
+  ul.varies li{margin-bottom:2px;font-size:.78rem}
+  .actions{margin-top:12px}
+  .btn{min-height:48px;padding:10px 22px;font-size:1rem}
+  .btn.big{min-height:52px;padding:12px 26px;font-size:1.1rem}
+}
 
 /* factors */
 .factor{display:grid;grid-template-columns:1fr auto;gap:2px 14px;align-items:baseline;
@@ -896,15 +939,18 @@ function screenArch(){
     const done = state.completed.find(r=>r.islandId===isl.id);
     if(done){
       const rm = roomFor(done.final);
-      return `<div class="isle done"><span class="flag">${isl.flag}</span>
-        <span class="zone z-${isl.zone}">${isl.zone}</span><h3>${esc(isl.name)}</h3>
+      return `<div class="isle done">
+        <div class="isle-head"><span class="flag">${isl.flag}</span><span class="zone z-${isl.zone}">${isl.zone}</span></div>
+        <h3>${esc(isl.name)}</h3>
+        <p class="muted isle-summary">${esc(isl.climate.summary)}</p>
+        <span class="done-tag">✓ Settled</span>
         <dl><dt>👥</dt><dd>${done.final} people</dd>
             <dt>🏡</dt><dd>${stars(rm.stars)} ${rm.word}</dd></dl></div>`;
     }
     return `<button class="isle" data-action="island" data-id="${isl.id}">
-      <span class="flag">${isl.flag}</span><span class="zone z-${isl.zone}">${isl.zone}</span>
+      <div class="isle-head"><span class="flag">${isl.flag}</span><span class="zone z-${isl.zone}">${isl.zone}</span></div>
       <h3>${esc(isl.name)}</h3>
-      <p class="muted" style="margin:0">${esc(isl.climate.summary)}</p>
+      <p class="muted isle-summary">${esc(isl.climate.summary)}</p>
       ${rainRow(isl)}${climateScores(isl,false)}${variesRows(isl)}</button>`;
   }).join("");
   const n = state.completed.length;
@@ -913,8 +959,8 @@ function screenArch(){
     : `${n} done. Settle more, or go and think about Australia.`;
   return `<h1 tabindex="-1">${COPY.archH}</h1>
     <p class="lede">${note}</p>
-    ${state.completed.length===0 ? `<div class="card" style="padding:14px 18px;margin-bottom:16px">
-      <p style="margin:0">${COPY.climateLine}</p></div>` : ""}
+    ${state.completed.length===0 ? `<div class="climate-hint">
+      <span class="hint-ic">💡</span><p>${COPY.climateLine}</p></div>` : ""}
     <div class="isles">${cards}</div>
     <div class="actions">${reflectBtn()}</div>`;
 }
@@ -945,12 +991,14 @@ function screenIsland(){
   const isl = currentIsland();
   if(!isl) return screenArch();
   const n=scoutedOn(isl), t=isl.sites.length, enough=n>=t;
-  return `<h1 tabindex="-1">${isl.flag} ${esc(isl.name)}</h1>
-    <span class="progress ${enough?"done":""}">${enough?"All scouted. Now pick one!":`Scouted ${n} of ${t}`}</span>
+  return `<div class="island-topbar">
+      <h1 tabindex="-1" style="margin:0">${isl.flag} ${esc(isl.name)}</h1>
+      <span class="progress ${enough?"done":""}">${enough?"All scouted. Now pick one!":`Scouted ${n} of ${t}`}</span>
+    </div>
     <div class="maplayout">
       <div>${climateBox(isl)}<div class="mapwrap">${mapSVG(isl)}</div>${mapKey(isl)}</div>
       <div>${scoutPanel(isl)}</div></div>
-    <div class="actions"><button class="btn secondary" data-action="go" data-screen="arch">← Back</button></div>`;
+    <div class="actions" style="margin-top:14px"><button class="btn secondary" data-action="go" data-screen="arch">← Back</button></div>`;
 }
 
 function screenPredict(){
@@ -1021,19 +1069,25 @@ function screenResult(){
     `<p class="center">You guessed <strong>${done.prediction}</strong>. You got <strong>${done.final}</strong>.</p>`;
   return `<p class="step">${isl.flag} ${esc(isl.name)} · ${esc(isl.zone)}</p>
     <h1 tabindex="-1">${esc(s.name)}, 3 years on</h1>
-    <div class="card">${meters(done.final)}
-      ${graph(done.pops)}<p class="center">${out.line}</p>${pred}
-      <p class="center muted">Your choices changed this by <strong>${done.cardTotal>0?"+":""}${done.cardTotal}</strong>.</p></div>
-    ${state.completed.length===1 ? `<div class="card" style="border-color:var(--warm);background:#fffdf6">
-      <p style="margin:0">${COPY.twoMetersNote}</p></div>` : ""}
-    ${isl.echo ? `<div class="echo-card"><h2>🇦🇺 ${esc(isl.echo.title)}</h2><p>${esc(isl.echo.text)}</p></div>` : ""}
-    <div class="card"><h2 style="margin-top:0">Why</h2>
-      <p>Best thing: <strong>${best.label.toLowerCase()}</strong>.
-         Hardest thing: <strong>${worst.label.toLowerCase()}</strong>.</p>
-      ${FACTORS.map(f=>factorRow(f,s.scores[f.key],s.notes[f.key])).join("")}</div>
-    <div class="actions">
-      <button class="btn ${canReflect()?"secondary":""} ${canReflect()?"":"big"}" data-action="go" data-screen="arch">Settle another island</button>
-      ${reflectBtn()}</div>`;
+    <div class="resultlayout">
+      <div class="resultcol">
+        <div class="card">${meters(done.final)}
+          ${graph(done.pops)}<p class="center">${out.line}</p>${pred}
+          <p class="center muted">Your choices changed this by <strong>${done.cardTotal>0?"+":""}${done.cardTotal}</strong>.</p></div>
+        ${state.completed.length===1 ? `<div class="card" style="border-color:var(--warm);background:#fffdf6">
+          <p style="margin:0">${COPY.twoMetersNote}</p></div>` : ""}
+        ${isl.echo ? `<div class="echo-card"><h2>🇦🇺 ${esc(isl.echo.title)}</h2><p>${esc(isl.echo.text)}</p></div>` : ""}
+      </div>
+      <div class="resultcol">
+        <div class="card"><h2 style="margin-top:0">Why</h2>
+          <p>Best thing: <strong>${best.label.toLowerCase()}</strong>.
+             Hardest thing: <strong>${worst.label.toLowerCase()}</strong>.</p>
+          ${FACTORS.map(f=>factorRow(f,s.scores[f.key],s.notes[f.key])).join("")}</div>
+        <div class="actions">
+          <button class="btn ${canReflect()?"secondary":""} ${canReflect()?"":"big"}" data-action="go" data-screen="arch">Settle another island</button>
+          ${reflectBtn()}</div>
+      </div>
+    </div>`;
 }
 
 function screenAustralia(){
@@ -1251,17 +1305,14 @@ function getScreenSpeechText(){
   if(s==="intro"){
     return [
       "The Sunrise Islands. Where would you live?",
-      "Four imaginary islands, four different climates. Nobody lives on them yet.",
-      "You are the scout for 20 settlers. Settle at least two islands, then decide where you would live.",
-      "Every place gives you two things to weigh up. People: how many can live there. And Room: how much space you have to live and play.",
-      "A crowded place has small blocks and busy streets. An open place has lots of room to play. You cannot have both!",
-      "Climate is the weather a place usually gets. Watch three things: how hot it is, how humid it is, and what plants grow."
+      "Four imaginary islands. Four different climates. Nobody lives on them yet.",
+      "You are the scout for 20 settlers."
     ];
   }
   if(s==="arch"){
     const n = state.completed.length;
     const guide = n === 0
-      ? "Pick an island. Settle any two islands. Do more if you want to."
+      ? "Pick an island. Climate is the weather a place usually gets. Look at how hot it is, how humid it is, that is how wet the air is, and what plants grow. Settle any two islands. Do more if you want to."
       : (n === 1
           ? "One island done! Settle one more, then you can go and think about Australia."
           : `${n} islands settled! Settle more, or tap I am ready to think.`);
@@ -1366,6 +1417,9 @@ function getScreenSpeechText(){
     }
     if(isl.echo){
       text.push(`${isl.echo.title}. ${isl.echo.text}`);
+    }
+    if(state.completed.length===1){
+      text.push("Notice: lots of people means less room for each of them. You cannot have both!");
     }
     if(done.prediction != null){
       text.push(`You guessed ${done.prediction}, and ended with ${done.final}.`);

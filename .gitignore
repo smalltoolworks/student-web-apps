@@ -11,3 +11,7 @@ Thumbs.db
 # Office lock files
 ~$*
 *.tmp
+
+# Dependencies
+node_modules/
+
