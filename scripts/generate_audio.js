@@ -61,11 +61,11 @@ const AUDIO_TRACKS = [
   // 1. Core Narrative Screens
   {
     id: "intro",
-    text: "The Sunrise Islands. Where would you live? Four imaginary islands, four different climates. Nobody lives on them yet. You are the scout for 20 settlers. Settle at least two islands, then decide where you would live. Every place gives you two things to weigh up. People: how many can live there. And Room: how much space you have to live and play. A crowded place has small blocks and busy streets. An open place has lots of room to play. You cannot have both! Climate is the weather a place usually gets. Watch three things: how hot it is, how humid it is, and what plants grow."
+    text: "The Sunrise Islands. Where would you live? Four imaginary islands, four different climates. Nobody lives on them yet. You are the scout for twenty settlers."
   },
   {
     id: "arch_start",
-    text: "Pick an island. Settle any two islands. Do more if you want to. Tap any island card to travel there."
+    text: "Pick an island. Climate is the weather a place usually gets. Look at how hot it is, how humid it is, that is how wet the air is, and what plants grow. Settle any two islands. Do more if you want to. Tap any island card to travel there."
   },
   {
     id: "arch_done1",

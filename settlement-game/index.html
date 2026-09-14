@@ -72,13 +72,6 @@ button{font:inherit;color:inherit}
 #audiotoast.show{opacity:1;pointer-events:auto;transform:translateY(0)}
 
 /* islands */
-ol.steps{margin:0;padding:0 0 0 1.5em}
-ol.steps li{margin:0 0 .6em;padding-left:.25em;font-size:1.08rem}
-ol.steps li::marker{font-weight:800;color:var(--teal)}
-ul.things{list-style:none;margin:14px 0 0;padding:0}
-ul.things li{display:flex;gap:13px;align-items:flex-start;margin:0 0 12px;font-size:1.06rem}
-ul.things li:last-child{margin-bottom:0}
-ul.things .ic{font-size:1.5rem;line-height:1.15;flex:0 0 auto;width:1.4em;text-align:center}
 /* Rainfall is an AMOUNT, not a rating, so it must not look like the green
    rating dots - otherwise "most rain" would read as "best island". */
 .rainrow{display:flex;align-items:center;gap:9px;margin:12px 0 0;font-size:.97rem;font-weight:600}
@@ -641,18 +634,9 @@ const COPY = Object.freeze({
   title:"The Sunrise Islands",
   sub:"Where would you live?",
   introP1:"Four imaginary islands. Four different climates. Nobody lives on them yet.",
-  steps:[
-    "You are the <strong>scout</strong> for 20 settlers.",
-    "Settle <strong>at least two islands</strong>.",
-    "Then decide where <em>you</em> would live.",
-  ],
-  climateLead:"<strong>Climate</strong> is the weather a place usually gets. Watch three things:",
-  climateThings:[
-    {ic:"🌡️", t:"How <strong>hot</strong> it is"},
-    {ic:"💨", t:"How <strong>humid</strong> it is — how wet the air is"},
-    {ic:"🌿", t:"What <strong>plants</strong> grow"},
-  ],
-  twoThings:"Every place gives you <strong>two</strong> things to weigh up:",
+  introJob:"You are the <strong>scout</strong> for 20 settlers.",
+  climateLine:"<strong>Climate</strong> is the weather a place usually gets. Look at how <strong>hot</strong> it is, how <strong>humid</strong> it is (how wet the air is), and what <strong>plants</strong> grow.",
+  twoMetersNote:"<strong>Notice:</strong> lots of people means less room for each of them. You cannot have both!",
   peopleDesc:"how many can live there",
   roomDesc:"how much space you have to live and play",
   archH:"Pick an island",
@@ -901,13 +885,9 @@ const reflectBtn = () => canReflect()
 function screenIntro(){
   return `<h1 tabindex="-1">${COPY.title}</h1>
   <p class="lede">${COPY.sub}</p>
-  <div class="card"><p class="lede">${COPY.introP1}</p>
-    <ol class="steps">${COPY.steps.map(t=>`<li>${t}</li>`).join("")}</ol></div>
-  <div class="card"><h2>Two things to weigh up</h2><p>${COPY.twoThings}</p>${meters(38)}
-    <p class="muted" style="margin-top:12px">A crowded place has small blocks and busy streets.
-       An open place has lots of room to play. You cannot have both!</p></div>
-  <div class="card"><h2>What is climate?</h2><p>${COPY.climateLead}</p>
-    <ul class="things">${COPY.climateThings.map(x=>`<li><span class="ic" aria-hidden="true">${x.ic}</span><span>${x.t}</span></li>`).join("")}</ul></div>
+  <div class="card">
+    <p class="lede" style="margin:0 0 .5em">${COPY.introP1}</p>
+    <p class="lede" style="margin:0">${COPY.introJob}</p></div>
   <div class="actions"><button class="btn big" data-action="go" data-screen="arch">Start →</button></div>`;
 }
 
@@ -933,6 +913,8 @@ function screenArch(){
     : `${n} done. Settle more, or go and think about Australia.`;
   return `<h1 tabindex="-1">${COPY.archH}</h1>
     <p class="lede">${note}</p>
+    ${state.completed.length===0 ? `<div class="card" style="padding:14px 18px;margin-bottom:16px">
+      <p style="margin:0">${COPY.climateLine}</p></div>` : ""}
     <div class="isles">${cards}</div>
     <div class="actions">${reflectBtn()}</div>`;
 }
@@ -1042,6 +1024,8 @@ function screenResult(){
     <div class="card">${meters(done.final)}
       ${graph(done.pops)}<p class="center">${out.line}</p>${pred}
       <p class="center muted">Your choices changed this by <strong>${done.cardTotal>0?"+":""}${done.cardTotal}</strong>.</p></div>
+    ${state.completed.length===1 ? `<div class="card" style="border-color:var(--warm);background:#fffdf6">
+      <p style="margin:0">${COPY.twoMetersNote}</p></div>` : ""}
     ${isl.echo ? `<div class="echo-card"><h2>🇦🇺 ${esc(isl.echo.title)}</h2><p>${esc(isl.echo.text)}</p></div>` : ""}
     <div class="card"><h2 style="margin-top:0">Why</h2>
       <p>Best thing: <strong>${best.label.toLowerCase()}</strong>.
