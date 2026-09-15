@@ -2113,33 +2113,23 @@ function speakNext(){
 function renderSpeakBtn(){
   const bar = document.getElementById("speakbar");
   if(!bar) return;
-  const hasPre = !!getPreRenderedAudioTrack();
-  const isGeminiActive = GEMINI_CONFIG.hasKey() || hasPre;
   const isPlaying = speakingMode !== null;
 
   let label = "Read to me";
   let icon = "🔊";
   if(geminiLoading){
-    label = "Loading AI voice...";
+    label = "Loading audio...";
     icon = "⏳";
   } else if(isPlaying){
-    label = isGeminiActive ? "Stop AI voice" : "Stop reading";
+    label = "Stop reading";
     icon = "⏹";
-  } else if(isGeminiActive){
-    const vName = GEMINI_CONFIG.hasKey() ? GEMINI_CONFIG.voice : "Aoede";
-    label = `Read to me (${vName})`;
-    icon = "✨";
   }
 
   bar.innerHTML = `
-    <button id="speakbtn" class="${isPlaying ? "on" : ""} ${isGeminiActive ? "gemini" : ""}" data-speak="1"
+    <button id="speakbtn" class="${isPlaying ? "on" : ""}" data-speak="1"
       aria-label="${isPlaying ? "Stop reading aloud" : "Read this page aloud"}">
       <span class="spk-icon" aria-hidden="true">${icon}</span>
       <span>${label}</span>
-    </button>
-    <button id="teachercogbtn" class="speak-cog-btn ${isGeminiActive ? "has-key" : ""}"
-      aria-label="Teacher Gemini Voice Settings" title="${isGeminiActive ? "Gemini AI Voice Active (" + GEMINI_CONFIG.voice + ") — tap to change" : "Configure Gemini Voice (Teacher Mode)"}">
-      ⚙️
     </button>
   `;
 }
