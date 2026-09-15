@@ -1395,25 +1395,8 @@ function screenResult(){
       </div>
       <div class="resultcol">
         <div class="result-accordions">
-          <details class="acc-card why-acc" open name="result-col-acc">
-            <summary>
-              <div style="display:flex;align-items:center;gap:8px">
-                <span>🔍 <strong>Why it happened</strong></span>
-                <span class="acc-badge">5 factors</span>
-              </div>
-              <span class="muted" style="font-size:.82rem;font-weight:600">${best.label} vs ${worst.label}</span>
-            </summary>
-            <div class="acc-content">
-              <p style="margin:0 0 8px;font-size:.92rem">
-                Best thing: <strong style="color:var(--good)">${best.label.toLowerCase()}</strong>.
-                Hardest thing: <strong style="color:var(--bad)">${worst.label.toLowerCase()}</strong>.
-              </p>
-              ${FACTORS.map(f=>factorRow(f,s.scores[f.key],s.notes[f.key])).join("")}
-            </div>
-          </details>
-
           ${isl.echo ? `
-          <details class="acc-card aus-acc" name="result-col-acc">
+          <details class="acc-card aus-acc" open name="result-col-acc">
             <summary>
               <div style="display:flex;align-items:center;gap:8px">
                 <span>🇦🇺 <strong>Real Australia</strong></span>
@@ -1433,6 +1416,23 @@ function screenResult(){
             </div>
           </details>
           ` : ""}
+
+          <details class="acc-card why-acc" name="result-col-acc"${isl.echo ? "" : " open"}>
+            <summary>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span>🔍 <strong>Why it happened</strong></span>
+                <span class="acc-badge">5 factors</span>
+              </div>
+              <span class="muted" style="font-size:.82rem;font-weight:600">${best.label} vs ${worst.label}</span>
+            </summary>
+            <div class="acc-content">
+              <p style="margin:0 0 8px;font-size:.92rem">
+                Best thing: <strong style="color:var(--good)">${best.label.toLowerCase()}</strong>.
+                Hardest thing: <strong style="color:var(--bad)">${worst.label.toLowerCase()}</strong>.
+              </p>
+              ${FACTORS.map(f=>factorRow(f,s.scores[f.key],s.notes[f.key])).join("")}
+            </div>
+          </details>
         </div>
 
         <div class="actions" style="margin-top:12px">
