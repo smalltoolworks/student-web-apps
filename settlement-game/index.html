@@ -42,8 +42,9 @@ button{font:inherit;color:inherit}
 .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #145c6a}
 .btn[disabled]{background:#c3cdd2;box-shadow:0 3px 0 #a9b5bb;color:#5d6a70;cursor:not-allowed;transform:none}
 .btn.secondary{background:#fff;color:var(--teal);border:2px solid var(--teal);box-shadow:0 3px 0 #cfe2e6}
-.btn.warmbtn{background:var(--warm);box-shadow:0 3px 0 #a8641c}
 .btn.big{font-size:1.2rem;min-height:58px;padding:14px 30px}
+.btn.sm{font-size:.88rem;min-height:36px;padding:6px 14px;box-shadow:0 2px 0 #145c6a}
+.btn.secondary.sm{box-shadow:0 2px 0 #cfe2e6}
 :focus-visible{outline:3px solid var(--focus);outline-offset:3px}
 .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px;align-items:center}
 
@@ -157,23 +158,25 @@ ul.cscores .dots{flex:0 0 auto}
 .z-Grassland{background:var(--grass)} .z-Temperate{background:var(--temp)}
 
 /* map */
-.island-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;flex-wrap:wrap}
+.island-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px;flex-wrap:wrap}
+.island-nav-group{display:flex;align-items:center;gap:10px}
+.island-nav-group h1{margin:0;font-size:clamp(1.2rem, 1.8vw, 1.5rem)}
 .island-topbar .progress{margin-bottom:0}
-.maplayout{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.maplayout{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
 @media (max-width:880px){.maplayout{grid-template-columns:1fr}}
 .mapwrap{background:#2e7ba8;border:3px solid #245f83;border-radius:var(--r);overflow:hidden;line-height:0}
-svg.map{width:100%;max-height:min(390px, 48vh);height:auto;display:block;touch-action:manipulation}
+svg.map{width:100%;max-height:min(300px, 38vh);height:auto;display:block;touch-action:manipulation}
 .tile{cursor:pointer}
 .pin{cursor:pointer}
 .pin circle.hit{fill:transparent}
 .pin:focus{outline:none}
 .pin:focus-visible circle.ring{stroke:#0b6fb8;stroke-width:2.2}
-.climate{background:#f3f8fb;border:2px solid #bcd8e6;border-radius:var(--r);padding:10px 14px;margin:0 0 12px}
-.climate dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.92rem}
+.climate{background:#f3f8fb;border:2px solid #bcd8e6;border-radius:var(--r);padding:6px 12px;margin:0 0 8px}
+.climate dl{margin:0;display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:3px 10px;font-size:.85rem}
 .climate dt{color:var(--ink-soft);white-space:nowrap}
 .climate dd{margin:0;font-weight:600}
 .progress{display:inline-block;background:#fff3d6;border:2px solid var(--warm);border-radius:999px;
-  padding:5px 14px;font-weight:700;font-size:.92rem;margin-bottom:10px}
+  padding:4px 12px;font-weight:700;font-size:.88rem;margin-bottom:8px}
 .progress.done{background:#dff2e6;border-color:var(--good);color:#1d5c39}
 
 /* results */
@@ -211,15 +214,22 @@ svg.map{width:100%;max-height:min(390px, 48vh);height:auto;display:block;touch-a
 
 /* factors */
 .factor{display:grid;grid-template-columns:1fr auto;gap:2px 14px;align-items:baseline;
-  padding:9px 0;border-bottom:1px solid #eee6d5}
+  padding:clamp(4px, 0.8vh, 8px) 0;border-bottom:1px solid #eee6d5}
 .factor:last-of-type{border-bottom:none}
 .factor .fname{font-weight:700}
 .factor .fval{white-space:nowrap;font-weight:700}
-.factor .fnote{grid-column:1/-1;font-size:.95rem;color:var(--ink-soft);margin:0}
+.factor .fnote{grid-column:1/-1;font-size:.92rem;color:var(--ink-soft);margin:0}
 .dots{letter-spacing:.14em;font-size:1.05rem}
 .dots .on{color:var(--good)}
 .dots .off{color:#c9cfd3}
 .s1 .dots .on{color:var(--warm)}
+.scoutactions{margin-top:clamp(8px, 1.4vh, 16px)}
+
+/* year decisions */
+.year-topbar{margin-bottom:8px}
+.year-result-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:start}
+@media (max-width:760px){.year-result-grid{grid-template-columns:1fr}}
+.year-result-grid .decision, .year-result-grid .ledgercard{margin-bottom:0}
 
 /* ledger */
 .ledger{width:100%;border-collapse:collapse;margin:4px 0;font-variant-numeric:tabular-nums}
@@ -318,52 +328,41 @@ textarea:focus{border-color:var(--teal);outline:none}
 .written em{color:var(--ink-soft)}
 
 /* two real maps */
-.mapgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 18px}
-@media (max-width:820px){.mapgrid{grid-template-columns:1fr}}
-.realmap{background:#fff;border:3px solid var(--line);border-radius:var(--r);padding:12px;margin:0}
-.realmap img{width:100%;height:auto;display:block;border-radius:8px;background:#f4f4f0}
-.realmap h3{margin:0 0 8px;font-size:1.05rem}
-.realmap figcaption{font-size:.78rem;color:var(--ink-soft);margin-top:8px;line-height:1.45}
-.realmap .missingnote{display:none;padding:18px;background:#fdece7;border:2px dashed #e8b3a3;
-  border-radius:8px;font-weight:600;font-size:.95rem}
+.maps-page-header{margin:0 0 10px}
+.maps-split-layout{display:grid;grid-template-columns:1.22fr .78fr;gap:16px;align-items:start}
+@media (max-width:860px){.maps-split-layout{grid-template-columns:1fr;gap:12px}}
+.maps-left-col .mapgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 8px}
+.mapgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 14px}
+.realmap{background:#fff;border:3px solid var(--line);border-radius:var(--r);padding:8px 10px;margin:0}
+.realmap img{width:auto;max-width:100%;max-height:min(320px, 44vh);display:block;margin:0 auto;border-radius:8px;background:#f4f4f0;object-fit:contain}
+.realmap h3{margin:0 0 4px;font-size:.9rem}
+.realmap figcaption{font-size:.66rem;color:var(--ink-soft);margin-top:4px;line-height:1.3}
+.realmap .missingnote{display:none;padding:14px;background:#fdece7;border:2px dashed #e8b3a3;
+  border-radius:8px;font-weight:600;font-size:.9rem}
 .realmap.missing img{display:none}
 .realmap.missing .missingnote{display:block}
-.denskey{display:flex;flex-wrap:wrap;gap:5px 14px;margin:10px 0 0;padding:0;list-style:none;font-size:.82rem}
-.denskey li{display:flex;gap:6px;align-items:center;font-weight:600}
-.denskey .sw{width:16px;height:16px;border-radius:3px;border:1px solid rgba(0,0,0,.25);flex:0 0 auto}
-.denskey .t{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);width:100%;margin:0 0 2px}
+.denskey{display:flex;flex-wrap:wrap;gap:3px 8px;margin:4px 0 0;padding:0;list-style:none;font-size:.74rem}
+.denskey li{display:flex;gap:4px;align-items:center;font-weight:600}
+.denskey .sw{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.25);flex:0 0 auto}
+.denskey .t{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);width:100%;margin:0}
 .mapbtn{display:block;width:100%;padding:0;border:none;background:none;cursor:zoom-in}
 .mapbtn:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:8px}
-.zoomhint{display:none;font-size:.8rem;color:var(--teal);font-weight:700;margin:6px 0 0}
-/* Tablet, including iPad portrait: side by side with trimmed chrome, so both
-   maps AND the question sit on screen together. Measured at 768x1024: the
-   answer buttons end at 933px, inside the 1024px viewport. */
-@media (max-width:820px){
-  .mapgrid{grid-template-columns:1fr 1fr;gap:12px}
-  .realmap{padding:10px}
-  .realmap h3{font-size:.92rem;margin:0 0 5px}
-  .realmap.solo img{max-height:46vh}
-  .realmap img{max-height:30vh;width:auto;max-width:100%;margin:0 auto;object-fit:contain}
-  .zoomhint{display:block;font-size:.74rem;margin:4px 0 0}
-  .realmap figcaption{font-size:.66rem;margin-top:5px}
-}
-/* Phone: two maps plus the question genuinely cannot fit (side by side puts the
-   maps at 145px wide and still overflows). So stack them big enough to read and
-   let the page scroll; tapping a map opens it full size. */
+.zoomhint{display:block;font-size:.72rem;color:var(--teal);font-weight:700;margin:3px 0 0}
 @media (max-width:560px){
-  .mapgrid{grid-template-columns:1fr}
+  .maps-left-col .mapgrid, .mapgrid{grid-template-columns:1fr}
   .realmap img{max-height:24vh}
-  .realmap h3{font-size:1rem}
-  .realmap figcaption{font-size:.72rem}
 }
-#lightbox{position:fixed;inset:0;z-index:100;background:rgba(14,24,31,.94);display:flex;
-  flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px}
-#lightbox[hidden]{display:none}
-#lightbox img{max-width:100%;max-height:80vh;object-fit:contain;background:#fff;border-radius:10px}
-#lightbox p{color:#fff;margin:0;font-weight:800;text-align:center;font-size:1.05rem}
-#lightbox .lbclose{min-height:56px;padding:12px 28px;border-radius:999px;border:none;background:#fff;
-  color:var(--teal);font-weight:800;font-size:1.05rem;cursor:pointer}
-.lookbox{background:#fffdf6;border:3px solid var(--warm);border-radius:var(--r);padding:20px;margin:0 0 18px}
+
+.lookbox{background:#fffdf6;border:3px solid var(--warm);border-radius:var(--r);padding:clamp(12px, 1.8vh, 18px);margin:0}
+.lookbox h2{font-size:clamp(1rem, 1.25vw, 1.15rem);margin:0 0 8px;line-height:1.35}
+.lookbox .choices{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.lookbox .choice{width:100%;text-align:left;padding:10px 14px;min-height:44px;font-size:.92rem}
+.lookbox .feedback{margin-top:10px;padding:10px 12px;font-size:.88rem}
+
+/* Australia screen */
+.aus-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+@media (max-width:860px){.aus-layout{grid-template-columns:1fr}}
+.realmap.solo img{max-height:min(340px, 46vh);width:auto;max-width:100%;margin:0 auto;object-fit:contain}
 .echo-card{background:#f0f8fa;border:2px solid var(--teal);border-radius:var(--r);padding:18px 20px;margin:0 0 18px}
 .echo-card h2{margin:0 0 8px;font-size:1.18rem;color:var(--teal);display:flex;align-items:center;gap:8px}
 .echo-card p{margin:0;font-size:1.02rem;line-height:1.55}
@@ -1036,13 +1035,13 @@ function scoutPanel(isl){
   }
   const s = siteById(isl,state.openSite);
   const enough = scoutedOn(isl) >= isl.sites.length;
-  return `<div class="card"><p class="step">Place ${s.letter}</p>
-    <h2 style="margin-top:0">${esc(s.name)}</h2>
-    <p class="muted">${esc(s.blurb)}</p>
+  return `<div class="card"><p class="step" style="margin-bottom:2px">Place ${s.letter}</p>
+    <h2 style="margin:0 0 2px">${esc(s.name)}</h2>
+    <p class="muted" style="margin:0 0 6px">${esc(s.blurb)}</p>
     ${FACTORS.map(f=>factorRow(f,s.scores[f.key],s.notes[f.key])).join("")}
-    <div style="margin-top:16px">${enough
-      ? `<button class="btn big" data-action="settle" data-site="${s.id}">Settle here →</button>`
-      : `<button class="btn big" disabled>Settle here</button><p class="muted" style="margin-top:10px">${COPY.gateNote}</p>`}
+    <div class="scoutactions">${enough
+      ? `<button class="btn big" style="width:100%" data-action="settle" data-site="${s.id}">Settle here →</button>`
+      : `<button class="btn big" style="width:100%" disabled>Settle here</button><p class="muted" style="margin-top:6px;font-size:.82rem">${COPY.gateNote}</p>`}
     </div></div>`;
 }
 
@@ -1051,13 +1050,15 @@ function screenIsland(){
   if(!isl) return screenArch();
   const n=scoutedOn(isl), t=isl.sites.length, enough=n>=t;
   return `<div class="island-topbar">
-      <h1 tabindex="-1" style="margin:0">${isl.flag} ${esc(isl.name)}</h1>
+      <div class="island-nav-group">
+        <button class="btn secondary sm" data-action="go" data-screen="arch" title="Back to islands">← Islands</button>
+        <h1 tabindex="-1" style="margin:0">${isl.flag} ${esc(isl.name)}</h1>
+      </div>
       <span class="progress ${enough?"done":""}">${enough?"All scouted. Now pick one!":`Scouted ${n} of ${t}`}</span>
     </div>
     <div class="maplayout">
       <div>${climateBox(isl)}<div class="mapwrap">${mapSVG(isl)}</div>${mapKey(isl)}</div>
-      <div>${scoutPanel(isl)}</div></div>
-    <div class="actions" style="margin-top:14px"><button class="btn secondary" data-action="go" data-screen="arch">← Back</button></div>`;
+      <div>${scoutPanel(isl)}</div></div>`;
 }
 
 function screenPredict(){
@@ -1075,8 +1076,11 @@ function screenYear(){
   const isl=currentIsland(), s=siteById(isl,state.run.siteId);
   const i=state.run.yearIndex, y=isl.years[i], card=isl.cards[i], pick=state.run.cardChoice;
   const popNow = state.run.history.length ? state.run.history[state.run.history.length-1].after : START_POP;
-  const head = `<p class="step">${isl.flag} ${esc(s.name)} · Year ${y.n} of ${isl.years.length} · ${popNow} people</p>
-    <h1 tabindex="-1">${esc(y.title)}</h1><div class="banner year">${esc(y.headline)}</div>`;
+  const head = `<div class="year-topbar">
+      <p class="step" style="margin:0">${isl.flag} ${esc(s.name)} · Year ${y.n} of ${isl.years.length} · ${popNow} people</p>
+      <h1 tabindex="-1" style="margin:2px 0 4px;font-size:clamp(1.25rem, 1.8vw, 1.5rem)">${esc(y.title)}</h1>
+      <div class="banner year" style="margin:0 0 10px">${esc(y.headline)}</div>
+    </div>`;
 
   if(pick===null || pick===undefined){
     return head + `<div class="decision"><h2>${esc(card.q)}</h2>
@@ -1103,19 +1107,27 @@ function screenYear(){
   const cd=rec.cardDelta, total=rec.total, gone=rec.after===0;
   const more = i+1 < isl.years.length && !gone;
   return head + `
-    <div class="decision"><h2 style="font-size:1.05rem">${esc(card.q)}</h2>
-      <div class="opts">${optsHtml}</div>
-      <div class="feedback ${best?"":"soft"}">${best?"✓ ":""}${esc(chosen.why)}</div></div>
-    <div class="card"><table class="ledger">
-      <thead><tr><th>This year</th><th style="text-align:right">People</th></tr></thead>
-      <tbody>${rows}
-        <tr class="choicerow"><td>🤔 <strong>Your choice</strong> <span class="muted">${esc(chosen.t)}</span></td>
-          <td class="num"><span class="${cd>=0?"plus":"minus"}">${cd>0?"+":""}${cd}</span></td></tr>
-        <tr class="sum"><td>Change</td><td class="num ${total>=0?"plus":"minus"}">${total>0?"+":""}${total}</td></tr>
-      </tbody></table>
-      <p class="popline">${rec.before}<span class="arrow">→</span>${rec.after}</p></div>
-    ${gone?`<div class="banner warn">The last people have moved on.</div>`:""}
-    <div class="actions"><button class="btn big" data-action="${more?"nextyear":"finish"}">${more?"Next year →":"See what happened →"}</button></div>`;
+    <div class="year-result-grid">
+      <div class="decision" style="margin-bottom:0">
+        <h2 style="font-size:1.02rem;margin-top:0">${esc(card.q)}</h2>
+        <div class="opts">${optsHtml}</div>
+        <div class="feedback ${best?"":"soft"}">${best?"✓ ":""}${esc(chosen.why)}</div>
+      </div>
+      <div class="card ledgercard" style="margin-bottom:0">
+        <table class="ledger">
+          <thead><tr><th>This year</th><th style="text-align:right">People</th></tr></thead>
+          <tbody>${rows}
+            <tr class="choicerow"><td>🤔 <strong>Your choice</strong> <span class="muted">${esc(chosen.t)}</span></td>
+              <td class="num"><span class="${cd>=0?"plus":"minus"}">${cd>0?"+":""}${cd}</span></td></tr>
+            <tr class="sum"><td>Change</td><td class="num ${total>=0?"plus":"minus"}">${total>0?"+":""}${total}</td></tr>
+          </tbody></table>
+        <p class="popline" style="margin:8px 0 0">${rec.before}<span class="arrow">→</span>${rec.after}</p>
+        ${gone?`<div class="banner warn" style="margin:8px 0 0">The last people have moved on.</div>`:""}
+        <div class="actions" style="margin-top:10px">
+          <button class="btn big" style="width:100%" data-action="${more?"nextyear":"finish"}">${more?"Next year →":"See what happened →"}</button>
+        </div>
+      </div>
+    </div>`;
 }
 
 function screenResult(){
@@ -1160,29 +1172,32 @@ function screenAustralia(){
   const cmp = AUS_COMPARE.map(c=>`<tr><td><strong>${c.city}</strong><br><span class="muted">${c.where}</span></td>
     <td class="num">${c.people}</td><td class="stars">${stars(c.stars)}<br><span class="muted" style="font-weight:600">${esc(c.room)}</span></td></tr>`).join("");
   return `<p class="step">The real world</p>
-    <h1 tabindex="-1">Now look at Australia</h1>
-    <div class="card"><h2 style="margin-top:0">Your islands</h2>
-      <div class="tablescroll"><table class="rank">
-        <thead><tr><th>Island</th><th>Climate</th><th style="text-align:right">People</th><th>Room &amp; cost</th></tr></thead>
-        <tbody>${mine}</tbody></table></div></div>
-    <p class="lede">Australia has all four of those climates too. Start with how <strong>hot</strong> it gets.</p>
-    <figure class="realmap solo"><h3>🌡️ How hot it gets</h3>
-      <button class="mapbtn" data-action="zoom" data-src="images/temperature-annual.png"
-          data-label="🌡️ How hot it gets" aria-label="Enlarge the temperature map">
-        <img src="images/temperature-annual.png" alt="Map of Australia showing the average yearly top temperature. The north and the middle are orange, about 33 to 39 degrees. The south coast and Tasmania are pale green and yellow, about 15 to 24 degrees. It gets cooler the further south you go."
-          onerror="this.closest('.realmap').classList.add('missing')">
-      </button>
-      <div class="missingnote">Map image not added yet — save it as <code>images/temperature-annual.png</code></div>
-      <p class="zoomhint">Tap the map to see it big</p>
-      <figcaption>Average annual maximum temperature, 1991–2020.
-        © Commonwealth of Australia, Bureau of Meteorology, 2024. bom.gov.au</figcaption></figure>
-    <div class="card"><h2 style="margin-top:0">Coast or inland?</h2>
-      <div class="tablescroll"><table class="rank">
-        <thead><tr><th>Place</th><th style="text-align:right">People</th><th>Room &amp; cost</th></tr></thead>
-        <tbody>${cmp}</tbody></table></div>
-      <p style="margin-top:14px">Most Australians live on the mild coast. But some choose inland —
-         for space, cheaper houses, farms and mines.</p></div>
-    <div class="actions"><button class="btn big" data-action="go" data-screen="maps">Now two more maps →</button></div>`;
+    <h1 tabindex="-1" style="font-size:clamp(1.25rem, 1.8vw, 1.5rem);margin:2px 0 8px">Now look at Australia</h1>
+    <div class="aus-layout">
+      <div class="aus-tables-col">
+        <div class="card" style="margin-bottom:12px"><h2 style="margin-top:0;font-size:1.05rem">Your islands</h2>
+          <div class="tablescroll"><table class="rank">
+            <thead><tr><th>Island</th><th>Climate</th><th style="text-align:right">People</th><th>Room &amp; cost</th></tr></thead>
+            <tbody>${mine}</tbody></table></div></div>
+        <div class="card" style="margin-bottom:0"><h2 style="margin-top:0;font-size:1.05rem">Coast or inland?</h2>
+          <div class="tablescroll"><table class="rank">
+            <thead><tr><th>Place</th><th style="text-align:right">People</th><th>Room &amp; cost</th></tr></thead>
+            <tbody>${cmp}</tbody></table></div>
+          <p style="margin:8px 0 0;font-size:.88rem">Most Australians live on the mild coast. But some choose inland — for space, cheaper houses, farms and mines.</p></div>
+      </div>
+      <div class="aus-map-col">
+        <figure class="realmap solo" style="margin-bottom:10px"><h3>🌡️ How hot it gets</h3>
+          <button class="mapbtn" data-action="zoom" data-src="images/temperature-annual.png"
+              data-label="🌡️ How hot it gets" aria-label="Enlarge the temperature map">
+            <img src="images/temperature-annual.png" alt="Map of Australia showing the average yearly top temperature. The north and the middle are orange, about 33 to 39 degrees. The south coast and Tasmania are pale green and yellow, about 15 to 24 degrees. It gets cooler the further south you go."
+              onerror="this.closest('.realmap').classList.add('missing')">
+          </button>
+          <div class="missingnote">Map image not added yet — save it as <code>images/temperature-annual.png</code></div>
+          <p class="zoomhint">🔍 Tap map to zoom</p>
+          <figcaption>Average annual maximum temperature. bom.gov.au</figcaption></figure>
+        <div class="actions" style="margin-top:10px"><button class="btn big" style="width:100%" data-action="go" data-screen="maps">Now two more maps →</button></div>
+      </div>
+    </div>`;
 }
 
 function screenMaps(){
@@ -1195,45 +1210,52 @@ function screenMaps(){
     return `<button class="${cls}" ${answered?"disabled":""} data-action="maplook" data-i="${idx}">
       ${esc(o.t)}${answered&&o.ok?" ✓":""}</button>`;
   }).join("");
-  return `<p class="step">Two real maps</p>
-    <h1 tabindex="-1">Look at both maps</h1>
-    <p class="lede">One map shows <strong>rain</strong>. The other shows <strong>people</strong>.
-       Look at both to answer.</p>
-    <div class="mapgrid">
-      <figure class="realmap"><h3>🌧️ Where the rain falls</h3>
-        <button class="mapbtn" data-action="zoom" data-src="images/rainfall-january.png" data-label="🌧️ Where the rain falls" aria-label="Enlarge the rainfall map">
-          <img src="images/rainfall-january.png" alt="Map of Australia showing median January rainfall. The north is blue and purple for heavy rain. The middle is orange and white for almost no rain. The east and south coasts are green."
-          onerror="this.closest('.realmap').classList.add('missing')">
-        </button>
-        <div class="missingnote">Map image not added yet — save it as
-          <code>images/rainfall-january.png</code></div>
-        <p class="zoomhint">Tap the map to see it big</p>
-        <figcaption>Median rainfall, 1–31 January. © Commonwealth of Australia,
-          Bureau of Meteorology. bom.gov.au/climate</figcaption></figure>
-      <figure class="realmap"><h3>👥 Where the people live</h3>
-        <button class="mapbtn" data-action="zoom" data-src="images/population-density.jpg" data-label="👥 Where the people live" aria-label="Enlarge the population map">
-          <img src="images/population-density.jpg" alt="Map of Australia showing how many people live in each area. Almost the whole country is grey, meaning no people at all. Yellow and orange specks crowd along the east coast, the south-east corner and a small patch in the south-west near Perth. The huge middle of the country is completely grey."
-          onerror="this.closest('.realmap').classList.add('missing')">
-        </button>
-        <div class="missingnote">Map image not added yet — save it as
-          <code>images/population-density.jpg</code></div>
-        <ul class="denskey"><li class="t">Where Australians live</li>
-          <li><span class="sw" style="background:#67000d"></span>8000+ (Crowded cities)</li>
-          <li><span class="sw" style="background:#e6550d"></span>2000–5000 (Suburbs &amp; towns)</li>
-          <li><span class="sw" style="background:#fee08b"></span>Under 500 (Country &amp; farms)</li>
-          <li><span class="sw" style="background:#8c8c8c"></span>Nobody lives here (bush/desert)</li></ul>
-        <p class="zoomhint">Tap the map to see it big</p>
-        <figcaption>Estimated resident population density, June 2018.
-          © Commonwealth of Australia, Australian Bureau of Statistics, 2019.</figcaption></figure>
+  return `<div class="maps-page-header">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <p class="step" style="margin:0">Two real maps</p>
+          <h1 tabindex="-1" style="margin:2px 0 0;font-size:clamp(1.25rem, 1.8vw, 1.5rem)">Look at both maps</h1>
+        </div>
+        <p class="lede" style="margin:0;font-size:clamp(.85rem, 1vw, .95rem)">One map shows <strong>rain</strong>. The other shows <strong>people</strong>. Look at both to answer.</p>
+      </div>
     </div>
-    <div class="lookbox">
-      <p class="step">Question ${i+1} of ${MAP_LOOKS.length}</p>
-      <h2 style="margin:0 0 4px">${esc(item.q)}</h2>
-      <div class="choices">${opts}</div>
-      ${answered?`<div class="feedback">${esc(item.why)}</div>
-        <div class="actions">${last
-          ? `<button class="btn big" data-action="go" data-screen="pattern">See the pattern →</button>`
-          : `<button class="btn" data-action="nextlook">Next question →</button>`}</div>`:""}
+    <div class="maps-split-layout">
+      <div class="maps-left-col">
+        <div class="mapgrid">
+          <figure class="realmap"><h3>🌧️ Where the rain falls</h3>
+            <button class="mapbtn" data-action="zoom" data-src="images/rainfall-january.png" data-label="🌧️ Where the rain falls" aria-label="Enlarge the rainfall map">
+              <img src="images/rainfall-january.png" alt="Map of Australia showing median January rainfall. The north is blue and purple for heavy rain. The middle is orange and white for almost no rain. The east and south coasts are green."
+              onerror="this.closest('.realmap').classList.add('missing')">
+            </button>
+            <div class="missingnote">Map image not added yet — save it as <code>images/rainfall-january.png</code></div>
+            <p class="zoomhint">🔍 Tap map to zoom</p>
+            <figcaption>Median rainfall, January. bom.gov.au/climate</figcaption></figure>
+          <figure class="realmap"><h3>👥 Where the people live</h3>
+            <button class="mapbtn" data-action="zoom" data-src="images/population-density.jpg" data-label="👥 Where the people live" aria-label="Enlarge the population map">
+              <img src="images/population-density.jpg" alt="Map of Australia showing how many people live in each area."
+              onerror="this.closest('.realmap').classList.add('missing')">
+            </button>
+            <div class="missingnote">Map image not added yet — save it as <code>images/population-density.jpg</code></div>
+            <ul class="denskey">
+              <li><span class="sw" style="background:#67000d"></span>8000+ (Cities)</li>
+              <li><span class="sw" style="background:#e6550d"></span>2000–5000 (Towns)</li>
+              <li><span class="sw" style="background:#fee08b"></span>&lt;500 (Farms)</li>
+              <li><span class="sw" style="background:#8c8c8c"></span>Empty (Desert)</li></ul>
+            <p class="zoomhint">🔍 Tap map to zoom</p>
+            <figcaption>Population density, June 2018. ABS</figcaption></figure>
+        </div>
+      </div>
+      <div class="maps-right-col">
+        <div class="lookbox">
+          <p class="step" style="margin-bottom:4px">Question ${i+1} of ${MAP_LOOKS.length}</p>
+          <h2 style="margin:0 0 10px;font-size:clamp(1rem, 1.25vw, 1.15rem);line-height:1.35">${esc(item.q)}</h2>
+          <div class="choices">${opts}</div>
+          ${answered?`<div class="feedback">${esc(item.why)}</div>
+            <div class="actions" style="margin-top:10px">${last
+              ? `<button class="btn big" style="width:100%" data-action="go" data-screen="pattern">See the pattern →</button>`
+              : `<button class="btn" style="width:100%" data-action="nextlook">Next question →</button>`}</div>`:""}
+        </div>
+      </div>
     </div>`;
 }
 
@@ -1259,10 +1281,10 @@ function screenPattern(){
 
 function screenWrite(){
   const R=state.reflection;
-  const q=(id,label,starter,val)=>`<div class="card write">
-    <label for="${id}">${label}</label>
-    <p class="starter">Start like this: “${starter}…”</p>
-    <textarea id="${id}" data-field="${id}" rows="4"
+  const q=(id,label,starter,val)=>`<div class="card write" style="margin-bottom:10px;padding:clamp(10px, 1.4vh, 14px) clamp(12px, 1.8vw, 18px)">
+    <label for="${id}" style="font-size:.95rem;font-weight:700">${label}</label>
+    <p class="starter" style="margin:2px 0 4px;font-size:.82rem">Start like this: “${starter}…”</p>
+    <textarea id="${id}" data-field="${id}" rows="2" style="min-height:54px"
       placeholder="${starter}…">${esc(val||"")}</textarea></div>`;
   return `<p class="step">Your thinking</p>
     <h1 tabindex="-1">What do you think?</h1>
