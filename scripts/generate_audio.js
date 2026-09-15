@@ -26,15 +26,17 @@ apiKey = apiKey.replace(/^["']+|["']+$/g, "").trim();
 voice = voice.replace(/^["']+|["']+$/g, "").trim();
 model = model.replace(/^["']+|["']+$/g, "").trim();
 
-if (!apiKey) {
+const hasApiKey = Boolean(apiKey);
+const isMac = process.platform === "darwin";
+
+if (!hasApiKey && !isMac) {
   console.log(`
 ==============================================================
-🎙️  The Sunrise Islands: Gemini Audio Pre-Generator
+🎙️  The Sunrise Islands: Audio Pre-Generator
 ==============================================================
 
-Pre-render high-definition Gemini AI voice files for all
-game screens so students can listen with 0 latency, 0 quota,
-and 100% offline capability on classroom iPads.
+Pre-render audio files for all game screens so students can listen
+with 0 latency, 0 quota, and 100% offline capability on classroom iPads.
 
 Usage:
   export GEMINI_API_KEY="AIzaSy..."
@@ -49,6 +51,10 @@ Options:
 ==============================================================
 `);
   process.exit(1);
+}
+
+if (!hasApiKey) {
+  console.log("ℹ️  No GEMINI_API_KEY provided. Using macOS Karen (en_AU) high-definition voice.");
 }
 
 const OUTPUT_DIR = path.resolve(__dirname, "../settlement-game/audio");
@@ -300,7 +306,24 @@ async function synthesize(track) {
   const outPath = path.join(OUTPUT_DIR, `${track.id}.wav`);
   if (!force && fs.existsSync(outPath) && fs.statSync(outPath).size > 1000) {
     console.log(`   ⏩ [${track.id}] already exists, skipping.`);
-    return;
+    return false;
+  }
+
+  if (!hasApiKey && isMac) {
+    console.log(`🎙️  Generating [${track.id}] with macOS Karen (en_AU)...`);
+    const { execSync } = require("child_process");
+    const tempAiff = `/tmp/say_${track.id}_${Date.now()}.aiff`;
+    const tempTxt = `/tmp/say_${track.id}_${Date.now()}.txt`;
+    fs.writeFileSync(tempTxt, track.text, "utf8");
+    try {
+      execSync(`say -v Karen -f "${tempTxt}" -o "${tempAiff}"`);
+      execSync(`afconvert -f WAVE -d LEI16@24000 "${tempAiff}" "${outPath}"`);
+      console.log(`   ✓ Saved: ${outPath} (${(fs.statSync(outPath).size / 1024).toFixed(1)} KB)`);
+    } finally {
+      if (fs.existsSync(tempAiff)) fs.unlinkSync(tempAiff);
+      if (fs.existsSync(tempTxt)) fs.unlinkSync(tempTxt);
+    }
+    return true;
   }
 
   const prompt = `Read this clearly, warmly, and at a steady pace for Year 3 Australian primary students (ages 8-9):\n\n${track.text}`;
@@ -350,22 +373,25 @@ async function synthesize(track) {
 
   fs.writeFileSync(outPath, buffer);
   console.log(`   ✓ Saved: ${outPath} (${(buffer.length / 1024).toFixed(1)} KB)`);
+  return true;
 }
 
 async function run() {
-  console.log(`Starting audio generation for ${AUDIO_TRACKS.length} tracks...`);
+  console.log(`Starting audio check/generation for ${AUDIO_TRACKS.length} tracks...`);
   let count = 0;
   for (const track of AUDIO_TRACKS) {
     try {
-      await synthesize(track);
+      const generated = await synthesize(track);
       count++;
-      // Brief pause between requests to respect rate limits
-      await new Promise(r => setTimeout(r, 1200));
+      if (generated && hasApiKey) {
+        // Brief pause between Gemini API requests to respect rate limits
+        await new Promise(r => setTimeout(r, 1200));
+      }
     } catch (e) {
       console.error(`   ✕ Failed for [${track.id}]:`, e.message);
     }
   }
-  console.log(`\nDone! Processed ${count} of ${AUDIO_TRACKS.length} tracks in settlement-game/audio/\n`);
+  console.log(`\nDone! Verified ${count} of ${AUDIO_TRACKS.length} tracks in settlement-game/audio/\n`);
 }
 
 run();

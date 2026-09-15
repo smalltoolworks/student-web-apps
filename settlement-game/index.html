@@ -1983,11 +1983,16 @@ function showAudioToast(msg){
   window._toastTimeout = setTimeout(()=>{ t.classList.remove("show"); }, 3800);
 }
 
+let storySpeechChunks = [];
+let storySpeechIndex = 0;
+
 function stopIslandStory(){
   if(islandStoryAudioEl){
     try{ islandStoryAudioEl.pause(); islandStoryAudioEl.currentTime = 0; }catch(e){}
     islandStoryAudioEl = null;
   }
+  storySpeechChunks = [];
+  storySpeechIndex = 0;
   activeIslandStory = null;
   if(SPEECH){
     try{ speechSynthesis.cancel(); }catch(e){}
@@ -2013,6 +2018,8 @@ function stopSpeech(){
     try{ islandStoryAudioEl.pause(); islandStoryAudioEl.currentTime = 0; }catch(e){}
     islandStoryAudioEl = null;
   }
+  storySpeechChunks = [];
+  storySpeechIndex = 0;
   if(activeIslandStory !== null){
     activeIslandStory = null;
     updateStoryButtons();
@@ -2045,6 +2052,15 @@ async function toggleIslandStory(islandId){
   activeIslandStory = islandId;
   updateStoryButtons();
 
+  let fallbackCalled = false;
+  const triggerFallback = () => {
+    if(fallbackCalled) return;
+    fallbackCalled = true;
+    if(activeIslandStory === islandId){
+      proceedStoryWithGeminiOrBrowser(story);
+    }
+  };
+
   // 1. Try pre-rendered studio track first
   try {
     const audio = new Audio(story.file);
@@ -2053,22 +2069,28 @@ async function toggleIslandStory(islandId){
       stopIslandStory();
     };
     audio.onerror = () => {
-      if(activeIslandStory === islandId){
-        proceedStoryWithGeminiOrBrowser(story);
-      }
+      islandStoryAudioEl = null;
+      triggerFallback();
     };
     await audio.play();
   } catch(e){
     islandStoryAudioEl = null;
-    if(activeIslandStory === islandId){
-      proceedStoryWithGeminiOrBrowser(story);
-    }
+    triggerFallback();
   }
 }
 
 async function proceedStoryWithGeminiOrBrowser(story){
   const islandId = story.id;
   if(GEMINI_CONFIG.hasKey()){
+    let fallbackCalled = false;
+    const triggerBrowserFallback = () => {
+      if(fallbackCalled) return;
+      fallbackCalled = true;
+      if(activeIslandStory === islandId){
+        startBrowserStorySpeech(story);
+      }
+    };
+
     try {
       const cacheKey = `story:${islandId}:${GEMINI_CONFIG.voice}:${GEMINI_CONFIG.model}`;
       let audioUrl = geminiAudioCache.get(cacheKey);
@@ -2085,17 +2107,15 @@ async function proceedStoryWithGeminiOrBrowser(story){
         stopIslandStory();
       };
       audio.onerror = () => {
-        if(activeIslandStory === islandId){
-          startBrowserStorySpeech(story);
-        }
+        islandStoryAudioEl = null;
+        triggerBrowserFallback();
       };
       await audio.play();
       return;
     } catch(err){
       console.warn("Gemini story audio failed, falling back to browser voice:", err);
-      if(activeIslandStory === islandId){
-        startBrowserStorySpeech(story);
-      }
+      islandStoryAudioEl = null;
+      triggerBrowserFallback();
       return;
     }
   }
@@ -2103,25 +2123,45 @@ async function proceedStoryWithGeminiOrBrowser(story){
 }
 
 function startBrowserStorySpeech(story){
-  if(!SPEECH) return;
-  const u = new SpeechSynthesisUtterance(story.text);
-  window._activeSpeechUtterance = u;
-  u.rate = 0.95;
-  u.pitch = 1.0;
-  const v = pickVoice();
-  if(v) u.voice = v;
-  u.onend = () => {
-    if(activeIslandStory === story.id) stopIslandStory();
-  };
-  u.onerror = (err) => {
-    if(err && err.error === "canceled") return;
-    if(activeIslandStory === story.id) stopIslandStory();
-  };
-  try {
-    speechSynthesis.speak(u);
-  } catch(e){
+  if(!SPEECH) {
     stopIslandStory();
+    return;
   }
+  try {
+    if(speechSynthesis.paused) speechSynthesis.resume();
+  } catch(e){}
+
+  storySpeechChunks = story.text.split(/(?<=[.!?:])\s+/).map(s=>s.trim()).filter(Boolean);
+  storySpeechIndex = 0;
+
+  function playNextStoryChunk(){
+    if(activeIslandStory !== story.id) return;
+    if(storySpeechIndex >= storySpeechChunks.length){
+      stopIslandStory();
+      return;
+    }
+    const part = storySpeechChunks[storySpeechIndex++];
+    const u = new SpeechSynthesisUtterance(part);
+    window._activeSpeechUtterance = u;
+    u.rate = 0.95;
+    u.pitch = 1.0;
+    const v = pickVoice();
+    if(v) u.voice = v;
+    u.onend = () => {
+      if(activeIslandStory === story.id) playNextStoryChunk();
+    };
+    u.onerror = (err) => {
+      if(err && err.error === "canceled") return;
+      if(activeIslandStory === story.id) playNextStoryChunk();
+    };
+    try {
+      speechSynthesis.speak(u);
+    } catch(e){
+      stopIslandStory();
+    }
+  }
+
+  playNextStoryChunk();
 }
 
 function getPreRenderedAudioTrack(){
@@ -2175,17 +2215,24 @@ async function startSpeech(){
   if(preTrack){
     speakingMode = "gemini";
     renderSpeakBtn();
+    let fallbackCalled = false;
+    const triggerMainFallback = () => {
+      if(fallbackCalled) return;
+      fallbackCalled = true;
+      geminiAudioEl = null;
+      proceedLiveOrBrowser();
+    };
     geminiAudioEl = new Audio(preTrack);
     geminiAudioEl.onended = ()=>{ stopSpeech(); };
     geminiAudioEl.onerror = ()=>{
-      geminiAudioEl = null;
-      proceedLiveOrBrowser();
+      triggerMainFallback();
     };
     try {
       await geminiAudioEl.play();
       return;
     } catch(e){
-      geminiAudioEl = null;
+      triggerMainFallback();
+      return;
     }
   }
 
@@ -2238,6 +2285,9 @@ async function startSpeech(){
 
 function startBrowserSpeech(textArray){
   if(!SPEECH) return;
+  try {
+    if(speechSynthesis.paused) speechSynthesis.resume();
+  } catch(e){}
   chunks = textArray;
   chunkAt = 0;
   speaking = true;

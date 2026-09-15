@@ -1,0 +1,15 @@
+{
+  "name": "student-web-apps",
+  "version": "1.0.0",
+  "description": "Student Web Apps & Assessment Automation Scripts",
+  "main": "index.html",
+  "scripts": {
+    "capture": "node scripts/capture_pat_tests.js"
+  },
+  "dependencies": {
+    "playwright": "^1.50.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
