@@ -213,6 +213,10 @@ svg.map{width:100%;max-height:min(300px, 38vh);height:auto;display:block;touch-a
 .acc-card.aus-acc[open]{border-color:var(--teal)}
 .acc-card.aus-acc .acc-content{background:#f9fdfe}
 .acc-card.aus-acc .acc-badge{background:#e0f2fe;color:#0369a1}
+.echo-figure{margin:10px 0 0;border-radius:8px;overflow:hidden;border:1.5px solid #cce3ee;background:#fff;box-shadow:0 2px 6px rgba(10,50,70,.06)}
+.echo-btn{display:block;width:100%;padding:0;border:none;background:none;cursor:zoom-in}
+.echo-img{display:block;width:100%;max-height:min(200px, 26vh);object-fit:cover;object-position:center}
+.echo-caption{padding:7px 10px;font-size:.8rem;line-height:1.4;color:#3a5866;background:#f4f9fc;border-top:1px solid #e1eef4}
 .result-notice-hint{
   margin-top:10px;padding:8px 12px;background:#fffdf6;border:1.5px solid var(--warm);
   border-radius:8px;font-size:.85rem;font-weight:600;line-height:1.4
@@ -607,7 +611,10 @@ const ISLANDS = Object.freeze([
   /* ---------------- TROPICAL ---------------- */
   {id:"palm", name:"Palm Island", flag:"🌴", zone:"Tropical", like:"like Darwin",
    echo:{title:"Real Australia: The Tropical North",
-         text:"In Darwin and tropical Queensland, traditional homes were built high on tall timber stilts (‘Queenslanders’) to let floodwaters pass underneath and catch cool sea breezes."},
+         text:"In Darwin and tropical Queensland, traditional homes were built high on tall timber stilts (‘Queenslanders’) to let floodwaters pass underneath and catch cool sea breezes.",
+         img:"images/queenslander.png",
+         alt:"Traditional Queenslander timber house on high stilts with verandas and stairs",
+         caption:"Traditional Queenslander homes built on tall stilts to catch cool sea breezes and let floodwaters pass underneath."},
    climate:{temperature:"Hot all year", humidity:"Very wet, sticky air",
             vegetation:"Rainforest and mangroves", summary:"Two seasons: The Wet and The Dry. Cyclones.", rainMm:1730, rainWord:"Heavy rain",
             short:{temp:"Hot all year",humidity:"Wet, sticky air",plants:"Rainforest"}},
@@ -646,7 +653,10 @@ const ISLANDS = Object.freeze([
   /* ---------------- DESERT ---------------- */
   {id:"red", name:"Red Island", flag:"🏜️", zone:"Desert", like:"like Alice Springs",
    echo:{title:"Real Australia: The Desert Outback",
-         text:"Desert towns like Alice Springs were founded around permanent waterholes. In Coober Pedy, summer gets over 45°C, so people live in cool underground dugouts!"},
+         text:"Desert towns like Alice Springs were founded around permanent waterholes. In Coober Pedy, summer gets over 45°C, so people live in cool underground dugouts!",
+         img:"images/coober-pedy.jpg",
+         alt:"Underground dugout dining room in Coober Pedy carved into desert sandstone",
+         caption:"In Coober Pedy, people live in cool underground dugouts to escape summer heat over 45°C."},
    climate:{temperature:"Baking days, freezing nights", humidity:"Very dry air",
             vegetation:"Spinifex and saltbush", summary:"Almost no rain. Hot days, cold nights.", rainMm:280,  rainWord:"Very little rain",
             short:{temp:"Baking days, cold nights",humidity:"Very dry",plants:"Spinifex"}},
@@ -1289,6 +1299,13 @@ function screenResult(){
             <div class="acc-content">
               <h3 style="margin:0 0 6px;font-size:1.02rem;color:var(--teal)">🇦🇺 ${esc(isl.echo.title)}</h3>
               <p style="margin:0;font-size:.95rem;line-height:1.55">${esc(isl.echo.text)}</p>
+              ${isl.echo.img ? `
+              <figure class="echo-figure">
+                <button class="echo-btn" data-action="zoom" data-src="${esc(isl.echo.img)}" data-label="${esc(isl.echo.title)}" aria-label="Enlarge photo">
+                  <img src="${esc(isl.echo.img)}" alt="${esc(isl.echo.alt || isl.echo.caption || isl.echo.title)}" class="echo-img" loading="lazy">
+                </button>
+                ${isl.echo.caption ? `<figcaption class="echo-caption">${esc(isl.echo.caption)} <span class="zoomhint" style="display:inline;margin-left:6px;font-size:.74rem">🔍 Tap to zoom</span></figcaption>` : ""}
+              </figure>` : ""}
             </div>
           </details>
           ` : ""}
