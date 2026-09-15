@@ -19,6 +19,7 @@ let force = args.includes("--force");
 // pre-rendered Gemini Aoede voice used by every shipped track. It is opt-in only,
 // so a missing key can never silently ship a mismatched voice again.
 let allowSay = args.includes("--allow-say");
+let reseed = args.includes("--reseed");
 
 for (const arg of args) {
   if (arg.startsWith("--key=")) apiKey = arg.slice(6).trim();
@@ -51,6 +52,8 @@ Options:
   --voice="Aoede"       Voice name (Aoede, Puck, Kore, Charon, Fenrir)
   --model="gemini-2.5-flash-preview-tts"
   --force               Re-generate files even if they already exist
+  --reseed              Re-record tracks that exist but have no manifest entry
+                        (default: adopt them, to conserve the 100/day quota)
   --allow-say           macOS only: permit the robotic "say" fallback when no
                         key is set. Off by default - the shipped tracks all use
                         the Gemini Aoede voice and must not be mixed.
@@ -143,135 +146,10 @@ const AUDIO_TRACKS = [
     text: "Guess first! 20 settlers are moving to your settlement. How many people do you think will live here in 3 years? There is no wrong guess. About 5, about 20, about 40, or about 60?"
   },
 
-  // 3. Island Scouting (General & 3 Places Each)
-  // Palm Island (Tropical)
-  {
-    id: "palm_scout_general",
-    text: "Palm Island. Tropical climate, like Darwin. Two seasons: The Wet and The Dry. Cyclones. Heavy rain, about 1,730 millimetres. Tap a letter on the map to scout a place for your settlers."
-  },
-  {
-    id: "palm_site_a",
-    text: "Place A: Breezy Hill. High clearing. Sea breeze. Water: River 2 tiles away. Heat: Hot, but breezy. Humidity: Wet, sticky air. Plants: Rainforest all round. Shelter: Rock and trees."
-  },
-  {
-    id: "palm_site_b",
-    text: "Place B: Deep Rainforest. Under tall trees, by the river. Water: River right here. Heat: Hot. No breeze. Humidity: Dripping wet. Plants: Big trees. Poor soil. Shelter: Trees block the wind."
-  },
-  {
-    id: "palm_site_c",
-    text: "Place C: Mangrove Shore. Muddy flats by the sea. Water: River 2 tiles away. Heat: Hot and steamy. Humidity: Wettest spot. Mosquitoes. Plants: Fish and crabs. No farms. Shelter: Low and open. Tide comes in."
-  },
-
-  // Red Island (Desert)
-  {
-    id: "red_scout_general",
-    text: "Red Island. Desert climate, like Alice Springs. Almost no rain. Hot days, cold nights. Very little rain, about 280 millimetres. Tap a letter on the map to scout a place for your settlers."
-  },
-  {
-    id: "red_site_a",
-    text: "Place A: Spring Camp. Red rock by the waterhole. Water: Waterhole here. Never dries up. Heat: 42 degrees by day. Frost at night. Humidity: So dry you get thirsty. Plants: Only spinifex. Shelter: Rock gives shade."
-  },
-  {
-    id: "red_site_b",
-    text: "Place B: Salt Flat. Flat white salt crust. Water: Waterhole 3 tiles away. Heat: White ground throws heat back. Humidity: Bone dry. Plants: Salty. Only saltbush. Shelter: Rocks break the wind."
-  },
-  {
-    id: "red_site_c",
-    text: "Place C: Dune Field. Red sand hills that move. Water: No water. 5 tiles away. Heat: Sand burns feet, then freezes. Humidity: The driest spot. Plants: Bare sand. Shelter: Dunes move in the wind."
-  },
-
-  // Gold Island (Grassland)
-  {
-    id: "gold_scout_general",
-    text: "Gold Island. Grassland climate, like Dubbo. Warm summers, cool winters. Summer storms. Low rain, about 580 millimetres. Tap a letter on the map to scout a place for your settlers."
-  },
-  {
-    id: "gold_site_a",
-    text: "Place A: Creek Bend. Deep grass by the creek. Water: Creek right here. Dries in drought. Heat: Pleasant. Cold winter nights. Humidity: Pleasant air. Plants: Thick grass. Good soil. Shelter: Few trees."
-  },
-  {
-    id: "gold_site_b",
-    text: "Place B: Stony Rise. Rocky rise over the plains. Water: Creek 2 tiles away. Heat: Warm, windy. Humidity: Dry breeze. Plants: Scattered gum trees. Shelter: Rocks and trees."
-  },
-  {
-    id: "gold_site_c",
-    text: "Place C: Open Plain. Flat grass to the horizon. Water: Creek 4 tiles away. Heat: Hot sun, cold wind. Humidity: Pleasant air. Plants: Endless grass. Shelter: No trees at all."
-  },
-
-  // Green Island (Temperate)
-  {
-    id: "green_scout_general",
-    text: "Green Island. Temperate climate, like Sydney. Four mild seasons. Rain spread across the year. Rain all year, about 1,220 millimetres. Tap a letter on the map to scout a place for your settlers."
-  },
-  {
-    id: "green_site_a",
-    text: "Place A: River Flats. Flat green land by the river. Water: River right here. Floods in big rain. Heat: Pleasant. Cool winter. Humidity: Pleasant air. Plants: Tall trees. Rich farm soil. Shelter: Trees near the river."
-  },
-  {
-    id: "green_site_b",
-    text: "Place B: Woodland Hill. Clearing in the gum trees. Water: River 2 tiles away. Heat: Gentle sun and shade. Humidity: Pleasant air. Plants: Gum trees and ferns. Shelter: Trees block the wind."
-  },
-  {
-    id: "green_site_c",
-    text: "Place C: Windy Point. Bare headland in the sea. Water: River 4 tiles away. Salty sea water. Heat: Cool sea breeze all day. Humidity: Salty air. Plants: Short scrub only. Shelter: Bare rock. Very windy."
-  },
-
-  // 4. Island Year Decision Cards
-  // Palm Island Cards
-  {
-    id: "palm_y1",
-    text: "Palm Island. Year 1 of 3. Settling In. The settlers land and start building. How should we build our houses? Think about the climate here. Choice 1: Thick mud walls. Choice 2: On stilts, off the wet ground. Choice 3: Low on the ground."
-  },
-  {
-    id: "palm_y2",
-    text: "Palm Island. Year 2 of 3. The Big Wet. Rain for weeks. Six weeks of rain. The food is going mouldy. Think about the climate here. Choice 1: Cover it with palm leaves. Choice 2: Bury it to keep it cool. Choice 3: Lift the store up and dry food by the fire."
-  },
-  {
-    id: "palm_y3",
-    text: "Palm Island. Year 3 of 3. Cyclone! A cyclone is coming! Think about the climate here. Choice 1: Shelter in the rock cave. Choice 2: Tie the roofs down and stay. Choice 3: Go to the beach and watch."
-  },
-
-  // Red Island Cards
-  {
-    id: "red_y1",
-    text: "Red Island. Year 1 of 3. Settling In. The settlers arrive, looking for shade. Where do we build to escape the heat? Think about the climate here. Choice 1: Flat tin roof in the sun. Choice 2: Dig down into the cool ground or rock shade. Choice 3: Big glass windows."
-  },
-  {
-    id: "red_y2",
-    text: "Red Island. Year 2 of 3. Heatwave. Two weeks over 45 degrees. Summer heat is here. Water dries up fast. Think about the climate here. Choice 1: Dig for water in the dry creek. Choice 2: Drink less and wait. Choice 3: Leave water in open buckets."
-  },
-  {
-    id: "red_y3",
-    text: "Red Island. Year 3 of 3. The Long Dry. A whole year with no rain. No rain for a year. Crops dry up and die. Think about the climate here. Choice 1: Try to plant tomatoes. Choice 2: Eat desert bush food and seeds. Choice 3: Wait for a cloud."
-  },
-
-  // Gold Island Cards
-  {
-    id: "gold_y1",
-    text: "Gold Island. Year 1 of 3. Settling In. The settlers arrive, grass up to their knees. How should we feed our 20 settlers? Think about the climate here. Choice 1: Grow rainforest fruit. Choice 2: Plant wheat and keep sheep. Choice 3: Dig for fish in the dry dirt."
-  },
-  {
-    id: "gold_y2",
-    text: "Gold Island. Year 2 of 3. Bushfire Season. Hot summer, dry grass. Lightning starts a grass fire! Think about the climate here. Choice 1: Burn small patches early, caring for Country. Choice 2: Let the dry grass grow right up to the huts. Choice 3: Hide in the tall dry grass."
-  },
-  {
-    id: "gold_y3",
-    text: "Gold Island. Year 3 of 3. Drought. The creek stops running. Deep water wells keep inland towns alive. Drought! The creek has dried up. Think about the climate here. Choice 1: Move everyone away immediately. Choice 2: Drill a deep well down into ground water. Choice 3: Wash all clothes in the drinking water."
-  },
-
-  // Green Island Cards
-  {
-    id: "green_y1",
-    text: "Green Island. Year 1 of 3. Settling In. The settlers arrive in spring. Where do the houses go? Think about the climate here. Choice 1: High on the windy hill. Choice 2: Right on the riverbank. Choice 3: Near the river, above the flood line."
-  },
-  {
-    id: "green_y2",
-    text: "Green Island. Year 2 of 3. First Harvest. A mild summer with steady rain. What is the best farm crop here? Think about the climate here. Choice 1: Desert spinifex. Choice 2: Vegetables, fruit and orchard trees. Choice 3: Mangrove crabs."
-  },
-  {
-    id: "green_y3",
-    text: "Green Island. Year 3 of 3. Flooding Rain. Three days of torrential rain. The river is rising fast! Think about the climate here. Choice 1: Move food and animals to high ground. Choice 2: Go swimming in the flood. Choice 3: Build a fence across the river."
-  },
+  // NOTE: the per-island scout, place and year tracks used to be written out by hand
+  // here. Eight year tracks and eight place tracks had silently fallen behind the game
+  // data - students heard options the screen no longer offered. They are now derived
+  // from ISLANDS in islandTracks(), so they cannot drift again.
 
   // 5. Two Maps Questions
   {
@@ -320,10 +198,19 @@ function loadGameData() {
   return ctx.out;
 }
 
+// Place names the TTS voice gets wrong, respelled phonetically. This affects ONLY the
+// narration text - the words on screen are unchanged. "Coober Pedy" came out as
+// "Coopy Pedy"; it is COO-ber PEE-dee.
+const SAY_AS = [
+  [/\bCoober Pedy\b/g, "Cooba Peedy"]
+];
+
 // Mirrors cleanSpeechChunk() in index.html, so a pre-rendered track says exactly
 // what the live Gemini / browser-voice fallback would say for the same screen.
 function cleanForSpeech(str) {
-  return String(str || "")
+  let out = String(str || "");
+  SAY_AS.forEach(([re, to]) => { out = out.replace(re, to); });
+  return out
     .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F1E6}-\u{1F1FF}\uFE0F\uFE0E\u200D]/gu, "")
     .replace(/\bmm\b/g, "millimetres")
     .replace(/°C/g, " degrees")
@@ -372,10 +259,62 @@ function resultTracks() {
     });
   });
 
+  // One track per decision a student can make, so the game can explain their own
+  // choices back to them. Also fills the year screen, which had no track after a pick.
+  ISLANDS.forEach(isl => {
+    (isl.cards || []).forEach((card, year) => {
+      card.opts.forEach((opt, idx) => {
+        tracks.push({
+          id: `card_${isl.id}_y${year + 1}_${idx}`,
+          text: cleanForSpeech(`In year ${year + 1} you chose: ${opt.t}. ${opt.why}`)
+        });
+      });
+    });
+  });
+
   return tracks;
 }
 
-AUDIO_TRACKS.push(...resultTracks());
+// The scout, place and year tracks, built from the same ISLANDS data the screens read.
+function islandTracks() {
+  const { FACTORS, ISLANDS } = loadGameData();
+  const tracks = [];
+  const label = {water:"Water", temp:"Heat", humidity:"Humidity", plants:"Plants", shelter:"Shelter"};
+  // Notes sometimes already end in punctuation ("Fire runs fast."), so do not double it.
+  const sentence = t => /[.!?]$/.test(String(t).trim()) ? String(t).trim() : String(t).trim() + ".";
+
+  ISLANDS.forEach(isl => {
+    const c = isl.climate || {};
+    tracks.push({
+      id: `${isl.id}_scout_general`,
+      text: cleanForSpeech(`${isl.name}. ${isl.zone} climate, ${isl.like}. ${c.summary || ""} `
+        + `${c.rainWord || "Rain"}, about ${c.rainMm} millimetres. `
+        + `Tap a letter on the map to scout a place for your settlers.`)
+    });
+
+    isl.sites.forEach(site => {
+      const notes = FACTORS.map(f => `${label[f.key]}: ${sentence(site.notes[f.key])}`).join(" ");
+      tracks.push({
+        id: `${isl.id}_site_${site.letter.toLowerCase()}`,
+        text: cleanForSpeech(`Place ${site.letter}: ${site.name}. ${sentence(site.blurb)} ${notes}`)
+      });
+    });
+
+    (isl.years || []).forEach((yr, i) => {
+      const card = isl.cards[i];
+      const opts = card.opts.map((o, n) => `Choice ${n + 1}: ${o.t}.`).join(" ");
+      tracks.push({
+        id: `${isl.id}_y${yr.n}`,
+        text: cleanForSpeech(`${isl.name}. Year ${yr.n} of 3. ${yr.title}. ${sentence(yr.headline)} `
+          + `${card.q} Think about the climate here. ${opts}`)
+      });
+    });
+  });
+
+  return tracks;
+}
+
+AUDIO_TRACKS.push(...islandTracks(), ...resultTracks());
 
 function pcmBase64ToWavBuffer(base64Str, sampleRate = 24000) {
   const pcmBytes = Buffer.from(base64Str, "base64");
@@ -405,11 +344,36 @@ function pcmBase64ToWavBuffer(base64Str, sampleRate = 24000) {
   return Buffer.concat([header, pcmBytes]);
 }
 
+// Records the text each wav was made from. Without this a track whose script changes
+// keeps its old audio forever, which is how eight year tracks came to narrate options
+// the game no longer offered.
+const MANIFEST_PATH = path.join(OUTPUT_DIR, "manifest.json");
+let manifest = {};
+try { manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf8")); } catch (e) { manifest = {}; }
+
+function textHash(text) {
+  return require("crypto").createHash("sha256").update(text, "utf8").digest("hex").slice(0, 16);
+}
+
 async function synthesize(track) {
   const outPath = path.join(OUTPUT_DIR, `${track.id}.wav`);
-  if (!force && fs.existsSync(outPath) && fs.statSync(outPath).size > 1000) {
+  const hash = textHash(track.text);
+  const exists = fs.existsSync(outPath) && fs.statSync(outPath).size > 1000;
+  if (!force && exists && manifest[track.id] === hash) {
     console.log(`   ⏩ [${track.id}] already exists, skipping.`);
     return false;
+  }
+  // A file with no manifest entry is adopted as-is rather than re-recorded. The free
+  // tier allows 100 TTS requests per day and the library is ~100 tracks, so a blanket
+  // re-record burns the whole day's quota and leaves the tail ungenerated. Use --reseed
+  // when you genuinely need every track re-cut.
+  if (!force && exists && !manifest[track.id] && !reseed) {
+    manifest[track.id] = hash;
+    console.log(`   📎 [${track.id}] adopted into manifest (not re-recorded).`);
+    return false;
+  }
+  if (!force && exists && manifest[track.id] !== hash) {
+    console.log(`   ♻️  [${track.id}] script changed - re-recording.`);
   }
 
   if (!hasApiKey && isMac) {
@@ -422,6 +386,7 @@ async function synthesize(track) {
       execSync(`say -v Karen -f "${tempTxt}" -o "${tempAiff}"`);
       execSync(`afconvert -f WAVE -d LEI16@24000 "${tempAiff}" "${outPath}"`);
       console.log(`   ✓ Saved: ${outPath} (${(fs.statSync(outPath).size / 1024).toFixed(1)} KB)`);
+      manifest[track.id] = hash;
     } finally {
       if (fs.existsSync(tempAiff)) fs.unlinkSync(tempAiff);
       if (fs.existsSync(tempTxt)) fs.unlinkSync(tempTxt);
@@ -475,6 +440,7 @@ async function synthesize(track) {
   }
 
   fs.writeFileSync(outPath, buffer);
+  manifest[track.id] = hash;
   console.log(`   ✓ Saved: ${outPath} (${(buffer.length / 1024).toFixed(1)} KB)`);
   return true;
 }
@@ -491,9 +457,18 @@ async function run() {
         await new Promise(r => setTimeout(r, 1200));
       }
     } catch (e) {
-      console.error(`   ✕ Failed for [${track.id}]:`, e.message);
+      const daily = /RequestsPerDay/i.test(e.message) || /per_model_per_day/i.test(e.message);
+      console.error(`   ✕ Failed for [${track.id}]:`, e.message.split("\n")[0]);
+      if (daily) {
+        const left = AUDIO_TRACKS.length - count;
+        console.error(`\n🛑 Daily TTS quota reached (free tier: 100 requests/day).`);
+        console.error(`   ${left} track(s) not generated. Progress is saved - re-run tomorrow`);
+        console.error(`   and only the missing tracks will be recorded.\n`);
+        break;
+      }
     }
   }
+  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 1));
   console.log(`\nDone! Verified ${count} of ${AUDIO_TRACKS.length} tracks in settlement-game/audio/\n`);
 }
 

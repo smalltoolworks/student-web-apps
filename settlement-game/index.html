@@ -1967,6 +1967,12 @@ function getScreenSpeechText(){
       `Final population: ${done.final} people. ${out.label}! ${out.line}`,
       `Room and space: ${rm.word}. ${rm.note}`
     ];
+    // Walk back through the decisions they actually made, and what each one did.
+    (done.choices || []).forEach((idx, year) => {
+      const card = isl.cards && isl.cards[year];
+      const opt = card && idx != null ? card.opts[idx] : null;
+      if(opt) text.push(`In year ${year + 1} you chose: ${opt.t}. ${opt.why}`);
+    });
     if(best && worst){
       text.push(`Best thing: ${best.label}. Hardest thing: ${worst.label}.`);
     }
@@ -2378,7 +2384,7 @@ function getPreRenderedAudioTrack(){
     if(state.run.cardChoice === null || state.run.cardChoice === undefined){
       return `audio/${isl.id}_y${state.run.yearIndex + 1}.wav`;
     }
-    return null;
+    return `audio/card_${isl.id}_y${state.run.yearIndex + 1}_${state.run.cardChoice}.wav`;
   }
   if(s === "maps" || s === "australia"){
     return `audio/map_q${Math.min(3, Math.max(1, (state.mapStep || 0) + 1))}.wav`;
@@ -2392,8 +2398,12 @@ function getPreRenderedAudioTrack(){
     if(!site || !site.letter) return null;
     const band = OUTCOMES.findIndex(o => done.final >= o.min);
     if(band < 0) return null;
-    // Two parts: how it went (5 shared band tracks), then why + Real Australia (12 site tracks).
-    return [`audio/result_band${band}.wav`, `audio/result_${isl.id}_${site.letter.toLowerCase()}.wav`];
+    // How it went (5 shared band tracks), then the student's own decisions and what each
+    // one did (36 card tracks), then why this place is like that (12 site tracks).
+    const picks = (done.choices || [])
+      .map((idx, year) => (idx == null ? null : `audio/card_${isl.id}_y${year + 1}_${idx}.wav`))
+      .filter(Boolean);
+    return [`audio/result_band${band}.wav`, ...picks, `audio/result_${isl.id}_${site.letter.toLowerCase()}.wav`];
   }
   if(s === "pattern") return "audio/pattern.wav";
   if(s === "write"){
@@ -2427,17 +2437,25 @@ async function startSpeech(){
       proceedLiveOrBrowser();
     };
     // Play the parts back to back; if any part is missing, fall back for the whole narration.
+    let playedAny = false;
     const playFrom = async (i) => {
       if(mySeq !== preTrackSeq) return;
       if(i >= preTracks.length){ stopSpeech(); return; }
       const el = new Audio(preTracks[i]);
       geminiAudioEl = el;
-      el.onended = ()=>{ if(mySeq === preTrackSeq) playFrom(i+1); };
-      el.onerror = ()=>{ triggerMainFallback(); };
+      el.onended = ()=>{ if(mySeq === preTrackSeq){ playedAny = true; playFrom(i+1); } };
+      // Skip a part that will not load rather than restarting the whole narration in the
+      // browser voice - one absent track should not change the voice mid-sentence.
+      el.onerror = ()=>{
+        if(mySeq !== preTrackSeq) return;
+        if(playedAny || i < preTracks.length - 1) playFrom(i+1);
+        else triggerMainFallback();
+      };
       try {
         await el.play();
+        playedAny = true;
       } catch(e){
-        triggerMainFallback();
+        if(playedAny || i < preTracks.length - 1) playFrom(i+1); else triggerMainFallback();
       }
     };
     await playFrom(0);
@@ -2747,7 +2765,7 @@ function chooseCard(idx){
   const L=yearLedger(s.scores,isl,i);
   const before=state.run.history.length?state.run.history[state.run.history.length-1].after:START_POP;
   const total=L.factorTotal+delta;
-  const rec={...L,cardDelta:delta,total,before,after:Math.max(0,before+total)};
+  const rec={...L,cardIdx:idx,cardDelta:delta,total,before,after:Math.max(0,before+total)};
   setState({run:{...state.run,cardChoice:idx,history:[...state.run.history,rec]}});
 }
 function finishRun(){
@@ -2755,8 +2773,10 @@ function finishRun(){
   const pops=[START_POP,...state.run.history.map(h=>h.after)];
   const final=pops[pops.length-1];
   const cardTotal=state.run.history.reduce((a,h)=>a+h.cardDelta,0);
+  // Keep the actual decisions so the result screen can explain what they caused.
+  const choices=state.run.history.map(h=>h.cardIdx);
   setState({completed:[...state.completed,{islandId:isl.id,siteId:s.id,siteName:s.name,
-      final,pops,cardTotal,prediction:state.prediction}],
+      final,pops,cardTotal,choices,prediction:state.prediction}],
     run:null,openSite:null,terrainNote:null,prediction:null,screen:"result"});
 }
 // Every textarea on the screen, not just the first - Q3 renders three.
