@@ -131,8 +131,21 @@ ul.cscores .dots{flex:0 0 auto}
   border-radius:var(--r);padding:clamp(10px, 1.4vh, 14px) clamp(10px, 1.2vw, 14px);cursor:pointer;min-height:56px;
   transition:border-color .15s, transform .12s, box-shadow .15s}
 .isle:hover{border-color:var(--teal);background:#f4fbfc;transform:translateY(-2px);box-shadow:0 4px 12px rgba(29,122,140,.12)}
+.isle:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
 .isle-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
 .isle .flag{font-size:clamp(1.6rem, 2.2vw, 2rem);line-height:1;margin:0}
+.isle-head-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.isle-story-btn{
+  display:inline-flex;align-items:center;gap:4px;background:#f8f9fa;color:var(--ink);
+  border:1.5px solid var(--line);border-radius:999px;padding:2px 8px;font-size:.78rem;
+  font-weight:700;cursor:pointer;line-height:1.2;transition:all .15s ease;white-space:nowrap;
+  box-shadow:0 1px 2px rgba(0,0,0,.04)
+}
+.isle-story-btn:hover{background:var(--teal-soft);border-color:var(--teal);color:var(--teal);transform:scale(1.04)}
+.isle-story-btn:active{transform:scale(0.96)}
+.isle-story-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.isle-story-btn.playing{background:#fee2e2;border-color:#ef4444;color:#991b1b;animation:story-pulse 1.6s infinite ease-in-out}
+@keyframes story-pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{transform:scale(1.05);box-shadow:0 0 0 4px rgba(239,68,68,0)}}
 .isle h3{margin:2px 0 4px;font-size:clamp(1.05rem, 1.4vw, 1.2rem)}
 .isle-summary{margin:0 0 4px;font-size:clamp(.82rem, 1.1vw, .9rem);line-height:1.3;min-height:2.6em}
 .isle dl{margin:8px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:.92rem}
@@ -966,21 +979,38 @@ function screenIntro(){
 function screenArch(){
   const cards = ISLANDS.map(isl=>{
     const done = state.completed.find(r=>r.islandId===isl.id);
+    const isPlaying = activeIslandStory === isl.id;
+    const storyBtn = `<button type="button" class="isle-story-btn ${isPlaying ? "playing" : ""}" data-action="island-story" data-id="${isl.id}" aria-label="${isPlaying ? "Stop listening to " + isl.name : "Listen to " + isl.name + " story"}" title="${isPlaying ? "Stop listening" : "Read to me: Fun facts about " + isl.name}">
+      <span class="story-ic" aria-hidden="true">${isPlaying ? "⏹" : "🔊"}</span>
+      <span>${isPlaying ? "Stop" : "Listen"}</span>
+    </button>`;
     if(done){
       const rm = roomFor(done.final);
       return `<div class="isle done">
-        <div class="isle-head"><span class="flag">${isl.flag}</span><span class="zone z-${isl.zone}">${isl.zone}</span></div>
+        <div class="isle-head">
+          <span class="flag">${isl.flag}</span>
+          <div class="isle-head-actions">
+            <span class="zone z-${isl.zone}">${isl.zone}</span>
+            ${storyBtn}
+          </div>
+        </div>
         <h3>${esc(isl.name)}</h3>
         <p class="muted isle-summary">${esc(isl.climate.summary)}</p>
         <span class="done-tag">✓ Settled</span>
         <dl><dt>👥</dt><dd>${done.final} people</dd>
             <dt>🏡</dt><dd>${stars(rm.stars)} ${rm.word}</dd></dl></div>`;
     }
-    return `<button class="isle" data-action="island" data-id="${isl.id}">
-      <div class="isle-head"><span class="flag">${isl.flag}</span><span class="zone z-${isl.zone}">${isl.zone}</span></div>
+    return `<div class="isle" role="button" tabindex="0" data-action="island" data-id="${isl.id}">
+      <div class="isle-head">
+        <span class="flag">${isl.flag}</span>
+        <div class="isle-head-actions">
+          <span class="zone z-${isl.zone}">${isl.zone}</span>
+          ${storyBtn}
+        </div>
+      </div>
       <h3>${esc(isl.name)}</h3>
       <p class="muted isle-summary">${esc(isl.climate.summary)}</p>
-      ${rainRow(isl)}${climateScores(isl,false)}${variesRows(isl)}</button>`;
+      ${rainRow(isl)}${climateScores(isl,false)}${variesRows(isl)}</div>`;
   }).join("");
   const n = state.completed.length;
   const note = n===0 ? `Settle any <strong>two</strong> islands. Do more if you want to.`
@@ -1329,6 +1359,36 @@ function cleanSpeechChunk(str){
     .trim();
 }
 
+const ISLAND_STORIES = Object.freeze({
+  palm: {
+    id: "palm",
+    name: "Palm Island",
+    file: "audio/palm_story.wav",
+    text: "Welcome to Palm Island! Picture the steamy, tropical north near Darwin. Out here, there are only two wild seasons: The Wet and The Dry! When The Wet arrives, warm tropical rain pours from the sky like a giant waterfall, thunder cracks across the sea, and big storms can roar in! Plants grow crazy fast, and waterfalls tumble down rocky cliffs. It's hot, sticky, and full of adventure—just make sure you build up high on stilts, and keep a lookout for crocodiles in the creeks!"
+  },
+  red: {
+    id: "red",
+    name: "Red Island",
+    file: "audio/red_story.wav",
+    text: "Welcome to Red Island! Picture the huge, glowing red outback around Alice Springs. By day, the red sand and giant rocks bake under a blazing sun, reaching over forty degrees! But as soon as the sun dips, the sky lights up with millions of crystal stars, and the temperature drops freezing cold! Lizards run across the sand, tough prickly spinifex grass covers the dunes, and secret rock waterholes hide pure fresh water. Can your settlers survive the big heat?"
+  },
+  gold: {
+    id: "gold",
+    name: "Gold Island",
+    file: "audio/gold_story.wav",
+    text: "Welcome to Gold Island! Picture the sweeping golden plains out west near Dubbo. Endless golden grass ripples like ocean waves in the breeze. In summer, the sun beats down and sudden lightning storms bring booming thunder. In winter, mornings are crisp and frosty. It's classic big-sky sheep and wheat country! There's plenty of room to build, grow crops, and run animals—as long as the creek doesn't dry up when summer comes!"
+  },
+  green: {
+    id: "green",
+    name: "Green Island",
+    file: "audio/green_story.wav",
+    text: "Welcome to Green Island! Picture the breezy coast and green hills near Sydney. Here, you get four lovely, gentle seasons and steady rain right across the year. Tall eucalyptus trees shade sweet green ferns, fresh water trickles through rich river dirt, and kookaburras laugh from the treetops. It's easy to grow gardens, build cosy huts, and stay comfy—which is why almost every settler wants to live here! But watch out, space fills up fast!"
+  }
+});
+
+let activeIslandStory = null;
+let islandStoryAudioEl = null;
+
 function getScreenSpeechText(){
   const s = state.screen;
   if(s==="intro"){
@@ -1341,19 +1401,11 @@ function getScreenSpeechText(){
   if(s==="arch"){
     const n = state.completed.length;
     const guide = n === 0
-      ? "Pick an island. Climate is the weather a place usually gets. Look at how hot it is, how humid it is, that is how wet the air is, and what plants grow. Settle any two islands. Do more if you want to."
+      ? "Pick an island. Climate is the weather a place usually gets. Settle any two islands. Listen to each island to hear what it is like, then tap an island to explore!"
       : (n === 1
           ? "One island done! Settle one more, then you can go and think about Australia."
-          : `${n} islands settled! Settle more, or tap I am ready to think.`);
-    const list = ISLANDS.map(isl=>{
-      const done = state.completed.find(r=>r.islandId===isl.id);
-      if(done){
-        const rm = roomFor(done.final);
-        return `${isl.name}, settled. ${done.final} people, ${rm.word}.`;
-      }
-      return `${isl.name}. ${isl.zone} climate. ${isl.climate.summary}. ${isl.climate.rainWord}.`;
-    });
-    return [guide, ...list];
+          : `${n} islands settled! Settle more, or tap I am ready to think about Australia.`);
+    return [guide];
   }
   if(s==="island"){
     const isl = currentIsland();
@@ -1638,7 +1690,40 @@ function showAudioToast(msg){
   window._toastTimeout = setTimeout(()=>{ t.classList.remove("show"); }, 3800);
 }
 
+function stopIslandStory(){
+  if(islandStoryAudioEl){
+    try{ islandStoryAudioEl.pause(); islandStoryAudioEl.currentTime = 0; }catch(e){}
+    islandStoryAudioEl = null;
+  }
+  activeIslandStory = null;
+  if(SPEECH){
+    try{ speechSynthesis.cancel(); }catch(e){}
+  }
+  updateStoryButtons();
+}
+
+function updateStoryButtons(){
+  document.querySelectorAll(".isle-story-btn").forEach(btn=>{
+    const id = btn.dataset.id;
+    const isl = islandById(id);
+    const name = isl ? isl.name : "island";
+    const isPlaying = activeIslandStory === id;
+    btn.classList.toggle("playing", isPlaying);
+    btn.setAttribute("aria-label", isPlaying ? `Stop listening to ${name}` : `Listen to ${name} story`);
+    btn.setAttribute("title", isPlaying ? `Stop listening` : `Read to me: Fun facts about ${name}`);
+    btn.innerHTML = `<span class="story-ic" aria-hidden="true">${isPlaying ? "⏹" : "🔊"}</span><span>${isPlaying ? "Stop" : "Listen"}</span>`;
+  });
+}
+
 function stopSpeech(){
+  if(islandStoryAudioEl){
+    try{ islandStoryAudioEl.pause(); islandStoryAudioEl.currentTime = 0; }catch(e){}
+    islandStoryAudioEl = null;
+  }
+  if(activeIslandStory !== null){
+    activeIslandStory = null;
+    updateStoryButtons();
+  }
   if(geminiAudioEl){
     try{ geminiAudioEl.pause(); geminiAudioEl.currentTime = 0; }catch(e){}
     geminiAudioEl = null;
@@ -1653,6 +1738,97 @@ function stopSpeech(){
     try{ speechSynthesis.cancel(); }catch(e){}
   }
   renderSpeakBtn();
+}
+
+async function toggleIslandStory(islandId){
+  if(activeIslandStory === islandId){
+    stopIslandStory();
+    return;
+  }
+  stopSpeech();
+  const story = ISLAND_STORIES[islandId];
+  if(!story) return;
+
+  activeIslandStory = islandId;
+  updateStoryButtons();
+
+  // 1. Try pre-rendered studio track first
+  try {
+    const audio = new Audio(story.file);
+    islandStoryAudioEl = audio;
+    audio.onended = () => {
+      stopIslandStory();
+    };
+    audio.onerror = () => {
+      if(activeIslandStory === islandId){
+        proceedStoryWithGeminiOrBrowser(story);
+      }
+    };
+    await audio.play();
+  } catch(e){
+    islandStoryAudioEl = null;
+    if(activeIslandStory === islandId){
+      proceedStoryWithGeminiOrBrowser(story);
+    }
+  }
+}
+
+async function proceedStoryWithGeminiOrBrowser(story){
+  const islandId = story.id;
+  if(GEMINI_CONFIG.hasKey()){
+    try {
+      const cacheKey = `story:${islandId}:${GEMINI_CONFIG.voice}:${GEMINI_CONFIG.model}`;
+      let audioUrl = geminiAudioCache.get(cacheKey);
+      if(!audioUrl){
+        const blob = await fetchGeminiAudio(story.text, GEMINI_CONFIG.voice, GEMINI_CONFIG.model, GEMINI_CONFIG.key);
+        audioUrl = URL.createObjectURL(blob);
+        geminiAudioCache.set(cacheKey, audioUrl);
+      }
+      if(activeIslandStory !== islandId) return;
+
+      const audio = new Audio(audioUrl);
+      islandStoryAudioEl = audio;
+      audio.onended = () => {
+        stopIslandStory();
+      };
+      audio.onerror = () => {
+        if(activeIslandStory === islandId){
+          startBrowserStorySpeech(story);
+        }
+      };
+      await audio.play();
+      return;
+    } catch(err){
+      console.warn("Gemini story audio failed, falling back to browser voice:", err);
+      if(activeIslandStory === islandId){
+        startBrowserStorySpeech(story);
+      }
+      return;
+    }
+  }
+  startBrowserStorySpeech(story);
+}
+
+function startBrowserStorySpeech(story){
+  if(!SPEECH) return;
+  const u = new SpeechSynthesisUtterance(story.text);
+  window._activeSpeechUtterance = u;
+  u.rate = 0.95;
+  u.pitch = 1.0;
+  const v = pickVoice();
+  if(v) u.voice = v;
+  u.onend = () => {
+    if(activeIslandStory === story.id) stopIslandStory();
+  };
+  u.onerror = (err) => {
+    if(err && err.error === "canceled") return;
+    if(activeIslandStory === story.id) stopIslandStory();
+  };
+  try {
+    speechSynthesis.speak(u);
+  } catch(e){
+    stopIslandStory();
+  }
 }
 
 function getPreRenderedAudioTrack(){
@@ -1955,7 +2131,7 @@ document.getElementById("speakbar").addEventListener("click", (e)=>{
   }
   const btn = e.target.closest("#speakbtn");
   if(btn){
-    if(speakingMode !== null || speaking || geminiLoading) stopSpeech();
+    if(speakingMode !== null || speaking || geminiLoading || activeIslandStory !== null) stopSpeech();
     else startSpeech();
   }
 });
@@ -2054,6 +2230,10 @@ function copyWriting(){
 }
 function handle(el){
   const a=el.dataset.action;
+  if(a==="island-story"){
+    toggleIslandStory(el.dataset.id);
+    return;
+  }
   if(a==="go"){
     const to=el.dataset.screen;
     if(to==="arch") return setState({screen:"arch",islandId:null,openSite:null,terrainNote:null});

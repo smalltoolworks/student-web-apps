@@ -65,7 +65,7 @@ const AUDIO_TRACKS = [
   },
   {
     id: "arch_start",
-    text: "Pick an island. Climate is the weather a place usually gets. Look at how hot it is, how humid it is, that is how wet the air is, and what plants grow. Settle any two islands. Do more if you want to. Tap any island card to travel there."
+    text: "Pick an island. Climate is the weather a place usually gets. Settle any two islands. Do more if you want to. Tap the speaker on each island to hear what it is like, then tap an island to explore."
   },
   {
     id: "arch_done1",
@@ -74,6 +74,23 @@ const AUDIO_TRACKS = [
   {
     id: "arch_done2",
     text: "Two islands settled! Settle more if you want to, or tap I am ready to think about Australia."
+  },
+  // 1b. Immersive Island Stories (Read to me on Island Selection)
+  {
+    id: "palm_story",
+    text: "Welcome to Palm Island! Picture the steamy, tropical north near Darwin. Out here, there are only two wild seasons: The Wet and The Dry! When The Wet arrives, warm tropical rain pours from the sky like a giant waterfall, thunder cracks across the sea, and big storms can roar in! Plants grow crazy fast, and waterfalls tumble down rocky cliffs. It's hot, sticky, and full of adventure—just make sure you build up high on stilts, and keep a lookout for crocodiles in the creeks!"
+  },
+  {
+    id: "red_story",
+    text: "Welcome to Red Island! Picture the huge, glowing red outback around Alice Springs. By day, the red sand and giant rocks bake under a blazing sun, reaching over forty degrees! But as soon as the sun dips, the sky lights up with millions of crystal stars, and the temperature drops freezing cold! Lizards run across the sand, tough prickly spinifex grass covers the dunes, and secret rock waterholes hide pure fresh water. Can your settlers survive the big heat?"
+  },
+  {
+    id: "gold_story",
+    text: "Welcome to Gold Island! Picture the sweeping golden plains out west near Dubbo. Endless golden grass ripples like ocean waves in the breeze. In summer, the sun beats down and sudden lightning storms bring booming thunder. In winter, mornings are crisp and frosty. It's classic big-sky sheep and wheat country! There's plenty of room to build, grow crops, and run animals—as long as the creek doesn't dry up when summer comes!"
+  },
+  {
+    id: "green_story",
+    text: "Welcome to Green Island! Picture the breezy coast and green hills near Sydney. Here, you get four lovely, gentle seasons and steady rain right across the year. Tall eucalyptus trees shade sweet green ferns, fresh water trickles through rich river dirt, and kookaburras laugh from the treetops. It's easy to grow gardens, build cosy huts, and stay comfy—which is why almost every settler wants to live here! But watch out, space fills up fast!"
   },
   {
     id: "australia",
