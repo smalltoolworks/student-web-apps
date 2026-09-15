@@ -24,8 +24,7 @@ body{background:var(--paper);color:var(--ink);
   -webkit-text-size-adjust:100%;padding:0 0 clamp(40px, 6vh, 60px)}
 #app{max-width:min(1220px, 96vw);margin:0 auto;padding:clamp(10px, 2vh, 20px) clamp(12px, 2.5vw, 24px)}
 h1{font-size:clamp(1.4rem, 2.5vw, 1.85rem);line-height:1.2;margin:0 0 .25em;letter-spacing:-.01em}
-h1:focus{outline:none}
-h1:focus-visible{outline:3px solid var(--focus);outline-offset:6px;border-radius:6px}
+h1:focus,h1:focus-visible{outline:none}
 h2{font-size:clamp(1.15rem, 1.8vw, 1.3rem);margin:1em 0 .4em}
 h3{font-size:1.05rem;margin:0 0 .25em}
 p{margin:0 0 .7em;max-width:65ch}
@@ -54,18 +53,18 @@ button{font:inherit;color:inherit}
 .step{font-size:.85rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--ink-soft);margin:0 0 4px}
 
 /* intro hero */
-.intro-hero{max-width:580px;margin:clamp(24px, 6.5vh, 64px) auto clamp(20px, 4vh, 40px);text-align:center}
-.intro-flags{display:inline-flex;justify-content:center;gap:clamp(16px, 3vw, 28px);
-  font-size:clamp(2.5rem, 4.2vw, 3.2rem);line-height:1;margin-bottom:clamp(14px, 2vh, 20px)}
+.intro-hero{max-width:600px;margin:clamp(24px, 5vh, 52px) auto clamp(20px, 4vh, 36px);text-align:center}
+.intro-flags{display:inline-flex;justify-content:center;gap:clamp(18px, 3.2vw, 30px);
+  font-size:clamp(2.6rem, 4.4vw, 3.3rem);line-height:1;margin-bottom:clamp(16px, 2.4vh, 22px)}
 .intro-flags span{display:inline-block;transition:transform .2s ease}
 .intro-flags span:hover{transform:scale(1.18) translateY(-2px)}
-.intro-hero h1{font-size:clamp(2.1rem, 3.8vw, 2.7rem);margin:0 0 clamp(8px, 1.2vh, 12px);letter-spacing:-.02em}
-.intro-sub{font-size:clamp(1.15rem, 1.8vw, 1.35rem);color:var(--teal);font-weight:700;margin:0 0 clamp(22px, 3.2vh, 32px)}
-.intro-card{text-align:left;padding:clamp(26px, 3.6vh, 36px) clamp(26px, 3.6vw, 38px);
-  margin:0 0 clamp(24px, 3.2vh, 32px);border-radius:22px;border:3px solid var(--line);
+.intro-hero h1{font-size:clamp(2.1rem, 3.8vw, 2.7rem);margin:0 0 clamp(12px, 1.8vh, 16px);letter-spacing:-.02em}
+.intro-sub{font-size:clamp(1.15rem, 1.8vw, 1.35rem);color:var(--teal);font-weight:700;margin:0 0 clamp(26px, 3.6vh, 36px)}
+.intro-card{text-align:left;padding:clamp(26px, 3.6vh, 38px) clamp(28px, 3.8vw, 42px);
+  margin:0 0 clamp(28px, 3.8vh, 38px);border-radius:22px;border:3px solid var(--line);
   box-shadow:0 8px 26px rgba(0,0,0,.06);background:#fff}
-.intro-p1{font-size:clamp(1.15rem, 1.7vw, 1.28rem);line-height:1.6;margin:0 0 clamp(14px, 1.8vh, 18px)}
-.intro-p2{font-size:clamp(1.15rem, 1.7vw, 1.28rem);line-height:1.6;margin:0;color:var(--teal);font-weight:700}
+.intro-p1{font-size:clamp(1.15rem, 1.7vw, 1.28rem);line-height:1.8;margin:0 0 clamp(16px, 2.2vh, 22px)}
+.intro-p2{font-size:clamp(1.15rem, 1.7vw, 1.28rem);line-height:1.8;margin:0;color:var(--teal);font-weight:700}
 .intro-actions{justify-content:center;margin-top:0}
 .intro-actions .btn{font-size:1.3rem;min-height:62px;padding:16px 52px;border-radius:20px;box-shadow:0 4px 0 #145c6a}
 
@@ -241,13 +240,14 @@ svg.map{width:100%;max-height:min(300px, 38vh);height:auto;display:block;touch-a
   .actions{margin-top:12px}
   .btn{min-height:48px;padding:10px 22px;font-size:1rem}
   .btn.big{min-height:52px;padding:12px 26px;font-size:1.1rem}
-  .intro-hero{margin-top:clamp(10px, 3vh, 24px);margin-bottom:16px}
-  .intro-flags{font-size:2.2rem;gap:16px;margin-bottom:8px}
-  .intro-hero h1{font-size:1.85rem;margin-bottom:4px}
-  .intro-sub{font-size:1.15rem;margin-bottom:16px}
-  .intro-card{padding:18px 24px;margin-bottom:18px}
-  .intro-p1{margin-bottom:10px}
-  .intro-actions .btn{min-height:52px;padding:12px 38px;font-size:1.15rem}
+  .intro-hero{margin-top:clamp(16px, 3.2vh, 32px);margin-bottom:20px}
+  .intro-flags{font-size:2.4rem;gap:18px;margin-bottom:14px}
+  .intro-hero h1{font-size:1.95rem;margin-bottom:10px}
+  .intro-sub{font-size:1.18rem;margin-bottom:22px}
+  .intro-card{padding:22px 28px;margin-bottom:24px}
+  .intro-p1{margin-bottom:16px;line-height:1.75}
+  .intro-p2{line-height:1.75}
+  .intro-actions .btn{min-height:56px;padding:14px 44px;font-size:1.2rem}
   .aus-card{padding:8px 10px;margin-bottom:6px}
   .aus-rank-table th{padding:2px 4px;font-size:.7rem}
   .aus-rank-table td{padding:3px 4px;font-size:.8rem}
