@@ -187,6 +187,10 @@ svg.map{width:100%;max-height:min(300px, 38vh);height:auto;display:block;touch-a
 .resultlayout{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
 @media (max-width:768px){.resultlayout{grid-template-columns:1fr}}
 .result-accordions{display:flex;flex-direction:column;gap:10px}
+/* Buttons span the result column so the row lines up with the accordions above it. */
+.result-actions{display:flex;gap:10px;margin-top:10px;flex-wrap:nowrap}
+.result-actions .btn{flex:1 1 0;min-width:0}
+@media (max-width:560px){.result-actions{flex-wrap:wrap}.result-actions .btn{flex:1 1 100%}}
 .acc-card{
   background:var(--card);border:2px solid var(--line);border-radius:var(--r);
   overflow:hidden;transition:border-color .18s ease, box-shadow .18s ease
@@ -1488,7 +1492,7 @@ function screenResult(){
           </details>
         </div>
 
-        <div class="actions" style="margin-top:12px">
+        <div class="actions result-actions">
           <button class="btn ${canReflect()?"secondary":""} ${canReflect()?"":"big"}" data-action="go" data-screen="arch">Settle another island</button>
           ${reflectBtn()}
         </div>
