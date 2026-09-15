@@ -451,6 +451,21 @@ textarea:focus{border-color:var(--teal);outline:none}
 .lookbox .feedback{margin-top:10px;padding:10px 12px;font-size:.88rem}
 
 /* Australia screen */
+.aus-maps-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-bottom:12px}
+.aus-map-card{background:#fff;border:3px solid var(--line);border-radius:var(--r);padding:8px 10px;margin:0;
+  display:flex;flex-direction:column;justify-content:space-between;transition:border-color .15s, box-shadow .15s}
+.aus-map-card.active-map{border-color:var(--teal);box-shadow:0 0 0 2px rgba(26,107,122,0.18)}
+.aus-map-card img{width:auto;max-width:100%;max-height:min(185px, 23vh);display:block;margin:0 auto;
+  border-radius:6px;background:#f4f4f0;object-fit:contain}
+.aus-map-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.aus-map-head h3{margin:0;font-size:.88rem}
+.map-focus-tag{background:var(--teal);color:#fff;font-size:.68rem;font-weight:700;padding:1px 6px;
+  border-radius:999px;letter-spacing:.02em}
+.aus-bottom-grid{display:grid;grid-template-columns:1.05fr 0.95fr;gap:12px;align-items:start}
+@media (max-width:860px){
+  .aus-maps-grid{grid-template-columns:1fr;gap:10px}
+  .aus-bottom-grid{grid-template-columns:1fr;gap:10px}
+}
 .aus-layout{display:grid;grid-template-columns:1.05fr 0.95fr;gap:14px;align-items:start}
 @media (max-width:860px){.aus-layout{grid-template-columns:1fr}}
 .aus-card{padding:10px 14px;margin-bottom:8px}
@@ -801,7 +816,10 @@ const ISLANDS = Object.freeze([
   /* ---------------- TEMPERATE ---------------- */
   {id:"green", name:"Green Island", flag:"🌳", zone:"Temperate", like:"like Sydney",
    echo:{title:"Real Australia: Early Sydney",
-         text:"In 1788, the First Fleet landed at Botany Bay, but the water was swampy. Governor Phillip moved to Sydney Cove for a freshwater stream, then grew food on the rich river flats at Parramatta — just like your choice!"},
+         text:"In 1788, the First Fleet landed at Botany Bay, but the water was swampy. Governor Phillip moved to Sydney Cove for a freshwater stream, then grew food on the rich river flats at Parramatta — just like your choice!",
+         img:"images/sydney-cove.jpg",
+         alt:"Historical illustration of Sydney Cove in 1788 with First Fleet ships anchored in the harbour and early settlement tents along the shoreline",
+         caption:"Sydney Cove in 1788: Ships anchored in the harbour near freshwater streams and early settlement shelters."},
    climate:{temperature:"Mild. Warm summers, cool winters.", humidity:"Pleasant. Rain all year.",
             vegetation:"Gum trees and grassy flats", summary:"Four gentle seasons. Rain all year.", rainMm:1210, rainWord:"Good rain",
             short:{temp:"Mild",humidity:"Rain all year",plants:"Gum trees"}},
@@ -1409,114 +1427,120 @@ function screenResult(){
 }
 
 function screenAustralia(){
-  const mine = state.completed.slice().sort((a,b)=>b.final-a.final).map(r=>{
-    const isl=islandById(r.islandId), rm=roomFor(r.final);
-    return `<tr><td>${isl.flag} <strong>${esc(isl.name)}</strong></td>
-      <td><span class="zone z-${isl.zone}">${isl.zone}</span></td>
-      <td class="num">${r.final}</td>
-      <td class="stars">${stars(rm.stars)} <span class="muted" style="font-weight:600">${rm.word}</span></td></tr>`;
-  }).join("");
-  const cmp = AUS_COMPARE.map(c=>`<tr><td><strong>${c.city}</strong><br><span class="muted" style="font-size:.72rem">${c.where}</span></td>
-    <td class="num">${c.people}</td><td class="cmp-room-cell"><div class="cmp-room"><span class="stars">${stars(c.stars)}</span><span class="cmp-room-text">${esc(c.room)}</span></div></td></tr>`).join("");
-  return `<div class="screen-topbar">
-      <button class="btn secondary sm" data-action="go" data-screen="arch" title="Back to islands">← Back to islands</button>
-      <div>
-        <p class="step" style="margin:0">The real world</p>
-        <h1 tabindex="-1" style="font-size:clamp(1.15rem, 1.5vw, 1.4rem);margin:2px 0 0">Now look at Australia</h1>
-      </div>
-    </div>
-    <div class="aus-layout">
-      <div class="aus-tables-col">
-        <div class="card aus-card"><h2 style="margin:0 0 3px;font-size:.95rem;color:var(--teal)">🏝️ Your islands</h2>
-          <div class="tablescroll"><table class="rank aus-rank-table">
-            <thead><tr><th>Island</th><th>Climate</th><th style="text-align:right">People</th><th>Room &amp; cost</th></tr></thead>
-            <tbody>${mine}</tbody></table></div></div>
-        <div class="card aus-card" style="margin-bottom:0"><h2 style="margin-top:0;margin-bottom:3px;font-size:.95rem;color:var(--teal)">🇦🇺 Coast or inland?</h2>
-          <div class="tablescroll"><table class="rank aus-rank-table">
-            <thead><tr><th>Place</th><th style="text-align:right">People</th><th>Room &amp; cost</th></tr></thead>
-            <tbody>${cmp}</tbody></table></div>
-          <p class="aus-summary-note">💡 Most Australians live on the mild coast. Some choose inland for space, cheaper housing, farms or mining.</p></div>
-      </div>
-      <div class="aus-map-col">
-        <figure class="realmap solo" style="margin-bottom:6px"><h3 style="margin:0 0 4px;font-size:.95rem">🌡️ How hot it gets</h3>
-          <button class="mapbtn" data-action="zoom" data-src="images/temperature-annual.png"
-              data-label="🌡️ How hot it gets" aria-label="Enlarge the temperature map">
-            <img src="images/temperature-annual.png" alt="Map of Australia showing the average yearly top temperature. The north and the middle are orange, about 33 to 39 degrees. The south coast and Tasmania are pale green and yellow, about 15 to 24 degrees. It gets cooler the further south you go."
-              onerror="this.closest('.realmap').classList.add('missing')">
-          </button>
-          <div class="missingnote">Map image not added yet — save it as <code>images/temperature-annual.png</code></div>
-          <p class="zoomhint" style="margin:2px 0 0">🔍 Tap map to zoom</p>
-          <figcaption style="margin-top:2px">Average annual maximum temperature. bom.gov.au</figcaption></figure>
-        <div class="actions" style="margin-top:6px"><button class="btn big" style="width:100%;min-height:46px;padding:9px 18px" data-action="go" data-screen="maps">Now two more maps →</button></div>
-      </div>
-    </div>`;
-}
+  const i = Math.min(MAP_LOOKS.length - 1, Math.max(0, state.mapStep || 0));
+  const item = MAP_LOOKS[i];
+  const pick = state.mapPicks ? state.mapPicks[i] : null;
+  const answered = pick !== undefined && pick !== null;
+  const last = i === MAP_LOOKS.length - 1;
 
-function screenMaps(){
-  const i = state.mapStep, item = MAP_LOOKS[i], pick = state.mapPicks[i];
-  const answered = pick!==undefined && pick!==null;
-  const last = i === MAP_LOOKS.length-1;
-  const backAction = i === 0 ? `data-action="go" data-screen="australia"` : `data-action="prevlook"`;
-  const backLabel = i === 0 ? "← Australia" : `← Question ${i}`;
-  const backTitle = i === 0 ? "Back to Australia temperature map" : `Back to question ${i}`;
   const opts = item.a.map((o,idx)=>{
     let cls="choice";
     if(answered) cls += o.ok ? " right" : (pick===idx ? " picked" : " other");
     return `<button class="${cls}" ${answered?"disabled":""} data-action="maplook" data-i="${idx}">
       ${esc(o.t)}${answered&&o.ok?" ✓":""}</button>`;
   }).join("");
-  return `<div class="maps-page-header">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-        <div style="display:flex;align-items:center;gap:10px">
-          <button class="btn secondary sm" ${backAction} title="${backTitle}">${backLabel}</button>
-          <div>
-            <p class="step" style="margin:0">Two real maps · Question ${i+1} of ${MAP_LOOKS.length}</p>
-            <h1 tabindex="-1" style="margin:2px 0 0;font-size:clamp(1.25rem, 1.8vw, 1.5rem)">Look at both maps</h1>
-          </div>
-        </div>
-        <p class="lede" style="margin:0;font-size:clamp(.85rem, 1vw, .95rem)">One map shows <strong>rain</strong>. The other shows <strong>people</strong>. Look at both to answer.</p>
+
+  const cmp = AUS_COMPARE.map(c=>`<tr><td><strong>${c.city}</strong><br><span class="muted" style="font-size:.72rem">${c.where}</span></td>
+    <td class="num">${c.people}</td><td class="cmp-room-cell"><div class="cmp-room"><span class="stars">${stars(c.stars)}</span><span class="cmp-room-text">${esc(c.room)}</span></div></td></tr>`).join("");
+
+  return `<div class="screen-topbar">
+      <button class="btn secondary sm" data-action="go" data-screen="arch" title="Back to islands">← Back to islands</button>
+      <div>
+        <p class="step" style="margin:0">The real world · Australia</p>
+        <h1 tabindex="-1" style="font-size:clamp(1.15rem, 1.5vw, 1.4rem);margin:2px 0 0">Look at Australia: Heat, rain and people</h1>
       </div>
     </div>
-    <div class="maps-split-layout">
-      <div class="maps-left-col">
-        <div class="mapgrid">
-          <figure class="realmap"><h3>🌧️ Where the rain falls</h3>
-            <button class="mapbtn" data-action="zoom" data-src="images/rainfall-january.png" data-label="🌧️ Where the rain falls" aria-label="Enlarge the rainfall map">
-              <img src="images/rainfall-january.png" alt="Map of Australia showing median January rainfall. The north is blue and purple for heavy rain. The middle is orange and white for almost no rain. The east and south coasts are green."
-              onerror="this.closest('.realmap').classList.add('missing')">
-            </button>
-            <div class="missingnote">Map image not added yet — save it as <code>images/rainfall-january.png</code></div>
-            <p class="zoomhint">🔍 Tap map to zoom</p>
-            <figcaption>Median rainfall, January. bom.gov.au/climate</figcaption></figure>
-          <figure class="realmap"><h3>👥 Where the people live</h3>
-            <button class="mapbtn" data-action="zoom" data-src="images/population-density.jpg" data-label="👥 Where the people live" aria-label="Enlarge the population map">
-              <img src="images/population-density.jpg" alt="Map of Australia showing how many people live in each area."
-              onerror="this.closest('.realmap').classList.add('missing')">
-            </button>
-            <div class="missingnote">Map image not added yet — save it as <code>images/population-density.jpg</code></div>
-            <ul class="denskey">
-              <li><span class="sw" style="background:#67000d"></span>8000+ (Cities)</li>
-              <li><span class="sw" style="background:#e6550d"></span>2000–5000 (Towns)</li>
-              <li><span class="sw" style="background:#fee08b"></span>&lt;500 (Farms)</li>
-              <li><span class="sw" style="background:#8c8c8c"></span>Empty (Desert)</li></ul>
-            <p class="zoomhint">🔍 Tap map to zoom</p>
-            <figcaption>Population density, June 2018. ABS</figcaption></figure>
+
+    <!-- 3 Australia Maps -->
+    <div class="aus-maps-grid">
+      <!-- Map 1: Temperature -->
+      <figure class="realmap aus-map-card">
+        <div class="aus-map-head">
+          <h3>🌡️ How hot it gets</h3>
         </div>
+        <button class="mapbtn" data-action="zoom" data-src="images/temperature-annual.png"
+            data-label="🌡️ How hot it gets" aria-label="Enlarge the temperature map">
+          <img src="images/temperature-annual.png" alt="Map of Australia showing the average yearly top temperature. The north and the middle are orange, about 33 to 39 degrees. The south coast and Tasmania are pale green and yellow, about 15 to 24 degrees."
+            onerror="this.closest('.realmap').classList.add('missing')">
+        </button>
+        <div class="missingnote">Map image not added yet — save it as <code>images/temperature-annual.png</code></div>
+        <p class="zoomhint">🔍 Tap map to zoom</p>
+        <figcaption>Average annual max. temp · bom.gov.au</figcaption>
+      </figure>
+
+      <!-- Map 2: Rain -->
+      <figure class="realmap aus-map-card ${i === 0 || i === 2 ? "active-map" : ""}">
+        <div class="aus-map-head">
+          <h3>🌧️ Where the rain falls</h3>
+          ${i === 0 ? `<span class="map-focus-tag">Question 1</span>` : (i === 2 ? `<span class="map-focus-tag">Question 3</span>` : "")}
+        </div>
+        <button class="mapbtn" data-action="zoom" data-src="images/rainfall-january.png"
+            data-label="🌧️ Where the rain falls" aria-label="Enlarge the rainfall map">
+          <img src="images/rainfall-january.png" alt="Map of Australia showing median January rainfall. Heavy rain in the north, dry in the middle."
+            onerror="this.closest('.realmap').classList.add('missing')">
+        </button>
+        <div class="missingnote">Map image not added yet — save it as <code>images/rainfall-january.png</code></div>
+        <p class="zoomhint">🔍 Tap map to zoom</p>
+        <figcaption>Median rainfall, January · bom.gov.au</figcaption>
+      </figure>
+
+      <!-- Map 3: People -->
+      <figure class="realmap aus-map-card ${i === 1 || i === 2 ? "active-map" : ""}">
+        <div class="aus-map-head">
+          <h3>👥 Where the people live</h3>
+          ${i === 1 ? `<span class="map-focus-tag">Question 2</span>` : (i === 2 ? `<span class="map-focus-tag">Question 3</span>` : "")}
+        </div>
+        <button class="mapbtn" data-action="zoom" data-src="images/population-density.jpg"
+            data-label="👥 Where the people live" aria-label="Enlarge the population map">
+          <img src="images/population-density.jpg" alt="Map of Australia showing population density. Most people live in coastal cities."
+            onerror="this.closest('.realmap').classList.add('missing')">
+        </button>
+        <div class="missingnote">Map image not added yet — save it as <code>images/population-density.jpg</code></div>
+        <ul class="denskey">
+          <li><span class="sw" style="background:#67000d"></span>8000+ (Cities)</li>
+          <li><span class="sw" style="background:#e6550d"></span>2000–5000 (Towns)</li>
+          <li><span class="sw" style="background:#fee08b"></span>&lt;500 (Farms)</li>
+          <li><span class="sw" style="background:#8c8c8c"></span>Empty (Desert)</li>
+        </ul>
+        <p class="zoomhint">🔍 Tap map to zoom</p>
+        <figcaption>Population density · ABS</figcaption>
+      </figure>
+    </div>
+
+    <!-- Bottom row: Coast or inland comparison + Map question -->
+    <div class="aus-bottom-grid">
+      <div class="card aus-card" style="margin-bottom:0">
+        <h2 style="margin:0 0 4px;font-size:.98rem;color:var(--teal)">🇦🇺 Coast or inland?</h2>
+        <div class="tablescroll">
+          <table class="rank aus-rank-table">
+            <thead><tr><th>Place</th><th style="text-align:right">People</th><th>Room &amp; cost</th></tr></thead>
+            <tbody>${cmp}</tbody>
+          </table>
+        </div>
+        <p class="aus-summary-note">💡 Most Australians live on the mild coast. Some choose inland for space, cheaper housing, farms or mining.</p>
       </div>
-      <div class="maps-right-col">
-        <div class="lookbox">
-          <p class="step" style="margin-bottom:4px">Question ${i+1} of ${MAP_LOOKS.length}</p>
-          <h2 style="margin:0 0 10px;font-size:clamp(1rem, 1.25vw, 1.15rem);line-height:1.35">${esc(item.q)}</h2>
-          <div class="choices">${opts}</div>
-          ${answered?`<div class="feedback">${esc(item.why)}</div>
-            <div class="actions" style="margin-top:10px;justify-content:space-between">
-              <button class="btn secondary sm" ${backAction} title="${backTitle}">${backLabel}</button>
-              ${last
-                ? `<button class="btn big" style="flex:1" data-action="go" data-screen="pattern">See the pattern →</button>`
-                : `<button class="btn" style="flex:1" data-action="nextlook">Next question →</button>`}</div>`:""}
+
+      <div class="lookbox">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <p class="step" style="margin:0">Question ${i+1} of ${MAP_LOOKS.length}</p>
+          ${i > 0 ? `<button class="btn secondary sm" data-action="prevlook" style="font-size:.74rem;padding:2px 8px;min-height:26px" title="Previous question">← Question ${i}</button>` : ""}
         </div>
+        <h2 style="margin:0 0 8px;font-size:clamp(1rem, 1.2vw, 1.12rem);line-height:1.35">${esc(item.q)}</h2>
+        <div class="choices">${opts}</div>
+        ${answered ? `
+          <div class="feedback" style="margin-top:8px">${esc(item.why)}</div>
+          <div class="actions" style="margin-top:10px">
+            ${last
+              ? `<button class="btn big" style="width:100%" data-action="go" data-screen="pattern">See the pattern →</button>`
+              : `<button class="btn" style="width:100%" data-action="nextlook">Next question →</button>`}
+          </div>
+        ` : ""}
       </div>
     </div>`;
+}
+
+function screenMaps(){
+  return screenAustralia();
 }
 
 function screenPattern(){
@@ -1535,7 +1559,7 @@ function screenPattern(){
       <p class="muted">So there is no single right answer. There is a swap: crowded and mild,
          or roomy and hard.</p></div>
     <div class="actions">
-      <button class="btn secondary" data-action="go" data-screen="maps">← Look again</button>
+      <button class="btn secondary" data-action="go" data-screen="australia">← Look again at maps</button>
       <button class="btn big" data-action="go" data-screen="write">Write what you think →</button></div>`;
 }
 
@@ -1845,27 +1869,23 @@ function getScreenSpeechText(){
     }
     return text;
   }
-  if(s==="australia"){
-    return [
-      "Now look at Australia.",
-      "Australia has all four of those climates too.",
-      "Start with how hot it gets. The north and middle are hot, while the south and Tasmania are much cooler.",
-      "Coast or inland? Most Australians live on the mild coast. But some choose inland for open space, big backyards, farms and mining jobs."
-    ];
-  }
-  if(s==="maps"){
-    const i = state.mapStep, item = MAP_LOOKS[i], pick = state.mapPicks[i];
-    if(!item) return [];
-    const answered = pick !== undefined && pick !== null;
+  if(s==="australia" || s==="maps"){
+    const i = Math.min(MAP_LOOKS.length - 1, Math.max(0, state.mapStep || 0));
+    const item = MAP_LOOKS[i], pick = state.mapPicks ? state.mapPicks[i] : null;
     const text = [
-      "Look at both maps. One map shows rain. The other shows where people live.",
-      `Question ${i+1}: ${item.q}`
+      "Now look at Australia.",
+      "Three maps show how hot it gets, where rain falls, and where people live.",
+      "Most Australians live on the mild coast, while inland offers open space."
     ];
-    if(!answered){
-      text.push(`Option 1: ${item.a[0].t}.`);
-      text.push(`Option 2: ${item.a[1].t}.`);
-    } else {
-      text.push(item.why);
+    if(item){
+      text.push(`Question ${i+1}: ${item.q}`);
+      const answered = pick !== undefined && pick !== null;
+      if(!answered){
+        text.push(`Option 1: ${item.a[0].t}.`);
+        text.push(`Option 2: ${item.a[1].t}.`);
+      } else {
+        text.push(item.why);
+      }
     }
     return text;
   }
@@ -2236,10 +2256,9 @@ function getPreRenderedAudioTrack(){
     }
     return null;
   }
-  if(s === "maps"){
-    return `audio/map_q${state.mapStep + 1}.wav`;
+  if(s === "maps" || s === "australia"){
+    return `audio/map_q${Math.min(3, Math.max(1, (state.mapStep || 0) + 1))}.wav`;
   }
-  if(s === "australia") return "audio/australia.wav";
   if(s === "pattern") return "audio/pattern.wav";
   if(s === "write"){
     const step = Math.min(2, Math.max(0, state.writeStep || 0));
