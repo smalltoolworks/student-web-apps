@@ -247,8 +247,11 @@ svg.map{width:100%;max-height:min(300px, 38vh);height:auto;display:block;touch-a
   .intro-sub{font-size:1.15rem;margin-bottom:16px}
   .intro-card{padding:18px 24px;margin-bottom:18px}
   .intro-p1{margin-bottom:10px}
-  .intro-p1, .intro-p2{font-size:1.1rem;line-height:1.5}
   .intro-actions .btn{min-height:52px;padding:12px 38px;font-size:1.15rem}
+  .aus-card{padding:8px 10px;margin-bottom:6px}
+  .aus-rank-table th{padding:2px 4px;font-size:.7rem}
+  .aus-rank-table td{padding:3px 4px;font-size:.8rem}
+  .realmap.solo img{max-height:min(250px, 34vh)}
 }
 
 /* factors */
@@ -443,9 +446,23 @@ textarea:focus{border-color:var(--teal);outline:none}
 .lookbox .feedback{margin-top:10px;padding:10px 12px;font-size:.88rem}
 
 /* Australia screen */
-.aus-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.aus-layout{display:grid;grid-template-columns:1.05fr 0.95fr;gap:14px;align-items:start}
 @media (max-width:860px){.aus-layout{grid-template-columns:1fr}}
-.realmap.solo img{max-height:min(340px, 46vh);width:auto;max-width:100%;margin:0 auto;object-fit:contain}
+.aus-card{padding:10px 14px;margin-bottom:8px}
+.aus-rank-table{margin-top:2px}
+.aus-rank-table th{padding:3px 6px;font-size:.74rem;letter-spacing:.04em}
+.aus-rank-table td{padding:5px 6px;font-size:.84rem}
+.aus-rank-table td:first-child{white-space:nowrap;padding-right:8px}
+.aus-rank-table td.num{font-size:.9rem;white-space:nowrap;padding-right:8px}
+.aus-rank-table .stars{font-size:.84rem;letter-spacing:.02em}
+.cmp-room{display:flex;align-items:baseline;gap:6px;line-height:1.25}
+.cmp-room .stars{flex-shrink:0}
+.cmp-room-text{font-size:.78rem;line-height:1.22;color:var(--ink-soft);font-weight:500}
+.aus-summary-note{
+  margin:6px 0 0;padding:5px 10px;background:#f6fafc;border-radius:6px;
+  border:1px solid #ddecfa;font-size:.78rem;line-height:1.35;color:#355667
+}
+.realmap.solo img{max-height:min(285px, 38vh);width:auto;max-width:100%;margin:0 auto;object-fit:contain}
 .echo-card{background:#f0f8fa;border:2px solid var(--teal);border-radius:var(--r);padding:18px 20px;margin:0 0 18px}
 .echo-card h2{margin:0 0 8px;font-size:1.18rem;color:var(--teal);display:flex;align-items:center;gap:8px}
 .echo-card p{margin:0;font-size:1.02rem;line-height:1.55}
@@ -1327,33 +1344,33 @@ function screenAustralia(){
       <td class="num">${r.final}</td>
       <td class="stars">${stars(rm.stars)} <span class="muted" style="font-weight:600">${rm.word}</span></td></tr>`;
   }).join("");
-  const cmp = AUS_COMPARE.map(c=>`<tr><td><strong>${c.city}</strong><br><span class="muted">${c.where}</span></td>
-    <td class="num">${c.people}</td><td class="stars">${stars(c.stars)}<br><span class="muted" style="font-weight:600">${esc(c.room)}</span></td></tr>`).join("");
+  const cmp = AUS_COMPARE.map(c=>`<tr><td><strong>${c.city}</strong><br><span class="muted" style="font-size:.72rem">${c.where}</span></td>
+    <td class="num">${c.people}</td><td class="cmp-room-cell"><div class="cmp-room"><span class="stars">${stars(c.stars)}</span><span class="cmp-room-text">${esc(c.room)}</span></div></td></tr>`).join("");
   return `<p class="step">The real world</p>
-    <h1 tabindex="-1" style="font-size:clamp(1.25rem, 1.8vw, 1.5rem);margin:2px 0 8px">Now look at Australia</h1>
+    <h1 tabindex="-1" style="font-size:clamp(1.15rem, 1.5vw, 1.4rem);margin:2px 0 6px">Now look at Australia</h1>
     <div class="aus-layout">
       <div class="aus-tables-col">
-        <div class="card" style="margin-bottom:12px"><h2 style="margin-top:0;font-size:1.05rem">Your islands</h2>
-          <div class="tablescroll"><table class="rank">
+        <div class="card aus-card"><h2 style="margin:0 0 3px;font-size:.95rem;color:var(--teal)">🏝️ Your islands</h2>
+          <div class="tablescroll"><table class="rank aus-rank-table">
             <thead><tr><th>Island</th><th>Climate</th><th style="text-align:right">People</th><th>Room &amp; cost</th></tr></thead>
             <tbody>${mine}</tbody></table></div></div>
-        <div class="card" style="margin-bottom:0"><h2 style="margin-top:0;font-size:1.05rem">Coast or inland?</h2>
-          <div class="tablescroll"><table class="rank">
+        <div class="card aus-card" style="margin-bottom:0"><h2 style="margin-top:0;margin-bottom:3px;font-size:.95rem;color:var(--teal)">🇦🇺 Coast or inland?</h2>
+          <div class="tablescroll"><table class="rank aus-rank-table">
             <thead><tr><th>Place</th><th style="text-align:right">People</th><th>Room &amp; cost</th></tr></thead>
             <tbody>${cmp}</tbody></table></div>
-          <p style="margin:8px 0 0;font-size:.88rem">Most Australians live on the mild coast. But some choose inland — for space, cheaper houses, farms and mines.</p></div>
+          <p class="aus-summary-note">💡 Most Australians live on the mild coast. Some choose inland for space, cheaper housing, farms or mining.</p></div>
       </div>
       <div class="aus-map-col">
-        <figure class="realmap solo" style="margin-bottom:10px"><h3>🌡️ How hot it gets</h3>
+        <figure class="realmap solo" style="margin-bottom:6px"><h3 style="margin:0 0 4px;font-size:.95rem">🌡️ How hot it gets</h3>
           <button class="mapbtn" data-action="zoom" data-src="images/temperature-annual.png"
               data-label="🌡️ How hot it gets" aria-label="Enlarge the temperature map">
             <img src="images/temperature-annual.png" alt="Map of Australia showing the average yearly top temperature. The north and the middle are orange, about 33 to 39 degrees. The south coast and Tasmania are pale green and yellow, about 15 to 24 degrees. It gets cooler the further south you go."
               onerror="this.closest('.realmap').classList.add('missing')">
           </button>
           <div class="missingnote">Map image not added yet — save it as <code>images/temperature-annual.png</code></div>
-          <p class="zoomhint">🔍 Tap map to zoom</p>
-          <figcaption>Average annual maximum temperature. bom.gov.au</figcaption></figure>
-        <div class="actions" style="margin-top:10px"><button class="btn big" style="width:100%" data-action="go" data-screen="maps">Now two more maps →</button></div>
+          <p class="zoomhint" style="margin:2px 0 0">🔍 Tap map to zoom</p>
+          <figcaption style="margin-top:2px">Average annual maximum temperature. bom.gov.au</figcaption></figure>
+        <div class="actions" style="margin-top:6px"><button class="btn big" style="width:100%;min-height:46px;padding:9px 18px" data-action="go" data-screen="maps">Now two more maps →</button></div>
       </div>
     </div>`;
 }
