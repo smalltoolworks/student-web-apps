@@ -409,8 +409,18 @@ textarea:focus{border-color:var(--teal);outline:none}
 .write-card h2{font-size:clamp(1.1rem, 1.6vw, 1.35rem);margin:2px 0 6px;line-height:1.3}
 .write-hint-text{font-size:.82rem;color:var(--ink-soft);margin:8px 0 0;line-height:1.35}
 .write-card textarea{min-height:clamp(100px, 15vh, 150px);margin:4px 0 0;font-size:1.02rem}
+/* Q3 splits into three short slots, so they must not each be full height */
+.write-card textarea[rows="2"]{min-height:clamp(52px, 7.5vh, 74px)}
+.write-field-label{display:block;font-weight:800;color:var(--teal);font-size:.92rem;margin:10px 0 0}
+.write-field-label:first-of-type{margin-top:2px}
+.write-optional-tag{display:inline-block;margin-left:8px;font-size:.74rem;font-weight:800;
+  color:#8a5a00;background:#fff4d6;border:1.5px solid var(--warm);border-radius:999px;padding:2px 9px}
+.predict-recall{background:#f3f8fb;border:2px solid var(--teal);border-radius:12px;padding:9px 12px;margin:2px 0 8px}
+.predict-recall-line{margin:0;font-size:1rem;line-height:1.45}
+.bank-toggle{white-space:nowrap}
+.bank-hidden-note{font-size:.85rem;margin:6px 0 0;line-height:1.4}
 .bank-card{margin-bottom:0;background:#fffdf6;border-color:var(--warm)}
-.bank-head{display:flex;flex-direction:column;gap:2px;margin-bottom:4px}
+.bank-head{display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
 .bank-head strong{font-size:.92rem;color:var(--ink)}
 .write-actions{margin-top:14px}
 .report-thought-item{margin-bottom:14px}
@@ -427,7 +437,12 @@ body.screen-report #app{max-width:min(880px, 96vw);padding-top:clamp(6px, 1vh, 1
 .report-page .card h2{font-size:.98rem;margin:0 0 6px}
 .report-page table.rank th,.report-page table.rank td{padding:5px 6px;font-size:.88rem}
 .report-page table.rank td.num{font-size:.95rem}
+.report-subanswer{display:flex;align-items:baseline;gap:8px;margin-bottom:3px}
+.report-sublabel{flex:0 0 auto;font-weight:700;color:var(--ink-soft);font-size:.88rem}
+.report-subanswer .written{flex:1 1 auto;margin:0}
+@media (max-width:640px){.report-subanswer{flex-direction:column;gap:1px}}
 .report-page .report-thought-item{margin-bottom:8px}
+.report-page .report-sublabel{font-size:.8rem}
 .report-page .report-thought-head{margin-bottom:2px}
 .report-page .report-thought-head h3{font-size:.86rem;line-height:1.25}
 .report-page .written{padding:6px 10px;margin:0;font-size:.85rem;line-height:1.35}
@@ -906,7 +921,7 @@ const WRITE_QUESTIONS = Object.freeze([
     id: "q1",
     num: 1,
     label: "Coast",
-    title: "Question 1 of 3 · The Coast",
+    title: "The Coast",
     prompt: "Most Australians live near the coast. Why?",
     starter: "Most Australians live near the coast because",
     hint: "Think about Green Island and the rainfall map: what makes the coast an easier place to live?"
@@ -915,21 +930,49 @@ const WRITE_QUESTIONS = Object.freeze([
     id: "q2",
     num: 2,
     label: "Inland",
-    title: "Question 2 of 3 · The Inland",
+    title: "The Inland",
     prompt: "Some Australians live far inland. Why did people move inland in the past, or live there today?",
     starter: "People live inland because",
     hint: "Think about Red and Gold Islands: what does inland Australia have that coastal cities don't?"
   },
   {
+    // Three short slots instead of one open answer. Every student can fill them in,
+    // but naming a real cost of their OWN choice is where a strong answer shows.
+    // Deliberately reuses the "Best thing / Hardest thing" frame from the result screen.
     id: "q3",
     num: 3,
     label: "Your Choice",
-    title: "Question 3 of 3 · Your Choice",
-    prompt: "Where would YOU live? Why?",
-    starter: "I would live",
-    hint: "Would you choose the mild, busy coast or the wide open inland? What is your trade-off?"
+    title: "Your Choice",
+    prompt: "Where would you live in Australia?",
+    hint: "Think about the result screens: every place had a best thing AND a hardest thing.",
+    fields: [
+      {id:"q3place", label:"I would live…",             starter:"I would live",             rows:2},
+      {id:"q3best",  label:"The BEST thing would be…",  starter:"The best thing would be",  rows:2},
+      {id:"q3hard",  label:"The HARDEST thing would be…", starter:"The hardest thing would be", rows:2}
+    ]
+  },
+  {
+    // Optional stretch. Uses the student's own guess vs what they got, so it cannot be
+    // answered from the word bank and cannot be copied from a neighbour.
+    id: "q4",
+    num: 4,
+    label: "Challenge",
+    title: "Challenge",
+    optional: true,
+    prompt: "Why do you think that happened?",
+    starter: "I think that happened because",
+    hint: "What did you not know about that place when you made your guess?"
   }
 ]);
+
+// The first settlement is the only one that asks for a prediction, so this is the
+// single guess every student has. Returns null when there is nothing to reflect on.
+function predictionRecord(){
+  const r = (state.completed || []).find(c => c && c.prediction != null);
+  if(!r) return null;
+  const isl = islandById(r.islandId);
+  return {siteName: r.siteName, islandName: isl ? isl.name : "", guess: r.prediction, got: r.final};
+}
 
 const COPY = Object.freeze({
   title:"The Sunrise Islands",
@@ -1021,9 +1064,10 @@ function validate(){
 let state = {
   screen:"intro", islandId:null, scouted:[], openSite:null, terrainNote:null,
   run:null, completed:[], prediction:null,
-  reflection:{q1:"",q2:"",q3:""},
+  reflection:{q1:"",q2:"",q3place:"",q3best:"",q3hard:"",q4:""},
   mapStep:0, mapPicks:[],
   writeStep:0,
+  bankOpen:false,
 };
 let lastField = "q1";
 function setState(patch){ state={...state,...patch}; render(); }
@@ -1038,10 +1082,19 @@ const canReflect = () => state.completed.length >= MIN_ISLANDS;
 function save(){ try{ sessionStorage.setItem("sunriseIslands", JSON.stringify(state)); }catch(e){} }
 function restore(){
   try{ const raw=sessionStorage.getItem("sunriseIslands"); if(raw) state={...state,...JSON.parse(raw)}; }catch(e){}
-  if(!state.reflection) state.reflection={q1:"",q2:"",q3:""};
+  if(!state.reflection) state.reflection={q1:"",q2:"",q3place:"",q3best:"",q3hard:"",q4:""};
+  // Saves from before Q3 was split carried a single q3 string; keep the student's words.
+  if(typeof state.reflection.q3 === "string"){
+    if(!state.reflection.q3place) state.reflection.q3place = state.reflection.q3;
+    delete state.reflection.q3;
+  }
+  ["q1","q2","q3place","q3best","q3hard","q4"].forEach(k=>{
+    if(typeof state.reflection[k] !== "string") state.reflection[k] = "";
+  });
   if(!Array.isArray(state.mapPicks)) state.mapPicks=[];
   if(typeof state.mapStep!=="number") state.mapStep=0;
   if(typeof state.writeStep!=="number") state.writeStep=0;
+  if(typeof state.bankOpen!=="boolean") state.bankOpen=false;
 }
 
 /* ============================================================
@@ -1581,16 +1634,19 @@ function screenPattern(){
 }
 
 function screenWrite(){
-  const step = Math.min(2, Math.max(0, state.writeStep || 0));
+  const LAST = WRITE_QUESTIONS.length - 1;
+  const step = Math.min(LAST, Math.max(0, state.writeStep || 0));
   const curr = WRITE_QUESTIONS[step];
   const R = state.reflection || {};
-  const val = R[curr.id] || "";
-  lastField = curr.id;
+  const fields = curr.fields || [{id:curr.id, starter:curr.starter, rows:4}];
+  lastField = fields[0].id;
+
+  const answered = q => (q.fields || [{id:q.id}]).some(f => R[f.id] && R[f.id].trim());
 
   const stepperHtml = `
     <nav class="write-stepper" aria-label="Reflection question steps">
       ${WRITE_QUESTIONS.map((q, idx) => {
-        const isDone = Boolean(R[q.id] && R[q.id].trim());
+        const isDone = answered(q);
         const isCurrent = idx === step;
         const cls = isCurrent ? "write-step-pill active" : (isDone ? "write-step-pill done" : "write-step-pill");
         return `<button type="button" class="${cls}" data-action="editwrite" data-step="${idx}" aria-current="${isCurrent ? 'step' : 'false'}">
@@ -1600,33 +1656,52 @@ function screenWrite(){
       }).join("")}
     </nav>`;
 
+  // Q4 reflects on the student's own guess, so it needs their numbers in front of them.
+  const pr = curr.id === "q4" ? predictionRecord() : null;
+  const bannerHtml = pr ? `
+    <div class="predict-recall">
+      <p class="predict-recall-line">You guessed <strong>${pr.guess}</strong> people for
+        <strong>${esc(pr.siteName)}</strong>. You ended up with <strong>${pr.got}</strong>.</p>
+    </div>` : "";
+
+  const fieldsHtml = fields.map(f => `
+    ${f.label ? `<label class="write-field-label" for="${f.id}">${esc(f.label)}</label>` : ""}
+    <textarea id="${f.id}" data-field="${f.id}" rows="${f.rows || 4}"
+      placeholder="${esc(f.starter)}…">${esc(R[f.id] || "")}</textarea>`).join("");
+
   return `
     <div class="write-page-wrap">
       <div class="write-header">
-        <p class="step" style="margin-bottom:2px">Question ${step + 1} of 3 · Your Thinking</p>
+        <p class="step" style="margin-bottom:2px">Question ${step + 1} of ${WRITE_QUESTIONS.length} · Your Thinking</p>
         <h1 tabindex="-1" style="margin-bottom:6px">What do you think?</h1>
       </div>
       ${stepperHtml}
       <div class="write-wizard-grid">
         <div class="card write-card">
           <div class="write-prompt-header">
-            <span class="write-qtag">${esc(curr.title)}</span>
+            <span class="write-qtag">Question ${step + 1} of ${WRITE_QUESTIONS.length} · ${esc(curr.title)}</span>
+            ${curr.optional ? `<span class="write-optional-tag">⭐ Challenge — have a go if you can</span>` : ""}
             <h2>${esc(curr.prompt)}</h2>
           </div>
-          <p class="starter">Start like this: “${esc(curr.starter)}…”</p>
-          <textarea id="${curr.id}" data-field="${curr.id}" rows="4"
-            placeholder="${esc(curr.starter)}…">${esc(val)}</textarea>
+          ${bannerHtml}
+          ${curr.fields ? "" : `<p class="starter">Start like this: “${esc(curr.starter)}…”</p>`}
+          ${fieldsHtml}
           <p class="write-hint-text">💡 <em>${esc(curr.hint)}</em></p>
         </div>
 
         <div class="card bank-card">
           <div class="bank-head">
-            <strong>Word bank — tap to add</strong>
-            <span class="muted" style="font-size:.82rem">Tap any word to add it into your answer</span>
+            <strong>Word bank</strong>
+            <button type="button" class="btn secondary sm bank-toggle" data-action="togglebank"
+              aria-expanded="${state.bankOpen ? "true" : "false"}">
+              ${state.bankOpen ? "Hide words" : "Need help with words?"}
+            </button>
           </div>
-          <div class="bank">
-            ${WORD_BANK.map(w => `<button type="button" class="word" data-action="word" data-w="${esc(w)}">${esc(w)}</button>`).join("")}
-          </div>
+          ${state.bankOpen
+            ? `<div class="bank">
+                 ${WORD_BANK.map(w => `<button type="button" class="word" data-action="word" data-w="${esc(w)}">${esc(w)}</button>`).join("")}
+               </div>`
+            : `<p class="muted bank-hidden-note">Try it in your own words first. Tap the button if you get stuck.</p>`}
         </div>
       </div>
 
@@ -1635,8 +1710,8 @@ function screenWrite(){
           ? `<button class="btn secondary" data-action="go" data-screen="pattern">← The pattern</button>`
           : `<button class="btn secondary" data-action="prevwrite">← Question ${step}</button>`}
         <div style="flex:1"></div>
-        ${step < 2
-          ? `<button class="btn big" data-action="nextwrite">Question ${step + 2} of 3 →</button>`
+        ${step < LAST
+          ? `<button class="btn big" data-action="nextwrite">Question ${step + 2} of ${WRITE_QUESTIONS.length} →</button>`
           : `<button class="btn big" data-action="go" data-screen="report">See my report →</button>`}
       </div>
     </div>`;
@@ -1644,22 +1719,33 @@ function screenWrite(){
 
 function screenReport(){
   const R=state.reflection;
+  const pr=predictionRecord();
   const rows = state.completed.slice().sort((a,b)=>b.final-a.final).map(r=>{
     const isl=islandById(r.islandId), rm=roomFor(r.final);
     return `<tr><td>${isl.flag} <strong>${esc(isl.name)}</strong><br><span class="muted">${isl.zone} · ${esc(r.siteName)}</span></td>
       <td class="num">${r.final}</td><td class="stars">${stars(rm.stars)}<br><span class="muted" style="font-weight:600">${rm.word}</span></td></tr>`;
   }).join("");
+  const answer = v => `<div class="written">${v && v.trim() ? esc(v) : "<em>(not answered yet)</em>"}</div>`;
   const said = (t, v, stepIdx) => `
     <div class="report-thought-item">
       <div class="report-thought-head">
         <h3>${t}</h3>
         <button type="button" class="btn secondary sm edit-answer-btn" data-action="editwrite" data-step="${stepIdx}" aria-label="Change answer for question ${stepIdx + 1}">✏️ Change</button>
       </div>
-      <div class="written">${v && v.trim() ? esc(v) : "<em>(not answered yet)</em>"}</div>
+      ${answer(v)}
+    </div>`;
+  // Q3's three slots are one question, so they share one heading and one Change button.
+  const saidGroup = (t, parts, stepIdx) => `
+    <div class="report-thought-item">
+      <div class="report-thought-head">
+        <h3>${t}</h3>
+        <button type="button" class="btn secondary sm edit-answer-btn" data-action="editwrite" data-step="${stepIdx}" aria-label="Change answer for question ${stepIdx + 1}">✏️ Change</button>
+      </div>
+      ${parts.map(([lbl, v]) => `<div class="report-subanswer"><span class="report-sublabel">${lbl}</span>${answer(v)}</div>`).join("")}
     </div>`;
   return `<div class="report-page">
     <div class="screen-topbar">
-      <button class="btn secondary sm" data-action="editwrite" data-step="2" title="Back to reflection writing">← Back to writing</button>
+      <button class="btn secondary sm" data-action="editwrite" data-step="${WRITE_QUESTIONS.length - 1}" title="Back to reflection writing">← Back to writing</button>
       <div>
         <p class="step" style="margin:0">My report</p>
         <h1 tabindex="-1" style="margin:2px 0 0">My island report</h1>
@@ -1672,7 +1758,12 @@ function screenReport(){
     <div class="card"><h2 style="margin-top:0">What I think</h2>
       ${said("Most Australians live near the coast because…", R.q1, 0)}
       ${said("People live inland because…", R.q2, 1)}
-      ${said("I would live…", R.q3, 2)}</div>
+      ${saidGroup("Where I would live", [
+        ["I would live…", R.q3place],
+        ["The best thing would be…", R.q3best],
+        ["The hardest thing would be…", R.q3hard]
+      ], 2)}
+      ${pr ? said(`⭐ Challenge — I guessed ${pr.guess} for ${esc(pr.siteName)} and got ${pr.got}. Why?`, R.q4, 3) : ""}</div>
     <div class="card last-thing"><h2 style="margin-top:0">One last thing</h2>
       <p>${COPY.closing1}</p><p>${COPY.closing2}</p></div>
     <div class="actions">
@@ -1920,14 +2011,22 @@ function getScreenSpeechText(){
     ];
   }
   if(s==="write"){
-    const step = Math.min(2, Math.max(0, state.writeStep || 0));
+    const step = Math.min(WRITE_QUESTIONS.length - 1, Math.max(0, state.writeStep || 0));
     const item = WRITE_QUESTIONS[step];
-    return [
-      `Question ${step + 1} of 3.`,
-      item.prompt,
-      `Start like this: ${item.starter}...`,
-      "Write in your own words. Tap any word in the word bank to add it."
-    ];
+    const text = [`Question ${step + 1} of ${WRITE_QUESTIONS.length}.`];
+    if(item.optional) text.push("This one is a challenge. Have a go if you can.");
+    if(item.id === "q4"){
+      const pr = predictionRecord();
+      if(pr) text.push(`You guessed ${pr.guess} people for ${pr.siteName}. You ended up with ${pr.got}.`);
+    }
+    text.push(item.prompt);
+    if(item.fields){
+      item.fields.forEach((f, i) => text.push(`${i === 0 ? "First" : "Then"}, finish this: ${f.starter}...`));
+    } else {
+      text.push(`Start like this: ${item.starter}...`);
+    }
+    text.push("Write in your own words. If you get stuck, tap Need help with words.");
+    return text;
   }
   if(s==="report"){
     const R = state.reflection;
@@ -1938,7 +2037,10 @@ function getScreenSpeechText(){
     });
     if(R.q1 && R.q1.trim()) text.push(`Question 1: Most Australians live near the coast because ${R.q1}.`);
     if(R.q2 && R.q2.trim()) text.push(`Question 2: People live inland because ${R.q2}.`);
-    if(R.q3 && R.q3.trim()) text.push(`Question 3: I would live ${R.q3}.`);
+    if(R.q3place && R.q3place.trim()) text.push(`Question 3: I would live ${R.q3place}.`);
+    if(R.q3best && R.q3best.trim()) text.push(`The best thing would be ${R.q3best}.`);
+    if(R.q3hard && R.q3hard.trim()) text.push(`The hardest thing would be ${R.q3hard}.`);
+    if(R.q4 && R.q4.trim()) text.push(`My challenge answer: ${R.q4}.`);
     text.push(COPY.closing1);
     text.push(COPY.closing2);
     return text;
@@ -2295,7 +2397,7 @@ function getPreRenderedAudioTrack(){
   }
   if(s === "pattern") return "audio/pattern.wav";
   if(s === "write"){
-    const step = Math.min(2, Math.max(0, state.writeStep || 0));
+    const step = Math.min(WRITE_QUESTIONS.length - 1, Math.max(0, state.writeStep || 0));
     return `audio/write_q${step + 1}.wav`;
   }
   return null;
@@ -2657,14 +2759,29 @@ function finishRun(){
       final,pops,cardTotal,prediction:state.prediction}],
     run:null,openSite:null,terrainNote:null,prediction:null,screen:"result"});
 }
+// Every textarea on the screen, not just the first - Q3 renders three.
+function captureWriting(){
+  const tas = document.querySelectorAll('textarea[data-field]');
+  if(!tas.length) return;
+  const next = {...state.reflection};
+  tas.forEach(ta => { if(ta.dataset.field) next[ta.dataset.field] = ta.value; });
+  state.reflection = next;
+  save();
+}
+
 function copyWriting(){
   const R=state.reflection;
+  const pr=predictionRecord();
   const txt = "MY ISLAND REPORT\n\n"
     + state.completed.map(r=>{const i=islandById(r.islandId),m=roomFor(r.final);
         return `${i.name} (${i.zone}) — ${r.final} people, ${m.word}`;}).join("\n")
     + `\n\nMost Australians live near the coast because ${R.q1||"..."}`
     + `\n\nPeople live inland because ${R.q2||"..."}`
-    + `\n\nI would live ${R.q3||"..."}\n`;
+    + `\n\nI would live ${R.q3place||"..."}`
+    + `\n\nThe best thing would be ${R.q3best||"..."}`
+    + `\n\nThe hardest thing would be ${R.q3hard||"..."}`
+    + (pr ? `\n\nChallenge - I guessed ${pr.guess} for ${pr.siteName} and got ${pr.got}. ${R.q4||"..."}` : "")
+    + "\n";
   const done = ok => {
     const b=document.querySelector('[data-action="copy"]');
     if(b) b.textContent = ok ? "✓ Copied!" : "Select the text and copy";
@@ -2693,13 +2810,10 @@ function handle(el){
     const to=el.dataset.screen;
     if(to==="arch") return setState({screen:"arch",islandId:null,openSite:null,terrainNote:null,run:null});
     if(to==="write"){
-      const ta = document.querySelector('textarea[data-field]');
-      if(ta && ta.dataset.field){
-        state.reflection = {...state.reflection, [ta.dataset.field]: ta.value};
-        save();
-      }
+      captureWriting();
       return setState({screen:"write", writeStep: (typeof state.writeStep === "number" ? state.writeStep : 0)});
     }
+    captureWriting();
     return setState({screen:to});
   }
   if(a==="island")  return setState({islandId:el.dataset.id,screen:"island",openSite:null,terrainNote:null});
@@ -2739,29 +2853,21 @@ function handle(el){
   if(a==="prevlook") return setState({mapStep: Math.max(0, (state.mapStep || 0) - 1)});
   if(a==="nextlook") return setState({mapStep:state.mapStep+1});
   if(a==="nextwrite"){
-    const ta = document.querySelector('textarea[data-field]');
-    if(ta && ta.dataset.field){
-      state.reflection = {...state.reflection, [ta.dataset.field]: ta.value};
-      save();
-    }
-    return setState({writeStep: Math.min(2, (state.writeStep || 0) + 1)});
+    captureWriting();
+    return setState({writeStep: Math.min(WRITE_QUESTIONS.length - 1, (state.writeStep || 0) + 1)});
   }
   if(a==="prevwrite"){
-    const ta = document.querySelector('textarea[data-field]');
-    if(ta && ta.dataset.field){
-      state.reflection = {...state.reflection, [ta.dataset.field]: ta.value};
-      save();
-    }
+    captureWriting();
     return setState({writeStep: Math.max(0, (state.writeStep || 0) - 1)});
   }
   if(a==="editwrite"){
-    const ta = document.querySelector('textarea[data-field]');
-    if(ta && ta.dataset.field){
-      state.reflection = {...state.reflection, [ta.dataset.field]: ta.value};
-      save();
-    }
-    const step = Math.min(2, Math.max(0, +el.dataset.step || 0));
+    captureWriting();
+    const step = Math.min(WRITE_QUESTIONS.length - 1, Math.max(0, +el.dataset.step || 0));
     return setState({screen: "write", writeStep: step});
+  }
+  if(a==="togglebank"){
+    captureWriting();
+    return setState({bankOpen: !state.bankOpen});
   }
   if(a==="print"){ stopSpeech(); return window.print(); }
   if(a==="copy")     return copyWriting();
@@ -2779,7 +2885,7 @@ function handle(el){
   if(a==="restart"){
     try{ sessionStorage.removeItem("sunriseIslands"); }catch(e){}
     state={screen:"intro",islandId:null,scouted:[],openSite:null,terrainNote:null,
-      run:null,completed:[],prediction:null,reflection:{q1:"",q2:"",q3:""},mapStep:0,mapPicks:[],writeStep:0};
+      run:null,completed:[],prediction:null,reflection:{q1:"",q2:"",q3place:"",q3best:"",q3hard:"",q4:""},mapStep:0,mapPicks:[],writeStep:0};
     return render();
   }
 }

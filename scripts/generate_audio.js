@@ -117,19 +117,24 @@ const AUDIO_TRACKS = [
   },
   {
     id: "write",
-    text: "What do you think? Write in your own words. Tap any word in the word bank to add it. Question 1: Most Australians live near the coast. Why? Question 2: Some Australians live far inland. Why did people move inland in the past, or live there today? Question 3: Where would you live, and why?"
+    text: "What do you think? Write in your own words. Question 1: Most Australians live near the coast. Why? Question 2: Some Australians live far inland. Why did people move inland in the past, or live there today? Question 3: Where would you live in Australia, and what would be the best and hardest things? Question 4, a challenge: look at the guess you made and what you actually got. Why do you think that happened?"
   },
   {
     id: "write_q1",
-    text: "Question 1 of 3: Most Australians live near the coast. Why? Start like this: Most Australians live near the coast because... Write in your own words. Tap any word in the word bank to add it."
+    text: "Question 1 of 4: Most Australians live near the coast. Why? Start like this: Most Australians live near the coast because... Write in your own words. If you get stuck, tap Need help with words."
   },
   {
     id: "write_q2",
-    text: "Question 2 of 3: Some Australians live far inland. Why did people move inland in the past, or live there today? Start like this: People live inland because... Write in your own words. Tap any word in the word bank to add it."
+    text: "Question 2 of 4: Some Australians live far inland. Why did people move inland in the past, or live there today? Start like this: People live inland because... Write in your own words. If you get stuck, tap Need help with words."
   },
   {
     id: "write_q3",
-    text: "Question 3 of 3: Where would you live, and why? Start like this: I would live... Write in your own words. Tap any word in the word bank to add it."
+    text: "Question 3 of 4: Where would you live in Australia? First, finish this: I would live... Then, finish this: The best thing would be... Then, finish this: The hardest thing would be... Think about the result screens: every place had a best thing and a hardest thing. Write in your own words. If you get stuck, tap Need help with words."
+  },
+  {
+    // The student's own guess and result cannot be pre-rendered, so this stays general.
+    id: "write_q4",
+    text: "Question 4 of 4. This one is a challenge. Have a go if you can. Look at the guess you made and what you actually got. Why do you think that happened? Start like this: I think that happened because... What did you not know about that place when you made your guess?"
   },
 
   // 2. Predict Screen
