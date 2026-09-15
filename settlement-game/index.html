@@ -53,17 +53,20 @@ button{font:inherit;color:inherit}
 .step{font-size:.85rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--ink-soft);margin:0 0 4px}
 
 /* intro hero */
-.intro-hero{max-width:680px;margin:clamp(16px, 5vh, 48px) auto 0;text-align:center}
-.intro-flags{font-size:clamp(2.2rem, 3.8vw, 3rem);line-height:1;margin-bottom:14px;letter-spacing:.2em}
-.intro-hero h1{font-size:clamp(2.1rem, 3.8vw, 2.7rem);margin:0 0 8px;letter-spacing:-.02em}
-.intro-sub{font-size:clamp(1.15rem, 1.8vw, 1.35rem);color:var(--teal);font-weight:700;margin:0 0 clamp(18px, 2.5vh, 26px)}
-.intro-card{text-align:left;padding:clamp(20px, 3vh, 28px) clamp(22px, 3vw, 32px);
-  margin:0 0 clamp(18px, 2.5vh, 24px);border-radius:20px;border:3px solid var(--line);
-  box-shadow:0 8px 24px rgba(0,0,0,.06);background:#fff}
-.intro-p1{font-size:clamp(1.15rem, 1.7vw, 1.28rem);line-height:1.55;margin:0 0 10px}
-.intro-p2{font-size:clamp(1.15rem, 1.7vw, 1.28rem);line-height:1.55;margin:0;color:var(--teal);font-weight:700}
+.intro-hero{max-width:580px;margin:clamp(24px, 6.5vh, 64px) auto clamp(20px, 4vh, 40px);text-align:center}
+.intro-flags{display:inline-flex;justify-content:center;gap:clamp(16px, 3vw, 28px);
+  font-size:clamp(2.5rem, 4.2vw, 3.2rem);line-height:1;margin-bottom:clamp(14px, 2vh, 20px)}
+.intro-flags span{display:inline-block;transition:transform .2s ease}
+.intro-flags span:hover{transform:scale(1.18) translateY(-2px)}
+.intro-hero h1{font-size:clamp(2.1rem, 3.8vw, 2.7rem);margin:0 0 clamp(8px, 1.2vh, 12px);letter-spacing:-.02em}
+.intro-sub{font-size:clamp(1.15rem, 1.8vw, 1.35rem);color:var(--teal);font-weight:700;margin:0 0 clamp(22px, 3.2vh, 32px)}
+.intro-card{text-align:left;padding:clamp(26px, 3.6vh, 36px) clamp(26px, 3.6vw, 38px);
+  margin:0 0 clamp(24px, 3.2vh, 32px);border-radius:22px;border:3px solid var(--line);
+  box-shadow:0 8px 26px rgba(0,0,0,.06);background:#fff}
+.intro-p1{font-size:clamp(1.15rem, 1.7vw, 1.28rem);line-height:1.6;margin:0 0 clamp(14px, 1.8vh, 18px)}
+.intro-p2{font-size:clamp(1.15rem, 1.7vw, 1.28rem);line-height:1.6;margin:0;color:var(--teal);font-weight:700}
 .intro-actions{justify-content:center;margin-top:0}
-.intro-actions .btn{font-size:1.25rem;min-height:60px;padding:15px 44px;border-radius:18px;box-shadow:0 4px 0 #145c6a}
+.intro-actions .btn{font-size:1.3rem;min-height:62px;padding:16px 52px;border-radius:20px;box-shadow:0 4px 0 #145c6a}
 
 /* read aloud */
 #speakbar{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;align-items:center;gap:8px}
@@ -183,13 +186,14 @@ svg.map{width:100%;max-height:min(390px, 48vh);height:auto;display:block;touch-a
   .actions{margin-top:12px}
   .btn{min-height:48px;padding:10px 22px;font-size:1rem}
   .btn.big{min-height:52px;padding:12px 26px;font-size:1.1rem}
-  .intro-hero{margin-top:clamp(8px, 2.5vh, 20px)}
-  .intro-flags{font-size:2rem;margin-bottom:6px}
-  .intro-hero h1{font-size:1.8rem;margin-bottom:4px}
-  .intro-sub{font-size:1.1rem;margin-bottom:12px}
-  .intro-card{padding:16px 20px;margin-bottom:14px}
-  .intro-p1, .intro-p2{font-size:1.08rem}
-  .intro-actions .btn{min-height:50px;padding:12px 34px;font-size:1.15rem}
+  .intro-hero{margin-top:clamp(10px, 3vh, 24px);margin-bottom:16px}
+  .intro-flags{font-size:2.2rem;gap:16px;margin-bottom:8px}
+  .intro-hero h1{font-size:1.85rem;margin-bottom:4px}
+  .intro-sub{font-size:1.15rem;margin-bottom:16px}
+  .intro-card{padding:18px 24px;margin-bottom:18px}
+  .intro-p1{margin-bottom:10px}
+  .intro-p1, .intro-p2{font-size:1.1rem;line-height:1.5}
+  .intro-actions .btn{min-height:52px;padding:12px 38px;font-size:1.15rem}
 }
 
 /* factors */
@@ -947,7 +951,9 @@ const reflectBtn = () => canReflect()
 /* ---------- screens ---------- */
 function screenIntro(){
   return `<div class="intro-hero">
-    <div class="intro-flags" aria-hidden="true">🌴 🏜️ 🌾 🌳</div>
+    <div class="intro-flags" aria-hidden="true">
+      <span>🌴</span><span>🏜️</span><span>🌾</span><span>🌳</span>
+    </div>
     <h1 tabindex="-1">${COPY.title}</h1>
     <p class="intro-sub">${COPY.sub}</p>
     <div class="card intro-card">
