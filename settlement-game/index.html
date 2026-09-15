@@ -1707,6 +1707,7 @@ let speaking=false, chunks=[], chunkAt=0;
 let speakingMode = null; // null | "gemini" | "browser"
 let geminiLoading = false;
 let geminiAudioEl = null;
+let preTrackSeq = 0;   // bumped on every stop so a stale onended cannot advance a cancelled sequence
 const geminiAudioCache = new Map();
 window._activeSpeechUtterance = null;
 
@@ -2115,6 +2116,7 @@ function stopSpeech(){
     try{ geminiAudioEl.pause(); geminiAudioEl.currentTime = 0; }catch(e){}
     geminiAudioEl = null;
   }
+  preTrackSeq++;
   geminiLoading = false;
   speakingMode = null;
   speaking = false;
@@ -2279,6 +2281,18 @@ function getPreRenderedAudioTrack(){
   if(s === "maps" || s === "australia"){
     return `audio/map_q${Math.min(3, Math.max(1, (state.mapStep || 0) + 1))}.wav`;
   }
+  if(s === "result"){
+    if(!state.completed || !state.completed.length) return null;
+    const done = state.completed[state.completed.length-1];
+    const isl = islandById(done.islandId);
+    if(!isl) return null;
+    const site = siteById(isl, done.siteId);
+    if(!site || !site.letter) return null;
+    const band = OUTCOMES.findIndex(o => done.final >= o.min);
+    if(band < 0) return null;
+    // Two parts: how it went (5 shared band tracks), then why + Real Australia (12 site tracks).
+    return [`audio/result_band${band}.wav`, `audio/result_${isl.id}_${site.letter.toLowerCase()}.wav`];
+  }
   if(s === "pattern") return "audio/pattern.wav";
   if(s === "write"){
     const step = Math.min(2, Math.max(0, state.writeStep || 0));
@@ -2298,28 +2312,34 @@ async function startSpeech(){
 
   // 1. Try pre-rendered studio Gemini voice file first (instant, 0 latency, 0 quota)
   const preTrack = getPreRenderedAudioTrack();
-  if(preTrack){
+  const preTracks = preTrack ? (Array.isArray(preTrack) ? preTrack.filter(Boolean) : [preTrack]) : [];
+  if(preTracks.length){
     speakingMode = "gemini";
     renderSpeakBtn();
+    const mySeq = ++preTrackSeq;   // this run's ticket; stopSpeech bumps it to cancel us
     let fallbackCalled = false;
     const triggerMainFallback = () => {
-      if(fallbackCalled) return;
+      if(fallbackCalled || mySeq !== preTrackSeq) return;
       fallbackCalled = true;
       geminiAudioEl = null;
       proceedLiveOrBrowser();
     };
-    geminiAudioEl = new Audio(preTrack);
-    geminiAudioEl.onended = ()=>{ stopSpeech(); };
-    geminiAudioEl.onerror = ()=>{
-      triggerMainFallback();
+    // Play the parts back to back; if any part is missing, fall back for the whole narration.
+    const playFrom = async (i) => {
+      if(mySeq !== preTrackSeq) return;
+      if(i >= preTracks.length){ stopSpeech(); return; }
+      const el = new Audio(preTracks[i]);
+      geminiAudioEl = el;
+      el.onended = ()=>{ if(mySeq === preTrackSeq) playFrom(i+1); };
+      el.onerror = ()=>{ triggerMainFallback(); };
+      try {
+        await el.play();
+      } catch(e){
+        triggerMainFallback();
+      }
     };
-    try {
-      await geminiAudioEl.play();
-      return;
-    } catch(e){
-      triggerMainFallback();
-      return;
-    }
+    await playFrom(0);
+    return;
   }
 
   proceedLiveOrBrowser();

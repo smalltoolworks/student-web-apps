@@ -15,6 +15,10 @@ let apiKey = (process.env.GEMINI_API_KEY || "").trim();
 let voice = (process.env.GEMINI_VOICE || "Aoede").trim();
 let model = (process.env.GEMINI_MODEL || "gemini-2.5-flash-preview-tts").trim();
 let force = args.includes("--force");
+// The macOS "say" fallback produces a robotic Karen voice that does not match the
+// pre-rendered Gemini Aoede voice used by every shipped track. It is opt-in only,
+// so a missing key can never silently ship a mismatched voice again.
+let allowSay = args.includes("--allow-say");
 
 for (const arg of args) {
   if (arg.startsWith("--key=")) apiKey = arg.slice(6).trim();
@@ -27,7 +31,7 @@ voice = voice.replace(/^["']+|["']+$/g, "").trim();
 model = model.replace(/^["']+|["']+$/g, "").trim();
 
 const hasApiKey = Boolean(apiKey);
-const isMac = process.platform === "darwin";
+const isMac = process.platform === "darwin" && allowSay;
 
 if (!hasApiKey && !isMac) {
   console.log(`
@@ -47,6 +51,9 @@ Options:
   --voice="Aoede"       Voice name (Aoede, Puck, Kore, Charon, Fenrir)
   --model="gemini-2.5-flash-preview-tts"
   --force               Re-generate files even if they already exist
+  --allow-say           macOS only: permit the robotic "say" fallback when no
+                        key is set. Off by default - the shipped tracks all use
+                        the Gemini Aoede voice and must not be mixed.
 
 ==============================================================
 `);
@@ -54,7 +61,8 @@ Options:
 }
 
 if (!hasApiKey) {
-  console.log("ℹ️  No GEMINI_API_KEY provided. Using macOS Karen (en_AU) high-definition voice.");
+  console.log("⚠️  No GEMINI_API_KEY provided. Falling back to the robotic macOS Karen voice,");
+  console.log("   which will NOT match the Gemini Aoede voice used by every other track.");
 }
 
 const OUTPUT_DIR = path.resolve(__dirname, "../settlement-game/audio");
@@ -62,7 +70,8 @@ if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 }
 
-// Complete narration texts covering all game screens, places, and decisions
+// Complete narration texts covering all game screens, places, and decisions.
+// Result-screen tracks are appended below by resultTracks().
 const AUDIO_TRACKS = [
   // 1. Core Narrative Screens
   {
@@ -273,6 +282,95 @@ const AUDIO_TRACKS = [
     text: "Look at both maps. One map shows rain. The other shows where people live. Question 3: But look at the towns out in the dry country, like Alice Springs and Broken Hill. Why do people choose to live there? Option 1: Lots of open space, big backyards, farming and mining jobs. Option 2: Tropical beaches and rainforests."
   }
 ];
+
+/* ---------------------------------------------------------------------------
+   Result-screen tracks (17), derived from the game data in index.html so the
+   narration can never drift from ISLANDS / OUTCOMES / ROOMS.
+
+   The exact population is a number the student's own card choices produced, so
+   it cannot live in a pre-rendered file. It stays on screen as the big numeral.
+   What IS fixed splits cleanly in two:
+     - how it went  -> OUTCOMES and ROOMS share thresholds (45/28/15/1/0) = 5 bands
+     - why it went that way -> island x site = 12
+   The player plays band track, then site track.
+--------------------------------------------------------------------------- */
+function loadGameData() {
+  const vm = require("vm");
+  const src = fs.readFileSync(path.resolve(__dirname, "../settlement-game/index.html"), "utf8");
+  const grab = (name) => {
+    const m = new RegExp("const " + name + "\\s*=\\s*Object\\.freeze\\(").exec(src);
+    if (!m) throw new Error("Could not find " + name + " in index.html");
+    let i = src.indexOf("(", m.index + m[0].length - 1);
+    let depth = 0;
+    for (; i < src.length; i++) {
+      if (src[i] === "(") depth++;
+      else if (src[i] === ")") { depth--; if (!depth) { i++; break; } }
+    }
+    return src.slice(m.index, i) + ";";
+  };
+  const names = ["FACTORS", "OUTCOMES", "ROOMS", "ISLANDS"];
+  const ctx = { out: null };
+  vm.createContext(ctx);
+  vm.runInContext(names.map(grab).join("\n") + "\nout={" + names.join(",") + "};", ctx);
+  return ctx.out;
+}
+
+// Mirrors cleanSpeechChunk() in index.html, so a pre-rendered track says exactly
+// what the live Gemini / browser-voice fallback would say for the same screen.
+function cleanForSpeech(str) {
+  return String(str || "")
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F1E6}-\u{1F1FF}\uFE0F\uFE0E\u200D]/gu, "")
+    .replace(/\bmm\b/g, "millimetres")
+    .replace(/°C/g, " degrees")
+    .replace(/&amp;/g, "and")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// True when the room note just restates the outcome line (e.g. "Only a few people
+// stayed." / "Very few people stayed."), so we do not say the same thing twice.
+function restates(line, note) {
+  const words = t => new Set(String(t).toLowerCase().match(/[a-z]+/g) || []);
+  const a = words(line), b = words(note);
+  const shared = [...b].filter(w => w.length > 3 && a.has(w));
+  return shared.length >= 2;
+}
+
+function resultTracks() {
+  const { FACTORS, OUTCOMES, ROOMS, ISLANDS } = loadGameData();
+  const tracks = [];
+
+  // Part 1: how it went. One per band, shared by every island and site.
+  OUTCOMES.forEach((out, i) => {
+    const room = ROOMS[i];
+    let text;
+    if (out.min === 0) {
+      text = `${out.label}. ${out.line} ${room.note}`;
+    } else {
+      text = `Your settlement became a ${out.label}. ${out.line} Room and space: ${room.word}.`;
+      if (!restates(out.line, room.note)) text += ` ${room.note}`;
+    }
+    tracks.push({ id: `result_band${i}`, text: cleanForSpeech(text) });
+  });
+
+  // Part 2: why it went that way, plus the Real Australia echo. One per place.
+  ISLANDS.forEach(isl => {
+    isl.sites.forEach(site => {
+      // Same best/worst rule the result screen uses: stable sort, take the first.
+      const scored = FACTORS.map(f => ({ f, v: site.scores[f.key] }));
+      const worst = scored.slice().sort((a, b) => a.v - b.v)[0].f;
+      const best = scored.slice().sort((a, b) => b.v - a.v)[0].f;
+      let text = `Here is why. ${site.name} on ${isl.name}: the best thing here was `
+        + `${best.label.toLowerCase()}. The hardest thing was ${worst.label.toLowerCase()}.`;
+      if (isl.echo) text += ` ${isl.echo.title}. ${isl.echo.text}`;
+      tracks.push({ id: `result_${isl.id}_${site.letter.toLowerCase()}`, text: cleanForSpeech(text) });
+    });
+  });
+
+  return tracks;
+}
+
+AUDIO_TRACKS.push(...resultTracks());
 
 function pcmBase64ToWavBuffer(base64Str, sampleRate = 24000) {
   const pcmBytes = Buffer.from(base64Str, "base64");
