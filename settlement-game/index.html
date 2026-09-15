@@ -52,6 +52,19 @@ button{font:inherit;color:inherit}
 .card h2{margin-top:0}
 .step{font-size:.85rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--ink-soft);margin:0 0 4px}
 
+/* intro hero */
+.intro-hero{max-width:680px;margin:clamp(16px, 5vh, 48px) auto 0;text-align:center}
+.intro-flags{font-size:clamp(2.2rem, 3.8vw, 3rem);line-height:1;margin-bottom:14px;letter-spacing:.2em}
+.intro-hero h1{font-size:clamp(2.1rem, 3.8vw, 2.7rem);margin:0 0 8px;letter-spacing:-.02em}
+.intro-sub{font-size:clamp(1.15rem, 1.8vw, 1.35rem);color:var(--teal);font-weight:700;margin:0 0 clamp(18px, 2.5vh, 26px)}
+.intro-card{text-align:left;padding:clamp(20px, 3vh, 28px) clamp(22px, 3vw, 32px);
+  margin:0 0 clamp(18px, 2.5vh, 24px);border-radius:20px;border:3px solid var(--line);
+  box-shadow:0 8px 24px rgba(0,0,0,.06);background:#fff}
+.intro-p1{font-size:clamp(1.15rem, 1.7vw, 1.28rem);line-height:1.55;margin:0 0 10px}
+.intro-p2{font-size:clamp(1.15rem, 1.7vw, 1.28rem);line-height:1.55;margin:0;color:var(--teal);font-weight:700}
+.intro-actions{justify-content:center;margin-top:0}
+.intro-actions .btn{font-size:1.25rem;min-height:60px;padding:15px 44px;border-radius:18px;box-shadow:0 4px 0 #145c6a}
+
 /* read aloud */
 #speakbar{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;align-items:center;gap:8px}
 #speakbtn{display:flex;align-items:center;gap:8px;min-height:46px;padding:8px 16px;border-radius:999px;
@@ -170,6 +183,13 @@ svg.map{width:100%;max-height:min(390px, 48vh);height:auto;display:block;touch-a
   .actions{margin-top:12px}
   .btn{min-height:48px;padding:10px 22px;font-size:1rem}
   .btn.big{min-height:52px;padding:12px 26px;font-size:1.1rem}
+  .intro-hero{margin-top:clamp(8px, 2.5vh, 20px)}
+  .intro-flags{font-size:2rem;margin-bottom:6px}
+  .intro-hero h1{font-size:1.8rem;margin-bottom:4px}
+  .intro-sub{font-size:1.1rem;margin-bottom:12px}
+  .intro-card{padding:16px 20px;margin-bottom:14px}
+  .intro-p1, .intro-p2{font-size:1.08rem}
+  .intro-actions .btn{min-height:50px;padding:12px 34px;font-size:1.15rem}
 }
 
 /* factors */
@@ -926,12 +946,15 @@ const reflectBtn = () => canReflect()
 
 /* ---------- screens ---------- */
 function screenIntro(){
-  return `<h1 tabindex="-1">${COPY.title}</h1>
-  <p class="lede">${COPY.sub}</p>
-  <div class="card">
-    <p class="lede" style="margin:0 0 .5em">${COPY.introP1}</p>
-    <p class="lede" style="margin:0">${COPY.introJob}</p></div>
-  <div class="actions"><button class="btn big" data-action="go" data-screen="arch">Start →</button></div>`;
+  return `<div class="intro-hero">
+    <div class="intro-flags" aria-hidden="true">🌴 🏜️ 🌾 🌳</div>
+    <h1 tabindex="-1">${COPY.title}</h1>
+    <p class="intro-sub">${COPY.sub}</p>
+    <div class="card intro-card">
+      <p class="intro-p1">${COPY.introP1}</p>
+      <p class="intro-p2">${COPY.introJob}</p></div>
+    <div class="actions intro-actions"><button class="btn big" data-action="go" data-screen="arch">Start →</button></div>
+  </div>`;
 }
 
 function screenArch(){
