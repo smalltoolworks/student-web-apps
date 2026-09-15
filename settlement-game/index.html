@@ -182,6 +182,40 @@ svg.map{width:100%;max-height:min(300px, 38vh);height:auto;display:block;touch-a
 /* results */
 .resultlayout{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
 @media (max-width:768px){.resultlayout{grid-template-columns:1fr}}
+.result-accordions{display:flex;flex-direction:column;gap:10px}
+.acc-card{
+  background:var(--card);border:2px solid var(--line);border-radius:var(--r);
+  overflow:hidden;transition:border-color .18s ease, box-shadow .18s ease
+}
+.acc-card[open]{border-color:var(--teal);box-shadow:0 3px 10px rgba(29,122,140,.1)}
+.acc-card summary{
+  padding:12px 16px;font-weight:700;font-size:.95rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:#fff;user-select:none;min-height:48px;list-style:none;
+  transition:background .15s ease
+}
+.acc-card summary::-webkit-details-marker{display:none}
+.acc-card summary::after{
+  content:"▾";font-size:1.15rem;font-weight:800;color:var(--teal);transition:transform .2s ease;
+  width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0
+}
+.acc-card:not([open]) summary::after{transform:rotate(-90deg)}
+.acc-card summary:hover{background:#f4fbfc}
+.acc-card summary:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+.acc-content{padding:12px 16px 14px;border-top:1px solid #eee6d5;background:#fff}
+.acc-badge{
+  display:inline-block;font-size:.76rem;font-weight:700;padding:2px 8px;
+  border-radius:999px;background:#eef6fb;color:var(--teal)
+}
+.acc-card.aus-acc{border-color:#b4d6e4;background:#f3f9fc}
+.acc-card.aus-acc summary{background:#f3f9fc}
+.acc-card.aus-acc[open]{border-color:var(--teal)}
+.acc-card.aus-acc .acc-content{background:#f9fdfe}
+.acc-card.aus-acc .acc-badge{background:#e0f2fe;color:#0369a1}
+.result-notice-hint{
+  margin-top:10px;padding:8px 12px;background:#fffdf6;border:1.5px solid var(--warm);
+  border-radius:8px;font-size:.85rem;font-weight:600;line-height:1.4
+}
 
 /* Screen height responsiveness */
 @media (max-height: 760px) {
@@ -1206,21 +1240,51 @@ function screenResult(){
     <h1 tabindex="-1">${esc(s.name)}, 3 years on</h1>
     <div class="resultlayout">
       <div class="resultcol">
-        <div class="card">${meters(done.final)}
+        <div class="card" style="margin-bottom:0">${meters(done.final)}
           ${graph(done.pops)}<p class="center">${out.line}</p>${pred}
-          <p class="center muted">Your choices changed this by <strong>${done.cardTotal>0?"+":""}${done.cardTotal}</strong>.</p></div>
-        ${state.completed.length===1 ? `<div class="card" style="border-color:var(--warm);background:#fffdf6">
-          <p style="margin:0">${COPY.twoMetersNote}</p></div>` : ""}
-        ${isl.echo ? `<div class="echo-card"><h2>🇦🇺 ${esc(isl.echo.title)}</h2><p>${esc(isl.echo.text)}</p></div>` : ""}
+          <p class="center muted">Your choices changed this by <strong>${done.cardTotal>0?"+":""}${done.cardTotal}</strong>.</p>
+          ${state.completed.length===1 ? `<div class="result-notice-hint">💡 ${COPY.twoMetersNote}</div>` : ""}
+        </div>
       </div>
       <div class="resultcol">
-        <div class="card"><h2 style="margin-top:0">Why</h2>
-          <p>Best thing: <strong>${best.label.toLowerCase()}</strong>.
-             Hardest thing: <strong>${worst.label.toLowerCase()}</strong>.</p>
-          ${FACTORS.map(f=>factorRow(f,s.scores[f.key],s.notes[f.key])).join("")}</div>
-        <div class="actions">
+        <div class="result-accordions">
+          <details class="acc-card why-acc" open name="result-col-acc">
+            <summary>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span>🔍 <strong>Why it happened</strong></span>
+                <span class="acc-badge">5 factors</span>
+              </div>
+              <span class="muted" style="font-size:.82rem;font-weight:600">${best.label} vs ${worst.label}</span>
+            </summary>
+            <div class="acc-content">
+              <p style="margin:0 0 8px;font-size:.92rem">
+                Best thing: <strong style="color:var(--good)">${best.label.toLowerCase()}</strong>.
+                Hardest thing: <strong style="color:var(--bad)">${worst.label.toLowerCase()}</strong>.
+              </p>
+              ${FACTORS.map(f=>factorRow(f,s.scores[f.key],s.notes[f.key])).join("")}
+            </div>
+          </details>
+
+          ${isl.echo ? `
+          <details class="acc-card aus-acc" name="result-col-acc">
+            <summary>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span>🇦🇺 <strong>Real Australia</strong></span>
+                <span class="acc-badge">${esc(isl.echo.title.replace(/^Real Australia: /i, ""))}</span>
+              </div>
+            </summary>
+            <div class="acc-content">
+              <h3 style="margin:0 0 6px;font-size:1.02rem;color:var(--teal)">🇦🇺 ${esc(isl.echo.title)}</h3>
+              <p style="margin:0;font-size:.95rem;line-height:1.55">${esc(isl.echo.text)}</p>
+            </div>
+          </details>
+          ` : ""}
+        </div>
+
+        <div class="actions" style="margin-top:12px">
           <button class="btn ${canReflect()?"secondary":""} ${canReflect()?"":"big"}" data-action="go" data-screen="arch">Settle another island</button>
-          ${reflectBtn()}</div>
+          ${reflectBtn()}
+        </div>
       </div>
     </div>`;
 }
@@ -2469,6 +2533,15 @@ app.addEventListener("input",e=>{
 app.addEventListener("focusin",e=>{
   if(e.target && e.target.dataset && e.target.dataset.field) lastField=e.target.dataset.field;
 });
+/* Exclusive accordion toggle fallback for older browser engines */
+app.addEventListener("toggle",e=>{
+  const t=e.target;
+  if(t && t.tagName==="DETAILS" && t.name==="result-col-acc" && t.open){
+    app.querySelectorAll('details[name="result-col-acc"]').forEach(d=>{
+      if(d!==t) d.open=false;
+    });
+  }
+}, true);
 
 /* ============================================================
    8. INIT
