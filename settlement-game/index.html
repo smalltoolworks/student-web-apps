@@ -232,15 +232,18 @@ svg.map{width:100%;max-height:min(300px, 38vh);height:auto;display:block;touch-a
 .year-result-grid .decision, .year-result-grid .ledgercard{margin-bottom:0}
 
 /* ledger */
-.ledger{width:100%;border-collapse:collapse;margin:4px 0;font-variant-numeric:tabular-nums}
+.ledger{width:100%;border-collapse:separate;border-spacing:0;margin:4px 0;font-variant-numeric:tabular-nums}
 .ledger th{text-align:left;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;
-  color:var(--ink-soft);padding-bottom:6px;font-weight:700}
-.ledger td{padding:9px 0;border-bottom:1px solid #eee6d5}
+  color:var(--ink-soft);padding:6px 14px;font-weight:700}
+.ledger td{padding:9px 14px;border-bottom:1px solid #eee6d5}
 .ledger td.num{text-align:right;font-weight:800;white-space:nowrap}
-.ledger tr.doubled td{background:#fff6e2}
-.ledger tr.doubled td:first-child{box-shadow:inset 4px 0 0 var(--warm)}
-.ledger tr.choicerow td{background:#eef6fb}
-.ledger tr.choicerow td:first-child{box-shadow:inset 4px 0 0 var(--teal)}
+.ledger .ledger-ic{display:inline-block;width:1.5em;text-align:center;margin-right:4px;flex-shrink:0}
+.ledger tr.doubled td{background:#fff6e2;border-bottom-color:#ebd7b5}
+.ledger tr.doubled td:first-child{box-shadow:inset 5px 0 0 var(--warm);border-top-left-radius:6px;border-bottom-left-radius:6px}
+.ledger tr.doubled td:last-child{border-top-right-radius:6px;border-bottom-right-radius:6px}
+.ledger tr.choicerow td{background:#eef6fb;border-bottom-color:#c9e0eb}
+.ledger tr.choicerow td:first-child{box-shadow:inset 5px 0 0 var(--teal);border-top-left-radius:6px;border-bottom-left-radius:6px}
+.ledger tr.choicerow td:last-child{border-top-right-radius:6px;border-bottom-right-radius:6px}
 .ledger tr.sum td{border-bottom:none;border-top:3px double var(--ink);font-size:1.15rem;font-weight:800;padding-top:11px}
 .plus{color:var(--good)} .minus{color:var(--bad)}
 .x2{display:inline-block;background:var(--warm);color:#fff;border-radius:6px;padding:1px 7px;font-size:.8rem;margin-left:5px}
@@ -1162,7 +1165,7 @@ function screenYear(){
   const rows = rec.rows.map(r=>{
     const calc = r.doubled ? `<span class="muted">${(r.base>0?"+":"")+r.base}</span><span class="x2">×2</span> ` : "";
     return `<tr class="${r.doubled?"doubled":""}">
-      <td>${r.emoji} <strong>${r.label}</strong> <span class="muted">${r.word}</span></td>
+      <td><span class="ledger-ic">${r.emoji}</span> <strong>${r.label}</strong> <span class="muted">${r.word}</span></td>
       <td class="num">${calc}<span class="${r.value>=0?"plus":"minus"}">${(r.value>0?"+":"")+r.value}</span></td></tr>`;
   }).join("");
   const cd=rec.cardDelta, total=rec.total, gone=rec.after===0;
@@ -1178,7 +1181,7 @@ function screenYear(){
         <table class="ledger">
           <thead><tr><th>This year</th><th style="text-align:right">People</th></tr></thead>
           <tbody>${rows}
-            <tr class="choicerow"><td>🤔 <strong>Your choice</strong> <span class="muted">${esc(chosen.t)}</span></td>
+            <tr class="choicerow"><td><span class="ledger-ic">🤔</span> <strong>Your choice</strong> <span class="muted">${esc(chosen.t)}</span></td>
               <td class="num"><span class="${cd>=0?"plus":"minus"}">${cd>0?"+":""}${cd}</span></td></tr>
             <tr class="sum"><td>Change</td><td class="num ${total>=0?"plus":"minus"}">${total>0?"+":""}${total}</td></tr>
           </tbody></table>
