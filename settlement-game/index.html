@@ -201,6 +201,7 @@ svg.map{width:100%;max-height:min(300px, 38vh);height:auto;display:block;touch-a
 }
 .acc-card:not([open]) summary::after{transform:rotate(-90deg)}
 .acc-card summary:hover{background:#f4fbfc}
+.acc-card summary:focus{outline:none}
 .acc-card summary:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
 .acc-content{padding:12px 16px 14px;border-top:1px solid #eee6d5;background:#fff}
 .acc-badge{
@@ -348,8 +349,20 @@ table.rank .stars{color:var(--warm);font-weight:800;white-space:nowrap}
 .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:6px 16px;margin:10px 0 0;padding:0;list-style:none}
 .legend li{display:flex;gap:8px;align-items:flex-start;font-size:.92rem}
 .legend .sw{width:20px;height:20px;border-radius:5px;border:1px solid rgba(0,0,0,.2);flex:0 0 auto;margin-top:2px}
-details.key{margin-top:12px}
-details.key summary{cursor:pointer;font-weight:700;padding:10px 0;min-height:44px;display:flex;align-items:center}
+details.key{margin-top:10px}
+details.key summary{
+  cursor:pointer;font-weight:800;font-size:.95rem;padding:6px 0;min-height:36px;
+  display:inline-flex;align-items:center;gap:6px;user-select:none;
+  -webkit-tap-highlight-color:transparent;color:var(--ink)
+}
+details.key summary:focus{outline:none}
+details.key summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+details.key summary::-webkit-details-marker{display:none}
+details.key summary::after{
+  content:"▾";font-size:.9rem;color:var(--teal);transition:transform .2s ease;
+  display:inline-block;width:14px;height:14px;line-height:14px;text-align:center
+}
+details.key:not([open]) summary::after{transform:rotate(-90deg)}
 
 /* writing wizard */
 .write label{display:block;font-weight:800;font-size:1.15rem;margin:0 0 6px}
@@ -970,7 +983,7 @@ function mapSVG(isl){
 }
 function mapKey(isl){
   const used=[...new Set(isl.map.join("").split(""))];
-  return `<details class="key"><summary>Map key</summary><ul class="legend">`+
+  return `<details class="key" open><summary>Map key</summary><ul class="legend">`+
     used.map(ch=>{const t=TERRAIN[ch];
       return `<li><span class="sw" style="background:${t.fill}"></span><span><strong>${t.name}</strong> — ${t.note}</span></li>`;}).join("")+
     `</ul></details>`;
