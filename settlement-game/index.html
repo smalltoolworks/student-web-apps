@@ -418,6 +418,23 @@ textarea:focus{border-color:var(--teal);outline:none}
 .report-thought-head h3{margin:0}
 .edit-answer-btn{font-size:.78rem;padding:3px 10px;min-height:30px;line-height:1.2}
 
+/* --- compact report screen: aim to fit on one screen for screenshots --- */
+body.screen-report #app{max-width:min(880px, 96vw);padding-top:clamp(6px, 1vh, 12px)}
+.report-page .screen-topbar{margin-bottom:8px}
+.report-page .screen-topbar h1{font-size:1.15rem}
+.report-page .screen-topbar .step{font-size:.72rem}
+.report-page .card{padding:10px 16px;margin:0 0 8px}
+.report-page .card h2{font-size:.98rem;margin:0 0 6px}
+.report-page table.rank th,.report-page table.rank td{padding:5px 6px;font-size:.88rem}
+.report-page table.rank td.num{font-size:.95rem}
+.report-page .report-thought-item{margin-bottom:8px}
+.report-page .report-thought-head{margin-bottom:2px}
+.report-page .report-thought-head h3{font-size:.86rem;line-height:1.25}
+.report-page .written{padding:6px 10px;margin:0;font-size:.85rem;line-height:1.35}
+.report-page .last-thing p{font-size:.8rem;margin:0 0 .3em;line-height:1.35}
+.report-page .actions{margin-top:8px;gap:8px}
+.report-page .actions .btn{min-height:38px;padding:8px 16px;font-size:.9rem}
+
 /* two real maps */
 .maps-page-header{margin:0 0 10px}
 .maps-split-layout{display:grid;grid-template-columns:1.22fr .78fr;gap:16px;align-items:start}
@@ -1640,7 +1657,8 @@ function screenReport(){
       </div>
       <div class="written">${v && v.trim() ? esc(v) : "<em>(not answered yet)</em>"}</div>
     </div>`;
-  return `<div class="screen-topbar">
+  return `<div class="report-page">
+    <div class="screen-topbar">
       <button class="btn secondary sm" data-action="editwrite" data-step="2" title="Back to reflection writing">← Back to writing</button>
       <div>
         <p class="step" style="margin:0">My report</p>
@@ -1655,14 +1673,15 @@ function screenReport(){
       ${said("Most Australians live near the coast because…", R.q1, 0)}
       ${said("People live inland because…", R.q2, 1)}
       ${said("I would live…", R.q3, 2)}</div>
-    <div class="card"><h2 style="margin-top:0">One last thing</h2>
+    <div class="card last-thing"><h2 style="margin-top:0">One last thing</h2>
       <p>${COPY.closing1}</p><p>${COPY.closing2}</p></div>
     <div class="actions">
       <button class="btn" data-action="print">🖨️ Print my report</button>
       <button class="btn secondary" data-action="copy">📋 Copy my writing</button>
       <button class="btn secondary" data-action="editwrite" data-step="0">← Change my answers</button>
     </div>
-    <div class="actions"><button class="btn secondary" data-action="restart">Play again</button></div>`;
+    <div class="actions"><button class="btn secondary" data-action="restart">Play again</button></div>
+  </div>`;
 }
 
 const SCREENS = {intro:screenIntro, arch:screenArch, island:screenIsland, predict:screenPredict,
@@ -1672,6 +1691,7 @@ const SCREENS = {intro:screenIntro, arch:screenArch, island:screenIsland, predic
 function render(){
   stopSpeech(); closeLightbox();
   const app=document.getElementById("app");
+  document.body.classList.toggle("screen-report", state.screen==="report");
   app.innerHTML = (SCREENS[state.screen]||screenIntro)();
   const h=app.querySelector("h1"); if(h) h.focus({preventScroll:true});
   window.scrollTo(0,0);
