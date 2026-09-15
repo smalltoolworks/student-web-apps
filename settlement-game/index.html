@@ -499,6 +499,49 @@ textarea:focus{border-color:var(--teal);outline:none}
 .test-status.loading{color:#7c3aed}
 .offline-note{font-size:.85rem;color:var(--ink-soft);border-top:1px dashed var(--line);padding-top:12px;margin-top:4px;line-height:1.4}
 
+/* Lightbox modal */
+#lightbox{
+  position:fixed;inset:0;background:rgba(12,22,30,.84);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  z-index:300;padding:clamp(8px, 1.8vh, 18px);box-sizing:border-box;
+}
+#lightbox[hidden]{display:none!important}
+.lb-dialog{
+  background:#fff;border-radius:12px;border:3px solid var(--line);
+  box-shadow:0 16px 44px rgba(0,0,0,.4);display:flex;flex-direction:column;
+  max-width:min(95vw, 1100px);max-height:min(96vh, 900px);overflow:hidden;
+  animation:lbIn .16s ease-out;
+}
+@keyframes lbIn{
+  from{opacity:0;transform:scale(.96)}
+  to{opacity:1;transform:scale(1)}
+}
+.lb-header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 16px;background:#f4f8fb;border-bottom:2px solid var(--line);flex-shrink:0;
+}
+.lb-title{margin:0;font-weight:800;font-size:1.05rem;color:var(--ink)}
+.lbclose{
+  background:var(--teal);color:#fff;border:none;border-radius:999px;
+  padding:6px 16px;font-size:.92rem;font-weight:800;cursor:pointer;
+  box-shadow:0 2px 0 #145c6a;transition:background .15s, transform .1s;flex-shrink:0;
+}
+.lbclose:hover{background:#156270;transform:translateY(-1px)}
+.lbclose:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.lb-image-box{
+  display:flex;align-items:center;justify-content:center;
+  padding:10px 14px;background:#fff;overflow:hidden;flex:1;min-height:0;
+}
+.lb-img{
+  max-width:100%;max-height:calc(88vh - 95px);width:auto;height:auto;
+  object-fit:contain;display:block;border-radius:4px;
+}
+.lb-hint{
+  margin:0;padding:6px 12px;text-align:center;font-size:.75rem;
+  font-weight:600;color:var(--ink-soft);background:#fafafa;border-top:1px solid #eee6d5;flex-shrink:0;
+}
+
 @media print{
   #speakbar,#lightbox,#teachermodal,#audiotoast,.actions,.btn,.bank,.edit-answer-btn,details.key{display:none!important}
   body{background:#fff;padding:0}
@@ -2410,14 +2453,27 @@ document.addEventListener("keydown", (e)=>{
 function openLightbox(src,label){
   stopSpeech();
   const lb=document.getElementById("lightbox");
-  lb.innerHTML = `<p>${label}</p>
-    <img src="${src}" alt=""><button class="lbclose" data-lbclose="1">Close ✕</button>`;
+  lb.innerHTML = `<div class="lb-dialog" role="document">
+    <div class="lb-header">
+      <h2 class="lb-title">${esc(label)}</h2>
+      <button class="lbclose" data-lbclose="1" aria-label="Close enlarged view">Close ✕</button>
+    </div>
+    <div class="lb-image-box" data-lbclose="1">
+      <img src="${esc(src)}" alt="${esc(label)}" class="lb-img">
+    </div>
+    <p class="lb-hint">Tap outside or press Escape to close</p>
+  </div>`;
   lb.hidden=false;
+  document.body.style.overflow="hidden";
   const b=lb.querySelector(".lbclose"); if(b) b.focus();
 }
 function closeLightbox(){
   const lb=document.getElementById("lightbox");
-  if(lb && !lb.hidden){ lb.hidden=true; lb.innerHTML=""; }
+  if(lb && !lb.hidden){
+    lb.hidden=true;
+    lb.innerHTML="";
+    document.body.style.overflow="";
+  }
 }
 document.getElementById("lightbox").addEventListener("click",e=>{
   if(e.target.id==="lightbox" || e.target.dataset.lbclose) closeLightbox();
