@@ -314,7 +314,7 @@ table.rank .stars{color:var(--warm);font-weight:800;white-space:nowrap}
 details.key{margin-top:12px}
 details.key summary{cursor:pointer;font-weight:700;padding:10px 0;min-height:44px;display:flex;align-items:center}
 
-/* writing */
+/* writing wizard */
 .write label{display:block;font-weight:800;font-size:1.15rem;margin:0 0 6px}
 .starter{font-weight:700;color:var(--teal);margin:0 0 6px}
 textarea{width:100%;min-height:110px;padding:14px;font:inherit;font-size:1.05rem;line-height:1.5;
@@ -326,6 +326,35 @@ textarea:focus{border-color:var(--teal);outline:none}
 .word:hover{background:#e2eff6;border-color:var(--teal)}
 .written{background:#fff;border-left:5px solid var(--teal);padding:10px 14px;margin:0 0 14px;white-space:pre-wrap}
 .written em{color:var(--ink-soft)}
+
+.write-stepper{display:flex;gap:8px;margin:0 0 12px;align-items:center;flex-wrap:wrap}
+.write-step-pill{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;
+  background:#fff;border:2px solid var(--line);font-size:.86rem;font-weight:700;cursor:pointer;
+  color:var(--ink-soft);transition:all .15s ease
+}
+.write-step-pill:hover{border-color:var(--teal);color:var(--teal);background:#f4fbfc}
+.write-step-pill.active{background:var(--teal);border-color:var(--teal);color:#fff;box-shadow:0 2px 6px rgba(29,122,140,.3)}
+.write-step-pill.done:not(.active){border-color:#73b6a0;background:#f0f8f5;color:#1d6f4d}
+.write-step-pill .step-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.08);font-size:.72rem}
+.write-step-pill.active .step-num{background:rgba(255,255,255,.25);color:#fff}
+
+.write-wizard-grid{display:grid;grid-template-columns:1.22fr .78fr;gap:16px;align-items:start}
+@media (max-width:860px){.write-wizard-grid{grid-template-columns:1fr;gap:12px}}
+.write-card{margin-bottom:0}
+.write-prompt-header{margin-bottom:6px}
+.write-qtag{display:inline-block;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--teal);margin-bottom:2px}
+.write-card h2{font-size:clamp(1.1rem, 1.6vw, 1.35rem);margin:2px 0 6px;line-height:1.3}
+.write-hint-text{font-size:.82rem;color:var(--ink-soft);margin:8px 0 0;line-height:1.35}
+.write-card textarea{min-height:clamp(100px, 15vh, 150px);margin:4px 0 0;font-size:1.02rem}
+.bank-card{margin-bottom:0;background:#fffdf6;border-color:var(--warm)}
+.bank-head{display:flex;flex-direction:column;gap:2px;margin-bottom:4px}
+.bank-head strong{font-size:.92rem;color:var(--ink)}
+.write-actions{margin-top:14px}
+.report-thought-item{margin-bottom:14px}
+.report-thought-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
+.report-thought-head h3{margin:0}
+.edit-answer-btn{font-size:.78rem;padding:3px 10px;min-height:30px;line-height:1.2}
 
 /* two real maps */
 .maps-page-header{margin:0 0 10px}
@@ -400,7 +429,7 @@ textarea:focus{border-color:var(--teal);outline:none}
 .offline-note{font-size:.85rem;color:var(--ink-soft);border-top:1px dashed var(--line);padding-top:12px;margin-top:4px;line-height:1.4}
 
 @media print{
-  #speakbar,#lightbox,#teachermodal,#audiotoast,.actions,.btn,.bank,details.key{display:none!important}
+  #speakbar,#lightbox,#teachermodal,#audiotoast,.actions,.btn,.bank,.edit-answer-btn,details.key{display:none!important}
   body{background:#fff;padding:0}
   .card{break-inside:avoid;border-color:#999}
   textarea{border:1px solid #999;min-height:0}
@@ -709,6 +738,36 @@ const WORD_BANK = Object.freeze([
   "gold & mining","too dry","too hot","cyclones & floods","crowded cities","quiet & peaceful"
 ]);
 
+const WRITE_QUESTIONS = Object.freeze([
+  {
+    id: "q1",
+    num: 1,
+    label: "Coast",
+    title: "Question 1 of 3 · The Coast",
+    prompt: "Most Australians live near the coast. Why?",
+    starter: "Most Australians live near the coast because",
+    hint: "Think about Green Island and the rainfall map: what makes the coast an easier place to live?"
+  },
+  {
+    id: "q2",
+    num: 2,
+    label: "Inland",
+    title: "Question 2 of 3 · The Inland",
+    prompt: "Some Australians live far inland. Why did people move inland in the past, or live there today?",
+    starter: "People live inland because",
+    hint: "Think about Red and Gold Islands: what does inland Australia have that coastal cities don't?"
+  },
+  {
+    id: "q3",
+    num: 3,
+    label: "Your Choice",
+    title: "Question 3 of 3 · Your Choice",
+    prompt: "Where would YOU live? Why?",
+    starter: "I would live",
+    hint: "Would you choose the mild, busy coast or the wide open inland? What is your trade-off?"
+  }
+]);
+
 const COPY = Object.freeze({
   title:"The Sunrise Islands",
   sub:"Where would you live?",
@@ -801,6 +860,7 @@ let state = {
   run:null, completed:[], prediction:null,
   reflection:{q1:"",q2:"",q3:""},
   mapStep:0, mapPicks:[],
+  writeStep:0,
 };
 let lastField = "q1";
 function setState(patch){ state={...state,...patch}; render(); }
@@ -818,6 +878,7 @@ function restore(){
   if(!state.reflection) state.reflection={q1:"",q2:"",q3:""};
   if(!Array.isArray(state.mapPicks)) state.mapPicks=[];
   if(typeof state.mapStep!=="number") state.mapStep=0;
+  if(typeof state.writeStep!=="number") state.writeStep=0;
 }
 
 /* ============================================================
@@ -1280,21 +1341,65 @@ function screenPattern(){
 }
 
 function screenWrite(){
-  const R=state.reflection;
-  const q=(id,label,starter,val)=>`<div class="card write" style="margin-bottom:10px;padding:clamp(10px, 1.4vh, 14px) clamp(12px, 1.8vw, 18px)">
-    <label for="${id}" style="font-size:.95rem;font-weight:700">${label}</label>
-    <p class="starter" style="margin:2px 0 4px;font-size:.82rem">Start like this: “${starter}…”</p>
-    <textarea id="${id}" data-field="${id}" rows="2" style="min-height:54px"
-      placeholder="${starter}…">${esc(val||"")}</textarea></div>`;
-  return `<p class="step">Your thinking</p>
-    <h1 tabindex="-1">What do you think?</h1>
-    <p class="lede">Write in your own words. Tap a word below to add it.</p>
-    <div class="card"><p class="step" style="margin:0 0 8px">Word bank — tap to add</p>
-      <div class="bank">${WORD_BANK.map(w=>`<button class="word" data-action="word" data-w="${esc(w)}">${esc(w)}</button>`).join("")}</div></div>
-    ${q("q1","1. Most Australians live near the coast. Why?","Most Australians live near the coast because",R.q1)}
-    ${q("q2","2. Some Australians live far inland. Why did people move inland in the past, or live there today?","People live inland because",R.q2)}
-    ${q("q3","3. Where would YOU live? Why?","I would live",R.q3)}
-    <div class="actions"><button class="btn big" data-action="go" data-screen="report">See my report →</button></div>`;
+  const step = Math.min(2, Math.max(0, state.writeStep || 0));
+  const curr = WRITE_QUESTIONS[step];
+  const R = state.reflection || {};
+  const val = R[curr.id] || "";
+  lastField = curr.id;
+
+  const stepperHtml = `
+    <nav class="write-stepper" aria-label="Reflection question steps">
+      ${WRITE_QUESTIONS.map((q, idx) => {
+        const isDone = Boolean(R[q.id] && R[q.id].trim());
+        const isCurrent = idx === step;
+        const cls = isCurrent ? "write-step-pill active" : (isDone ? "write-step-pill done" : "write-step-pill");
+        return `<button type="button" class="${cls}" data-action="editwrite" data-step="${idx}" aria-current="${isCurrent ? 'step' : 'false'}">
+          <span class="step-num">${isDone && !isCurrent ? '✓' : idx + 1}</span>
+          <span class="step-lbl">${esc(q.label)}</span>
+        </button>`;
+      }).join("")}
+    </nav>`;
+
+  return `
+    <div class="write-page-wrap">
+      <div class="write-header">
+        <p class="step" style="margin-bottom:2px">Question ${step + 1} of 3 · Your Thinking</p>
+        <h1 tabindex="-1" style="margin-bottom:6px">What do you think?</h1>
+      </div>
+      ${stepperHtml}
+      <div class="write-wizard-grid">
+        <div class="card write-card">
+          <div class="write-prompt-header">
+            <span class="write-qtag">${esc(curr.title)}</span>
+            <h2>${esc(curr.prompt)}</h2>
+          </div>
+          <p class="starter">Start like this: “${esc(curr.starter)}…”</p>
+          <textarea id="${curr.id}" data-field="${curr.id}" rows="4"
+            placeholder="${esc(curr.starter)}…">${esc(val)}</textarea>
+          <p class="write-hint-text">💡 <em>${esc(curr.hint)}</em></p>
+        </div>
+
+        <div class="card bank-card">
+          <div class="bank-head">
+            <strong>Word bank — tap to add</strong>
+            <span class="muted" style="font-size:.82rem">Tap any word to add it into your answer</span>
+          </div>
+          <div class="bank">
+            ${WORD_BANK.map(w => `<button type="button" class="word" data-action="word" data-w="${esc(w)}">${esc(w)}</button>`).join("")}
+          </div>
+        </div>
+      </div>
+
+      <div class="actions write-actions">
+        ${step === 0
+          ? `<button class="btn secondary" data-action="go" data-screen="pattern">← The pattern</button>`
+          : `<button class="btn secondary" data-action="prevwrite">← Question ${step}</button>`}
+        <div style="flex:1"></div>
+        ${step < 2
+          ? `<button class="btn big" data-action="nextwrite">Question ${step + 2} of 3 →</button>`
+          : `<button class="btn big" data-action="go" data-screen="report">See my report →</button>`}
+      </div>
+    </div>`;
 }
 
 function screenReport(){
@@ -1304,7 +1409,14 @@ function screenReport(){
     return `<tr><td>${isl.flag} <strong>${esc(isl.name)}</strong><br><span class="muted">${isl.zone} · ${esc(r.siteName)}</span></td>
       <td class="num">${r.final}</td><td class="stars">${stars(rm.stars)}<br><span class="muted" style="font-weight:600">${rm.word}</span></td></tr>`;
   }).join("");
-  const said = (t,v)=>`<h3>${t}</h3><div class="written">${v && v.trim() ? esc(v) : "<em>(not answered yet)</em>"}</div>`;
+  const said = (t, v, stepIdx) => `
+    <div class="report-thought-item">
+      <div class="report-thought-head">
+        <h3>${t}</h3>
+        <button type="button" class="btn secondary sm edit-answer-btn" data-action="editwrite" data-step="${stepIdx}" aria-label="Change answer for question ${stepIdx + 1}">✏️ Change</button>
+      </div>
+      <div class="written">${v && v.trim() ? esc(v) : "<em>(not answered yet)</em>"}</div>
+    </div>`;
   return `<p class="step">My report</p>
     <h1 tabindex="-1">My island report</h1>
     <div class="card"><h2 style="margin-top:0">Where I settled</h2>
@@ -1312,15 +1424,15 @@ function screenReport(){
         <thead><tr><th>Island</th><th style="text-align:right">People</th><th>Room &amp; cost</th></tr></thead>
         <tbody>${rows}</tbody></table></div></div>
     <div class="card"><h2 style="margin-top:0">What I think</h2>
-      ${said("Most Australians live near the coast because…",R.q1)}
-      ${said("People live inland because…",R.q2)}
-      ${said("I would live…",R.q3)}</div>
+      ${said("Most Australians live near the coast because…", R.q1, 0)}
+      ${said("People live inland because…", R.q2, 1)}
+      ${said("I would live…", R.q3, 2)}</div>
     <div class="card"><h2 style="margin-top:0">One last thing</h2>
       <p>${COPY.closing1}</p><p>${COPY.closing2}</p></div>
     <div class="actions">
       <button class="btn" data-action="print">🖨️ Print my report</button>
       <button class="btn secondary" data-action="copy">📋 Copy my writing</button>
-      <button class="btn secondary" data-action="go" data-screen="write">← Change my answers</button>
+      <button class="btn secondary" data-action="editwrite" data-step="0">← Change my answers</button>
     </div>
     <div class="actions"><button class="btn secondary" data-action="restart">Play again</button></div>`;
 }
@@ -1563,11 +1675,13 @@ function getScreenSpeechText(){
     ];
   }
   if(s==="write"){
+    const step = Math.min(2, Math.max(0, state.writeStep || 0));
+    const item = WRITE_QUESTIONS[step];
     return [
-      "What do you think? Write in your own words. Tap any word in the word bank to add it.",
-      "Question 1: Most Australians live near the coast. Why?",
-      "Question 2: Some Australians live far inland. Why did people move inland in the past, or live there today?",
-      "Question 3: Where would you live, and why?"
+      `Question ${step + 1} of 3.`,
+      item.prompt,
+      `Start like this: ${item.starter}...`,
+      "Write in your own words. Tap any word in the word bank to add it."
     ];
   }
   if(s==="report"){
@@ -1883,7 +1997,10 @@ function getPreRenderedAudioTrack(){
   }
   if(s === "australia") return "audio/australia.wav";
   if(s === "pattern") return "audio/pattern.wav";
-  if(s === "write") return "audio/write.wav";
+  if(s === "write"){
+    const step = Math.min(2, Math.max(0, state.writeStep || 0));
+    return `audio/write_q${step + 1}.wav`;
+  }
   return null;
 }
 
@@ -2259,6 +2376,14 @@ function handle(el){
   if(a==="go"){
     const to=el.dataset.screen;
     if(to==="arch") return setState({screen:"arch",islandId:null,openSite:null,terrainNote:null});
+    if(to==="write"){
+      const ta = document.querySelector('textarea[data-field]');
+      if(ta && ta.dataset.field){
+        state.reflection = {...state.reflection, [ta.dataset.field]: ta.value};
+        save();
+      }
+      return setState({screen:"write", writeStep: (typeof state.writeStep === "number" ? state.writeStep : 0)});
+    }
     return setState({screen:to});
   }
   if(a==="island")  return setState({islandId:el.dataset.id,screen:"island",openSite:null,terrainNote:null});
@@ -2283,6 +2408,31 @@ function handle(el){
     return setState({mapPicks:picks});
   }
   if(a==="nextlook") return setState({mapStep:state.mapStep+1});
+  if(a==="nextwrite"){
+    const ta = document.querySelector('textarea[data-field]');
+    if(ta && ta.dataset.field){
+      state.reflection = {...state.reflection, [ta.dataset.field]: ta.value};
+      save();
+    }
+    return setState({writeStep: Math.min(2, (state.writeStep || 0) + 1)});
+  }
+  if(a==="prevwrite"){
+    const ta = document.querySelector('textarea[data-field]');
+    if(ta && ta.dataset.field){
+      state.reflection = {...state.reflection, [ta.dataset.field]: ta.value};
+      save();
+    }
+    return setState({writeStep: Math.max(0, (state.writeStep || 0) - 1)});
+  }
+  if(a==="editwrite"){
+    const ta = document.querySelector('textarea[data-field]');
+    if(ta && ta.dataset.field){
+      state.reflection = {...state.reflection, [ta.dataset.field]: ta.value};
+      save();
+    }
+    const step = Math.min(2, Math.max(0, +el.dataset.step || 0));
+    return setState({screen: "write", writeStep: step});
+  }
   if(a==="print"){ stopSpeech(); return window.print(); }
   if(a==="copy")     return copyWriting();
   if(a==="word"){
@@ -2299,7 +2449,7 @@ function handle(el){
   if(a==="restart"){
     try{ sessionStorage.removeItem("sunriseIslands"); }catch(e){}
     state={screen:"intro",islandId:null,scouted:[],openSite:null,terrainNote:null,
-      run:null,completed:[],prediction:null,reflection:{q1:"",q2:"",q3:""},mapStep:0,mapPicks:[]};
+      run:null,completed:[],prediction:null,reflection:{q1:"",q2:"",q3:""},mapStep:0,mapPicks:[],writeStep:0};
     return render();
   }
 }

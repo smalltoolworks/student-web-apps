@@ -104,6 +104,18 @@ const AUDIO_TRACKS = [
     id: "write",
     text: "What do you think? Write in your own words. Tap any word in the word bank to add it. Question 1: Most Australians live near the coast. Why? Question 2: Some Australians live far inland. Why did people move inland in the past, or live there today? Question 3: Where would you live, and why?"
   },
+  {
+    id: "write_q1",
+    text: "Question 1 of 3: Most Australians live near the coast. Why? Start like this: Most Australians live near the coast because... Write in your own words. Tap any word in the word bank to add it."
+  },
+  {
+    id: "write_q2",
+    text: "Question 2 of 3: Some Australians live far inland. Why did people move inland in the past, or live there today? Start like this: People live inland because... Write in your own words. Tap any word in the word bank to add it."
+  },
+  {
+    id: "write_q3",
+    text: "Question 3 of 3: Where would you live, and why? Start like this: I would live... Write in your own words. Tap any word in the word bank to add it."
+  },
 
   // 2. Predict Screen
   {
