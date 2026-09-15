@@ -156,6 +156,11 @@ ul.cscores .dots{flex:0 0 auto}
 .z-Tropical{background:var(--trop)} .z-Desert{background:var(--desert)}
 .z-Grassland{background:var(--grass)} .z-Temperate{background:var(--temp)}
 
+/* navigation topbars */
+.screen-topbar{display:flex;align-items:center;gap:12px;margin:0 0 10px;flex-wrap:wrap}
+.screen-topbar h1{margin:0;font-size:clamp(1.2rem, 1.8vw, 1.5rem)}
+.screen-topbar .step{margin:0}
+
 /* map */
 .island-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px;flex-wrap:wrap}
 .island-nav-group{display:flex;align-items:center;gap:10px}
@@ -1196,7 +1201,10 @@ function screenArch(){
   const note = n===0 ? `Settle any <strong>two</strong> islands. Do more if you want to.`
     : n===1 ? `One done. Settle <strong>one more</strong>, then you can go and think.`
     : `${n} done. Settle more, or go and think about Australia.`;
-  return `<h1 tabindex="-1">${COPY.archH}</h1>
+  return `<div class="screen-topbar">
+      <button class="btn secondary sm" data-action="go" data-screen="intro" title="Back to start screen">← Start</button>
+      <h1 tabindex="-1">${COPY.archH}</h1>
+    </div>
     <p class="lede">${note}</p>
     ${state.completed.length===0 ? `<div class="climate-hint">
       <span class="hint-ic">💡</span><p>${COPY.climateLine}</p></div>` : ""}
@@ -1243,10 +1251,18 @@ function screenIsland(){
 }
 
 function screenPredict(){
-  const isl=currentIsland(), s=siteById(isl,state.run.siteId);
-  return `<p class="step">Guess first</p>
-    <h1 tabindex="-1">How many people in 3 years?</h1>
-    <div class="card"><p class="lede">20 settlers are moving to ${esc(s.name)}.</p>
+  const isl=currentIsland(), s=isl && state.run ? siteById(isl,state.run.siteId) : null;
+  const siteLetter = s ? ` · Place ${s.letter}` : "";
+  const siteName = s ? s.name : "your settlement";
+  const islTitle = isl ? `${isl.flag} ${esc(isl.name)}` : "Island";
+  return `<div class="screen-topbar">
+      <button class="btn secondary sm" data-action="cancelsettle" title="Back to map">← Back to map</button>
+      <div>
+        <p class="step" style="margin:0">${islTitle}${siteLetter}</p>
+        <h1 tabindex="-1" style="margin:2px 0 0">How many people in 3 years?</h1>
+      </div>
+    </div>
+    <div class="card"><p class="lede">20 settlers are moving to ${esc(siteName)}.</p>
     <p class="muted">There is no wrong guess.</p>
     <div class="choices four">${[{v:5,e:"😟"},{v:20,e:"😐"},{v:40,e:"🙂"},{v:60,e:"🤩"}]
       .map(o=>`<button class="choice" data-action="predict" data-v="${o.v}">
@@ -1254,11 +1270,16 @@ function screenPredict(){
 }
 
 function screenYear(){
-  const isl=currentIsland(), s=siteById(isl,state.run.siteId);
+  const isl=currentIsland(), s=isl && state.run ? siteById(isl,state.run.siteId) : null;
+  if(!isl || !state.run) return screenArch();
+  const siteName = s ? s.name : "Settlement";
   const i=state.run.yearIndex, y=isl.years[i], card=isl.cards[i], pick=state.run.cardChoice;
   const popNow = state.run.history.length ? state.run.history[state.run.history.length-1].after : START_POP;
   const head = `<div class="year-topbar">
-      <p class="step" style="margin:0">${isl.flag} ${esc(s.name)} · Year ${y.n} of ${isl.years.length} · ${popNow} people</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:4px">
+        <button class="btn secondary sm" data-action="cancelyear" title="Leave settlement and go back to map">← Back to map</button>
+        <p class="step" style="margin:0">${isl.flag} ${esc(siteName)} · Year ${y.n} of ${isl.years.length} · ${popNow} people</p>
+      </div>
       <h1 tabindex="-1" style="margin:2px 0 4px;font-size:clamp(1.25rem, 1.8vw, 1.5rem)">${esc(y.title)}</h1>
       <div class="banner year" style="margin:0 0 10px">${esc(y.headline)}</div>
     </div>`;
@@ -1319,8 +1340,13 @@ function screenResult(){
   const worst=scored.slice().sort((a,b)=>a.v-b.v)[0].f, best=scored.slice().sort((a,b)=>b.v-a.v)[0].f;
   const pred = done.prediction==null ? "" :
     `<p class="center">You guessed <strong>${done.prediction}</strong>. You got <strong>${done.final}</strong>.</p>`;
-  return `<p class="step">${isl.flag} ${esc(isl.name)} · ${esc(isl.zone)}</p>
-    <h1 tabindex="-1">${esc(s.name)}, 3 years on</h1>
+  return `<div class="screen-topbar">
+      <button class="btn secondary sm" data-action="go" data-screen="arch" title="Back to islands">← Islands</button>
+      <div>
+        <p class="step" style="margin:0">${isl.flag} ${esc(isl.name)} · ${esc(isl.zone)}</p>
+        <h1 tabindex="-1" style="margin:2px 0 0">${esc(s.name)}, 3 years on</h1>
+      </div>
+    </div>
     <div class="resultlayout">
       <div class="resultcol">
         <div class="card" style="margin-bottom:0">${meters(done.final)}
@@ -1389,8 +1415,13 @@ function screenAustralia(){
   }).join("");
   const cmp = AUS_COMPARE.map(c=>`<tr><td><strong>${c.city}</strong><br><span class="muted" style="font-size:.72rem">${c.where}</span></td>
     <td class="num">${c.people}</td><td class="cmp-room-cell"><div class="cmp-room"><span class="stars">${stars(c.stars)}</span><span class="cmp-room-text">${esc(c.room)}</span></div></td></tr>`).join("");
-  return `<p class="step">The real world</p>
-    <h1 tabindex="-1" style="font-size:clamp(1.15rem, 1.5vw, 1.4rem);margin:2px 0 6px">Now look at Australia</h1>
+  return `<div class="screen-topbar">
+      <button class="btn secondary sm" data-action="go" data-screen="arch" title="Back to islands">← Back to islands</button>
+      <div>
+        <p class="step" style="margin:0">The real world</p>
+        <h1 tabindex="-1" style="font-size:clamp(1.15rem, 1.5vw, 1.4rem);margin:2px 0 0">Now look at Australia</h1>
+      </div>
+    </div>
     <div class="aus-layout">
       <div class="aus-tables-col">
         <div class="card aus-card"><h2 style="margin:0 0 3px;font-size:.95rem;color:var(--teal)">🏝️ Your islands</h2>
@@ -1422,6 +1453,9 @@ function screenMaps(){
   const i = state.mapStep, item = MAP_LOOKS[i], pick = state.mapPicks[i];
   const answered = pick!==undefined && pick!==null;
   const last = i === MAP_LOOKS.length-1;
+  const backAction = i === 0 ? `data-action="go" data-screen="australia"` : `data-action="prevlook"`;
+  const backLabel = i === 0 ? "← Australia" : `← Question ${i}`;
+  const backTitle = i === 0 ? "Back to Australia temperature map" : `Back to question ${i}`;
   const opts = item.a.map((o,idx)=>{
     let cls="choice";
     if(answered) cls += o.ok ? " right" : (pick===idx ? " picked" : " other");
@@ -1429,10 +1463,13 @@ function screenMaps(){
       ${esc(o.t)}${answered&&o.ok?" ✓":""}</button>`;
   }).join("");
   return `<div class="maps-page-header">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap">
-        <div>
-          <p class="step" style="margin:0">Two real maps</p>
-          <h1 tabindex="-1" style="margin:2px 0 0;font-size:clamp(1.25rem, 1.8vw, 1.5rem)">Look at both maps</h1>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="btn secondary sm" ${backAction} title="${backTitle}">${backLabel}</button>
+          <div>
+            <p class="step" style="margin:0">Two real maps · Question ${i+1} of ${MAP_LOOKS.length}</p>
+            <h1 tabindex="-1" style="margin:2px 0 0;font-size:clamp(1.25rem, 1.8vw, 1.5rem)">Look at both maps</h1>
+          </div>
         </div>
         <p class="lede" style="margin:0;font-size:clamp(.85rem, 1vw, .95rem)">One map shows <strong>rain</strong>. The other shows <strong>people</strong>. Look at both to answer.</p>
       </div>
@@ -1469,9 +1506,11 @@ function screenMaps(){
           <h2 style="margin:0 0 10px;font-size:clamp(1rem, 1.25vw, 1.15rem);line-height:1.35">${esc(item.q)}</h2>
           <div class="choices">${opts}</div>
           ${answered?`<div class="feedback">${esc(item.why)}</div>
-            <div class="actions" style="margin-top:10px">${last
-              ? `<button class="btn big" style="width:100%" data-action="go" data-screen="pattern">See the pattern →</button>`
-              : `<button class="btn" style="width:100%" data-action="nextlook">Next question →</button>`}</div>`:""}
+            <div class="actions" style="margin-top:10px;justify-content:space-between">
+              <button class="btn secondary sm" ${backAction} title="${backTitle}">${backLabel}</button>
+              ${last
+                ? `<button class="btn big" style="flex:1" data-action="go" data-screen="pattern">See the pattern →</button>`
+                : `<button class="btn" style="flex:1" data-action="nextlook">Next question →</button>`}</div>`:""}
         </div>
       </div>
     </div>`;
@@ -1574,8 +1613,13 @@ function screenReport(){
       </div>
       <div class="written">${v && v.trim() ? esc(v) : "<em>(not answered yet)</em>"}</div>
     </div>`;
-  return `<p class="step">My report</p>
-    <h1 tabindex="-1">My island report</h1>
+  return `<div class="screen-topbar">
+      <button class="btn secondary sm" data-action="editwrite" data-step="2" title="Back to reflection writing">← Back to writing</button>
+      <div>
+        <p class="step" style="margin:0">My report</p>
+        <h1 tabindex="-1" style="margin:2px 0 0">My island report</h1>
+      </div>
+    </div>
     <div class="card"><h2 style="margin-top:0">Where I settled</h2>
       <div class="tablescroll"><table class="rank">
         <thead><tr><th>Island</th><th style="text-align:right">People</th><th>Room &amp; cost</th></tr></thead>
@@ -2585,7 +2629,7 @@ function handle(el){
   }
   if(a==="go"){
     const to=el.dataset.screen;
-    if(to==="arch") return setState({screen:"arch",islandId:null,openSite:null,terrainNote:null});
+    if(to==="arch") return setState({screen:"arch",islandId:null,openSite:null,terrainNote:null,run:null});
     if(to==="write"){
       const ta = document.querySelector('textarea[data-field]');
       if(ta && ta.dataset.field){
@@ -2608,6 +2652,19 @@ function handle(el){
     return setState({run:{islandId:state.islandId,siteId:el.dataset.site,yearIndex:0,history:[],cardChoice:null},
       prediction:null, screen: first?"predict":"year"});
   }
+  if(a==="cancelsettle"){
+    const isl = currentIsland();
+    const siteId = state.run ? state.run.siteId : state.openSite;
+    state.run = null;
+    state.prediction = null;
+    return setState({screen:"island", openSite: siteId || (isl ? isl.sites[0].id : null)});
+  }
+  if(a==="cancelyear"){
+    const isl = currentIsland();
+    const siteId = state.run ? state.run.siteId : state.openSite;
+    state.run = null;
+    return setState({screen:"island", openSite: siteId || (isl ? isl.sites[0].id : null)});
+  }
   if(a==="predict"){ state.prediction=+el.dataset.v; return setState({screen:"year"}); }
   if(a==="card")     return chooseCard(+el.dataset.i);
   if(a==="nextyear") return setState({run:{...state.run,yearIndex:state.run.yearIndex+1,cardChoice:null}});
@@ -2617,6 +2674,7 @@ function handle(el){
     const picks=state.mapPicks.slice(); picks[state.mapStep]=+el.dataset.i;
     return setState({mapPicks:picks});
   }
+  if(a==="prevlook") return setState({mapStep: Math.max(0, (state.mapStep || 0) - 1)});
   if(a==="nextlook") return setState({mapStep:state.mapStep+1});
   if(a==="nextwrite"){
     const ta = document.querySelector('textarea[data-field]');
