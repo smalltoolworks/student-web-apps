@@ -30,6 +30,7 @@ h3{font-size:1.05rem;margin:0 0 .25em}
 p{margin:0 0 .7em;max-width:65ch}
 .lede{font-size:clamp(.98rem, 1.35vw, 1.15rem);margin:0 0 .5em}
 .lede.how{color:var(--ink-soft);margin:-.2em 0 .6em}
+.lede.how.solo{margin-top:0}
 .muted{color:var(--ink-soft)}
 .center{text-align:center}
 
@@ -1342,12 +1343,16 @@ function screenArch(){
   }).join("");
   const n = state.completed.length;
   const how = archHow(n);
+  // Deliberate: the "settle any two" note is SPOKEN but not drawn on the first
+  // visit, to keep the screen short enough for a Year 3 reader. From one island
+  // on it appears, because by then it is progress feedback, not preamble.
+  const note = n === 0 ? "" : archNote(n);
   return `<div class="screen-topbar">
       <button class="btn secondary sm" data-action="go" data-screen="intro" title="Back to start screen">← Start</button>
       <h1 tabindex="-1">${COPY.archH}</h1>
     </div>
-    <p class="lede">${archNote(n)}</p>
-    ${how ? `<p class="lede how">${how}</p>` : ""}
+    ${note ? `<p class="lede">${note}</p>` : ""}
+    ${how ? `<p class="lede how${note ? "" : " solo"}">${how}</p>` : ""}
     ${state.completed.length===0 ? `<div class="climate-hint">
       <span class="hint-ic">💡</span><p>${COPY.climateLine}</p></div>` : ""}
     <div class="isles">${cards}</div>
