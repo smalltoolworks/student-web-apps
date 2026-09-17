@@ -15,3 +15,8 @@ Thumbs.db
 # Dependencies
 node_modules/
 
+
+# Secrets - never commit API keys
+.env
+.env.*
+*.key
