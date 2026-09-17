@@ -20,6 +20,8 @@ let force = args.includes("--force");
 // so a missing key can never silently ship a mismatched voice again.
 let allowSay = args.includes("--allow-say");
 let reseed = args.includes("--reseed");
+// See what a run WOULD record, and what it would cost in quota, before spending any.
+let dry = args.includes("--dry");
 
 for (const arg of args) {
   if (arg.startsWith("--key=")) apiKey = arg.slice(6).trim();
@@ -51,6 +53,7 @@ Options:
   --key="AIzaSy..."     Provide API key as an argument
   --voice="Aoede"       Voice name (Aoede, Puck, Kore, Charon, Fenrir)
   --model="gemini-2.5-flash-preview-tts"
+  --dry                 List what needs recording and exit. Spends no quota.
   --force               Re-generate files even if they already exist
   --reseed              Re-record tracks that exist but have no manifest entry
                         (default: adopt them, to conserve the 100/day quota)
@@ -267,7 +270,9 @@ function resultTracks() {
       card.opts.forEach((opt, idx) => {
         tracks.push({
           id: `card_${isl.id}_y${year + 1}_${idx}`,
-          text: cleanForSpeech(`In year ${year + 1} you chose: ${opt.t}. ${opt.why}`)
+          // Position-neutral: the year screen replays these in the student's own
+          // ranked order, so they cannot say "you chose" or name a position.
+          text: cleanForSpeech(`${opt.t}. ${opt.why}`)
         });
       });
     });
@@ -307,7 +312,7 @@ function islandTracks() {
       tracks.push({
         id: `${isl.id}_y${yr.n}`,
         text: cleanForSpeech(`${isl.name}. Year ${yr.n} of 3. ${yr.title}. ${sentence(yr.headline)} `
-          + `${card.q} Think about the climate here. ${opts}`)
+          + `${card.q} Put them in order. Tap the best one first. ${opts}`)
       });
     });
   });
@@ -469,6 +474,18 @@ async function synthesizeWithRetry(track, attempts = 4) {
 }
 
 async function run() {
+  if (dry) {
+    const stale = AUDIO_TRACKS.filter(t => {
+      const out = path.join(OUTPUT_DIR, `${t.id}.wav`);
+      const exists = fs.existsSync(out) && fs.statSync(out).size > 1000;
+      return !exists || manifest[t.id] !== textHash(t.text);
+    });
+    console.log(`\nDRY RUN - nothing recorded.\n`);
+    console.log(`${stale.length} of ${AUDIO_TRACKS.length} tracks would be recorded:`);
+    stale.forEach(t => console.log(`   ${t.id}`));
+    console.log(`\nThat is ${stale.length} API requests (free tier allows 100/day).\n`);
+    return;
+  }
   console.log(`Starting audio check/generation for ${AUDIO_TRACKS.length} tracks...`);
   let count = 0;
   for (const track of AUDIO_TRACKS) {

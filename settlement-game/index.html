@@ -358,6 +358,18 @@ svg.map{width:100%;max-height:min(300px, 38vh);height:auto;display:block;touch-a
 .opt.chosen{border-color:var(--teal);background:#eef6fb}
 .opt.best{border-color:var(--good);background:#e4f4ea}
 .opt.dim{opacity:.5}
+/* ranking */
+.opt.placed{border-color:var(--teal);background:#eef6fb;cursor:default}
+.mark.rankno{font-size:.8rem;font-weight:800;color:var(--teal);flex:0 0 auto;min-width:2.9em;
+  background:#fff;border:2px solid var(--teal);border-radius:999px;padding:2px 6px;line-height:1.45;
+  letter-spacing:.01em}
+.opt.ranked{align-items:flex-start;min-height:0;padding:11px 14px;cursor:default}
+.opt.ranked .rankbody{display:flex;flex-direction:column;gap:2px;flex:1}
+.opt.ranked .rankname{font-weight:800}
+.opt.ranked .rankwhy{font-size:.88rem;font-weight:400;color:var(--ink-soft);line-height:1.4}
+.opt.ranked.best{border-color:var(--good);background:#e4f4ea}
+.opt.ranked.worstopt{border-color:#e0c6bf;background:#fdf2f0}
+.opt.ranked.worstopt .mark.rankno{color:#b3402a;border-color:#dba99e}
 .delta{margin-left:auto;font-weight:800;white-space:nowrap}
 .feedback{border-radius:var(--r);padding:14px 18px;margin-top:10px;font-weight:600;
   background:#e4f4ea;border:2px solid var(--good)}
@@ -764,17 +776,17 @@ const ISLANDS = Object.freeze([
           {n:3,title:"Cyclone!",doubles:"shelter",headline:"A cyclone hits. Shelter counts twice."}],
    cards:[
      {q:"How should we build our houses?", fix:"shelter", opts:[
-       {t:"Thick mud walls", d:1, why:"Helps with heat, but holds the damp in."},
-       {t:"On stilts, off the wet ground", d:3, why:"Stilts keep homes above the flood. Darwin houses do this."},
-       {t:"Low on the ground", d:-2, why:"The wet season runs straight through them."}]},
+       {t:"Thick mud walls", d:1, why:"Cool and solid \u2014 but they hold the damp in, and mould follows."},
+       {t:"On stilts, off the wet ground", d:3, why:"Stilts keep homes above the flood and catch the sea breeze. Darwin houses do this."},
+       {t:"Low on the ground", d:-2, why:"Quick to build and shady \u2014 but the wet season runs straight through them."}]},
      {q:"Six weeks of rain. The food is going mouldy.", fix:"humidity", opts:[
-       {t:"Cover it with palm leaves", d:1, why:"Keeps rain off. The air is still wet."},
-       {t:"Bury it to keep it cool", d:-2, why:"Warm wet ground rots food even faster."},
-       {t:"Lift the store up and dry food by the fire", d:3, why:"In wet air, food must stay up high and dry."}]},
+       {t:"Cover it with palm leaves", d:1, why:"Keeps the rain off \u2014 but the air underneath is still wet."},
+       {t:"Bury it to keep it cool", d:-2, why:"Underground IS cooler \u2014 but warm wet soil rots food even faster."},
+       {t:"Lift the store up and dry food by the fire", d:3, why:"In wet air, food must stay high and dry. Smoke keeps it good for months."}]},
      {q:"A cyclone is coming!", fix:"shelter", opts:[
-       {t:"Shelter in the rock cave", d:3, why:"Solid rock, above the flood. The safest place."},
-       {t:"Tie the roofs down and stay", d:1, why:"Cyclone winds still rip roofs off."},
-       {t:"Go to the beach and watch", d:-2, why:"Cyclones push the sea onto the shore."}]}]},
+       {t:"Shelter in the rock cave", d:3, why:"Solid rock, above the flood. The safest place on the island."},
+       {t:"Tie the roofs down and stay", d:1, why:"Saves some homes \u2014 but cyclone winds still tear roofs away."},
+       {t:"Rush down and save the boats", d:-2, why:"The boats are worth a lot \u2014 but a cyclone pushes the sea right over the shore."}]}]},
 
   /* ---------------- DESERT ---------------- */
   {id:"red", name:"Red Island", flag:"🏜️", zone:"Desert", like:"like Alice Springs",
@@ -807,16 +819,16 @@ const ISLANDS = Object.freeze([
    cards:[
      {q:"Hot days, freezing nights. What do we build with?", fix:"temp", opts:[
        {t:"A light shade shelter", d:1, why:"Good by day. Freezing by morning."},
-       {t:"Timber huts", d:-2, why:"There are no trees in a desert."},
+       {t:"Timber huts", d:-2, why:"Shady by day \u2014 but there are no trees out here to build with."},
        {t:"Thick mud bricks", d:3, why:"Thick walls stay cool by day and warm at night."}]},
-     {q:"45°C for two weeks!", fix:"temp", opts:[
-       {t:"Work at dawn, rest at midday", d:1, why:"Smart. But the shade is still 45°C."},
+     {q:"45\u00b0C for two weeks!", fix:"temp", opts:[
+       {t:"Work at dawn, rest at midday", d:1, why:"Smart \u2014 but even the shade is 45 degrees."},
        {t:"Dig cool rooms into the rock", d:3, why:"Underground stays cool. Coober Pedy really does this."},
-       {t:"Keep working all day", d:-2, why:"People collapse in that heat."}]},
+       {t:"Wet the roofs to cool them down", d:-2, why:"It does cool the air \u2014 for an hour. Then the water is gone, and you cannot spare it."}]},
      {q:"No rain for a year. The waterhole is shrinking.", fix:"water", opts:[
-       {t:"Dig a deep well", d:3, why:"Water underground lasts longest. Deep water wells keep inland towns alive."},
-       {t:"Carry water from the hills", d:1, why:"It works, but it takes all day."},
-       {t:"Wait for rain", d:-2, why:"Rain may not come for another year."}]}]},
+       {t:"Dig a deep well", d:3, why:"Water underground lasts longest. Deep wells keep inland towns alive."},
+       {t:"Carry water from the hills", d:1, why:"It works \u2014 but it takes all day, every day."},
+       {t:"Line the waterhole with clay", d:-2, why:"Clever \u2014 it does slow the soaking. But the sun still takes what is left."}]}]},
 
   /* ---------------- GRASSLAND ---------------- */
   {id:"gold", name:"Gold Island", flag:"🌾", zone:"Grassland", like:"like Dubbo",
@@ -848,15 +860,16 @@ const ISLANDS = Object.freeze([
           {n:3,title:"Grass Fire!",doubles:"shelter",headline:"Dry grass and hot wind. Shelter counts twice."}],
    cards:[
      {q:"Grass everywhere. What do we do with it?", fix:"plants", opts:[
-       {t:"Fish instead", d:1, why:"There are fish. The real riches are on the plains."},
+       {t:"Fish instead", d:1, why:"There are fish in the creek \u2014 but the real riches here are on the plains."},
        {t:"Graze sheep and cattle", d:3, why:"Too dry for thirsty crops, but grass feeds animals. That is why inland Australia runs sheep and cattle."},
-       {t:"Plough it for thirsty crops", d:-2, why:"Not enough rain. They dry up and die."}]},
+       {t:"Plough it for thirsty crops", d:-2, why:"Rich soil, and it looks perfect \u2014 but there is not enough rain, and the crops dry up."}]},
      {q:"The creek is low and summer has months to go.", fix:"water", opts:[
        {t:"Build a dam to store water", d:3, why:"Save water in the wet, use it in the dry. Farm dams dot inland Australia."},
-       {t:"Wait for rain", d:-2, why:"The dry spell can last for months."},{t:"Dig for water in the dry creek", d:1, why:"Finds a little water, then dries out."}]},
+       {t:"Sink a bore to the deep water", d:-2, why:"There IS water down there \u2014 but it comes up salty, and salt kills the grass."},
+       {t:"Dig for water in the dry creek", d:1, why:"Finds a little water in the sand \u2014 then that dries out too."}]},
      {q:"Smoke on the horizon!", fix:"shelter", opts:[
-       {t:"Clear a bare strip", d:1, why:"It helps, but embers blow across."},
-       {t:"Fight it when it comes", d:-2, why:"A grass fire moves faster than you can run."},
+       {t:"Clear a bare strip", d:1, why:"It slows the fire \u2014 but embers blow straight across."},
+       {t:"Fight it when it comes", d:-2, why:"Brave \u2014 but a grass fire moves faster than you can run."},
        {t:"Burn small patches early", d:3, why:"Small cool fires stop one big fire. Aboriginal peoples have done this for thousands of years."}]}]},
 
   /* ---------------- TEMPERATE ---------------- */
@@ -889,17 +902,17 @@ const ISLANDS = Object.freeze([
           {n:3,title:"Winter Rain",doubles:"shelter",headline:"Rain all winter. Shelter counts twice."}],
    cards:[
      {q:"Where do the houses go?", fix:"shelter", opts:[
-       {t:"High on the windy hill", d:1, why:"Safe and dry, but a long walk to water."},
-       {t:"Right on the riverbank", d:-2, why:"Winter rain lifts the river over the bank."},
+       {t:"High on the windy hill", d:1, why:"Safe and dry \u2014 but a long walk to water, every day."},
+       {t:"Right on the riverbank", d:-2, why:"Water at your door \u2014 but winter rain lifts the river over the bank."},
        {t:"Near the river, above the flood line", d:3, why:"Water close by, and safe from winter floods."}]},
      {q:"A long, warm summer.", fix:"plants", opts:[
        {t:"Plant grain and vegetables", d:3, why:"A long growing season. Temperate Australia grows most of our food."},
-       {t:"Plant nothing yet", d:-2, why:"A whole growing season wasted."},
-       {t:"Plant fruit trees only", d:1, why:"They do well, but take years to fruit."}]},
+       {t:"Clear the gum trees for more fields", d:-2, why:"More room to plant \u2014 but the bare soil washes away in the winter rain."},
+       {t:"Plant fruit trees only", d:1, why:"They do well here \u2014 but they take years to fruit."}]},
      {q:"Rain all winter.", fix:"shelter", opts:[
-       {t:"Flat roofs to catch the rain", d:-2, why:"Flat roofs pool water and leak."},
+       {t:"Flat roofs to catch the rain", d:-2, why:"Free water, caught where you need it \u2014 but flat roofs pool and leak."},
        {t:"Sloped roofs and drains", d:3, why:"Steady rain needs somewhere to run."},
-       {t:"Do nothing", d:1, why:"Gentle rain, but weeks of it soaks in."}]}]},
+       {t:"Dig ditches around the huts", d:1, why:"Carries the water away \u2014 but the roofs still leak."}]}]},
 ]);
 
 /* The inland trade-off, in real numbers. */
@@ -1025,6 +1038,26 @@ function yearLedger(scores, island, i, cardFix, cardDelta){
   });
   return {year:y, rows, factorTotal:rows.reduce((a,b)=>a+b.value,0)};
 }
+/* Ranking, not picking. Two things earn credit and they are independent: putting
+   the BEST option first, and knowing which one is WORST. So a student who spots
+   the trap but hesitates over the top two still scores better than a lucky guess.
+   Range -3..+3. Every option has a real case for it, which is what makes the
+   order worth thinking about. */
+const RANK_BEST  = [2, 0, -2];   // credit for where the best option was placed
+const RANK_WORST = [-1, 0, 1];   // credit for where the worst option was placed
+function rankScore(card, order){
+  const ds = card.opts.map(o => o.d);
+  const best = ds.indexOf(Math.max(...ds));
+  const worst = ds.indexOf(Math.min(...ds));
+  return RANK_BEST[order.indexOf(best)] + RANK_WORST[order.indexOf(worst)];
+}
+const rankVerdict = n =>
+  n === 3 ? "Perfect order!"
+  : n === 2 ? "So close — you put the best one first."
+  : n === 1 ? "Good thinking — you knew which one was worst."
+  : n === -1 ? "Nearly — but look again at what this climate takes away."
+  : "Have another look at the climate here.";
+
 /* What the choice was really worth this year - doubled too, if it hit the
    doubled factor. This is the number the result screen reports back. */
 function cardEffect(L, cardFix, cardDelta){
@@ -1420,7 +1453,8 @@ function screenYear(){
   const isl=currentIsland(), s=isl && state.run ? siteById(isl,state.run.siteId) : null;
   if(!isl || !state.run) return screenArch();
   const siteName = s ? s.name : "Settlement";
-  const i=state.run.yearIndex, y=isl.years[i], card=isl.cards[i], pick=state.run.cardChoice;
+  const i=state.run.yearIndex, y=isl.years[i], card=isl.cards[i];
+  const order=state.run.ranking||[], ranked=order.length===card.opts.length;
   const popNow = state.run.history.length ? state.run.history[state.run.history.length-1].after : START_POP;
   const head = `<div class="year-topbar">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:4px">
@@ -1431,20 +1465,34 @@ function screenYear(){
       <div class="banner year" style="margin:0 0 10px">${esc(y.headline)}</div>
     </div>`;
 
-  if(pick===null || pick===undefined){
+  const PLACE = ["1st","2nd","3rd"];
+  if(!ranked){
+    // Only two taps are ever needed - the last option places itself.
+    const nextWord = order.length===0 ? "best" : "next best";
     return head + `<div class="decision"><h2>${esc(card.q)}</h2>
-      <p class="muted">Think about the climate here.</p>
-      <div class="opts">${card.opts.map((o,idx)=>
-        `<button class="opt" data-action="card" data-i="${idx}"><span class="mark">→</span><span>${esc(o.t)}</span></button>`).join("")}
-      </div></div>`;
+      <p class="muted">Put them in order. Tap the <strong>${nextWord}</strong> one.</p>
+      <div class="opts">${card.opts.map((o,idx)=>{
+        const at = order.indexOf(idx);
+        return at > -1
+          ? `<div class="opt placed"><span class="mark rankno">${PLACE[at]}</span><span>${esc(o.t)}</span></div>`
+          : `<button class="opt" data-action="rank" data-i="${idx}"><span class="mark">→</span><span>${esc(o.t)}</span></button>`;
+      }).join("")}
+      </div>
+      ${order.length ? `<button class="btn secondary sm" data-action="rankreset" style="margin-top:10px">↺ Start again</button>` : ""}
+      </div>`;
   }
 
   const rec=state.run.history[state.run.history.length-1];
-  const chosen=card.opts[pick], bestD=Math.max(...card.opts.map(o=>o.d)), best=chosen.d===bestD;
-  const optsHtml = card.opts.map((o,idx)=>{
-    const cls = idx===pick ? (best?"opt best":"opt chosen") : "opt dim";
-    return `<div class="${cls}"><span class="mark">${idx===pick?(best?"✓":"•"):"·"}</span>
-      <span>${esc(o.t)}</span>
+  const bestD=Math.max(...card.opts.map(o=>o.d));
+  const topChoice=card.opts[order[0]];
+  // Every reason is shown, not just the one they took. A student who ranked the
+  // shade shelter first still gets told what the mud bricks would have done.
+  const optsHtml = order.map((oi,at)=>{
+    const o=card.opts[oi], top=o.d===bestD;
+    return `<div class="opt ranked ${top?"best":(o.d<0?"worstopt":"")}">
+      <span class="mark rankno">${PLACE[at]}</span>
+      <span class="rankbody"><span class="rankname">${esc(o.t)}</span>
+        <span class="rankwhy">${esc(o.why)}</span></span>
       <span class="delta ${o.d>0?"plus":(o.d<0?"minus":"")}">${o.d>0?"+":""}${o.d}</span></div>`;
   }).join("");
   const sgn = n => (n>0?"+":"")+n;
@@ -1458,7 +1506,7 @@ function screenYear(){
       if(r.doubled) calc += `<span class="x2">×2</span>`;
       calc += " ";
     }
-    const tag = r.fix ? `<div class="fixtag">${r.fix>0?"✓":"✕"} Your choice: ${esc(chosen.t)}</div>` : "";
+    const tag = r.fix ? `<div class="fixtag">${r.fix>0?"✓":"✕"} Your order — you put ${esc(topChoice.t)} first</div>` : "";
     const cls = [r.doubled?"doubled":"", r.fix?"fixed":""].filter(Boolean).join(" ");
     return `<tr class="${cls}">
       <td><span class="ledger-ic">${r.emoji}</span> <strong>${r.label}</strong> <span class="muted">${r.word}</span>${tag}</td>
@@ -1471,7 +1519,7 @@ function screenYear(){
       <div class="decision" style="margin-bottom:0">
         <h2 style="font-size:1.02rem;margin-top:0">${esc(card.q)}</h2>
         <div class="opts">${optsHtml}</div>
-        <div class="feedback ${best?"":"soft"}">${best?"✓ ":""}${esc(chosen.why)}</div>
+        <div class="feedback ${rec.cardDelta>0?"":"soft"}">${rec.cardDelta>0?"✓ ":""}${esc(rankVerdict(rec.cardDelta))}</div>
       </div>
       <div class="card ledgercard" style="margin-bottom:0">
         <table class="ledger">
@@ -1992,25 +2040,26 @@ function getScreenSpeechText(){
     if(!isl || !state.run) return [];
     const site = siteById(isl, state.run.siteId);
     const siteName = site ? site.name : "";
-    const i = state.run.yearIndex, y = isl.years[i], card = isl.cards[i], pick = state.run.cardChoice;
+    const i = state.run.yearIndex, y = isl.years[i], card = isl.cards[i];
+    const ranked = (state.run.ranking || []).length === card.opts.length;
     const popNow = state.run.history.length ? state.run.history[state.run.history.length-1].after : START_POP;
-    if(pick === null || pick === undefined){
+    if(!ranked){
       return [
         `${isl.name}${siteName ? ", " + siteName : ""}. Year ${y.n} of ${isl.years.length}. Current population: ${popNow} people.`,
         `${y.title}. ${y.headline}`,
         card.q,
-        "Think about the climate here.",
+        "Put them in order. Tap the best one first.",
         `Choice 1: ${card.opts[0].t}.`,
         `Choice 2: ${card.opts[1].t}.`,
         `Choice 3: ${card.opts[2].t}.`
       ];
     }
     const rec = state.run.history[state.run.history.length-1];
-    const chosen = card.opts[pick];
+    const ord = rec.ranking || [];
     return [
       `Year ${y.n}: ${y.title}.`,
-      `You chose: ${chosen.t}.`,
-      chosen.why,
+      rankVerdict(rec.cardDelta),
+      ...ord.map((oi,at) => `${["First","Second","Third"][at]}: ${card.opts[oi].t}. ${card.opts[oi].why}`),
       `Population changed from ${rec.before} to ${rec.after} people.`,
       rec.after === 0 ? "The last people have moved on." : "Tap Next Year to continue."
     ];
@@ -2035,7 +2084,7 @@ function getScreenSpeechText(){
     (done.choices || []).forEach((idx, year) => {
       const card = isl.cards && isl.cards[year];
       const opt = card && idx != null ? card.opts[idx] : null;
-      if(opt) text.push(`In year ${year + 1} you chose: ${opt.t}. ${opt.why}`);
+      if(opt) text.push(`${opt.t}. ${opt.why}`);
     });
     if(best && worst){
       text.push(`Best thing: ${best.label}. Hardest thing: ${worst.label}.`);
@@ -2445,10 +2494,11 @@ function getPreRenderedAudioTrack(){
   if(s === "year"){
     const isl = currentIsland();
     if(!isl || !state.run) return null;
-    if(state.run.cardChoice === null || state.run.cardChoice === undefined){
-      return `audio/${isl.id}_y${state.run.yearIndex + 1}.wav`;
+    const yr = state.run.yearIndex + 1, ord = state.run.ranking || [];
+    if(ord.length !== (isl.cards[state.run.yearIndex] || {opts:[]}).opts.length){
+      return `audio/${isl.id}_y${yr}.wav`;
     }
-    return `audio/card_${isl.id}_y${state.run.yearIndex + 1}_${state.run.cardChoice}.wav`;
+    return ord.map(k => `audio/card_${isl.id}_y${yr}_${k}.wav`);
   }
   if(s === "maps" || s === "australia"){
     return `audio/map_q${Math.min(3, Math.max(1, (state.mapStep || 0) + 1))}.wav`;
@@ -2823,15 +2873,26 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeLightbox(); }
 /* ============================================================
    7. EVENTS
    ============================================================ */
-function chooseCard(idx){
+/* One tap places the best, a second places the next best, and the third option
+   places itself - so a three-way ranking costs a Year 3 student two decisions. */
+function rankPick(idx){
   const isl=currentIsland(), s=siteById(isl,state.run.siteId), i=state.run.yearIndex;
-  const card=isl.cards[i], delta=card.opts[idx].d;
+  const card=isl.cards[i];
+  const order=[...(state.run.ranking||[])];
+  if(order.includes(idx) || order.length>=card.opts.length) return;
+  order.push(idx);
+  if(order.length===card.opts.length-1){
+    order.push(card.opts.map((_,k)=>k).find(k=>!order.includes(k)));
+  }
+  if(order.length<card.opts.length) return setState({run:{...state.run,ranking:order}});
+
+  const delta=rankScore(card,order);
   const L=yearLedger(s.scores,isl,i,card.fix,delta);
   const before=state.run.history.length?state.run.history[state.run.history.length-1].after:START_POP;
   const total=L.factorTotal;
-  const rec={...L,cardIdx:idx,cardDelta:delta,cardFix:card.fix,
+  const rec={...L,ranking:order,cardIdx:order[0],cardDelta:delta,cardFix:card.fix,
              cardEffect:cardEffect(L,card.fix,delta),total,before,after:Math.max(0,before+total)};
-  setState({run:{...state.run,cardChoice:idx,history:[...state.run.history,rec]}});
+  setState({run:{...state.run,ranking:order,history:[...state.run.history,rec]}});
 }
 function finishRun(){
   const isl=currentIsland(), s=siteById(isl,state.run.siteId);
@@ -2839,9 +2900,10 @@ function finishRun(){
   const final=pops[pops.length-1];
   const cardTotal=state.run.history.reduce((a,h)=>a+(h.cardEffect||0),0);
   // Keep the actual decisions so the result screen can explain what they caused.
-  const choices=state.run.history.map(h=>h.cardIdx);
+  const choices=state.run.history.map(h=>h.cardIdx);          // what they ranked FIRST
+  const orders=state.run.history.map(h=>h.ranking||null);     // the full order, for the recap
   setState({completed:[...state.completed,{islandId:isl.id,siteId:s.id,siteName:s.name,
-      final,pops,cardTotal,choices,prediction:state.prediction}],
+      final,pops,cardTotal,choices,orders,prediction:state.prediction}],
     run:null,openSite:null,terrainNote:null,prediction:null,screen:"result"});
 }
 // Every textarea on the screen, not just the first - Q3 renders three.
@@ -2910,7 +2972,7 @@ function handle(el){
   }
   if(a==="settle"){
     const first = state.completed.length===0;
-    return setState({run:{islandId:state.islandId,siteId:el.dataset.site,yearIndex:0,history:[],cardChoice:null},
+    return setState({run:{islandId:state.islandId,siteId:el.dataset.site,yearIndex:0,history:[],ranking:[]},
       prediction:null, screen: first?"predict":"year"});
   }
   if(a==="cancelsettle"){
@@ -2927,8 +2989,9 @@ function handle(el){
     return setState({screen:"island", openSite: siteId || (isl ? isl.sites[0].id : null)});
   }
   if(a==="predict"){ state.prediction=+el.dataset.v; return setState({screen:"year"}); }
-  if(a==="card")     return chooseCard(+el.dataset.i);
-  if(a==="nextyear") return setState({run:{...state.run,yearIndex:state.run.yearIndex+1,cardChoice:null}});
+  if(a==="rank")     return rankPick(+el.dataset.i);
+  if(a==="nextyear") return setState({run:{...state.run,yearIndex:state.run.yearIndex+1,ranking:[]}});
+  if(a==="rankreset") return setState({run:{...state.run,ranking:[]}});
   if(a==="finish")   return finishRun();
   if(a==="zoom") return openLightbox(el.dataset.src, el.dataset.label);
   if(a==="maplook"){
@@ -3019,7 +3082,7 @@ if(params.has("debug")){
     const n=fin(0), rm=roomFor(n);
     rows.push({island:isl.name,climate:isl.zone,site:s.name,
       W:s.scores.water,H:s.scores.temp,Hu:s.scores.humidity,P:s.scores.plants,S:s.scores.shelter,
-      worst:fin(-2),none:n,best:fin(3), room:"★".repeat(rm.stars)+"☆".repeat(3-rm.stars)+" "+rm.word,
+      worst:fin(-3),none:n,best:fin(3), room:"★".repeat(rm.stars)+"☆".repeat(3-rm.stars)+" "+rm.word,
       outcome:outcomeFor(n).label});
   }));
   console.log("Sunrise Islands — balance (people after 3 years)"); console.table(rows);
