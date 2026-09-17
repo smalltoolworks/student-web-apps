@@ -29,6 +29,7 @@ h2{font-size:clamp(1.15rem, 1.8vw, 1.3rem);margin:1em 0 .4em}
 h3{font-size:1.05rem;margin:0 0 .25em}
 p{margin:0 0 .7em;max-width:65ch}
 .lede{font-size:clamp(.98rem, 1.35vw, 1.15rem);margin:0 0 .5em}
+.lede.how{color:var(--ink-soft);margin:-.2em 0 .6em}
 .muted{color:var(--ink-soft)}
 .center{text-align:center}
 
@@ -292,12 +293,20 @@ svg.map{width:100%;max-height:min(300px, 38vh);height:auto;display:block;touch-a
 .ledger tr.doubled td{background:#fff6e2;border-bottom-color:#ebd7b5}
 .ledger tr.doubled td:first-child{box-shadow:inset 5px 0 0 var(--warm);border-top-left-radius:6px;border-bottom-left-radius:6px}
 .ledger tr.doubled td:last-child{border-top-right-radius:6px;border-bottom-right-radius:6px}
-.ledger tr.choicerow td{background:#eef6fb;border-bottom-color:#c9e0eb}
-.ledger tr.choicerow td:first-child{box-shadow:inset 5px 0 0 var(--teal);border-top-left-radius:6px;border-bottom-left-radius:6px}
-.ledger tr.choicerow td:last-child{border-top-right-radius:6px;border-bottom-right-radius:6px}
 .ledger tr.sum td{border-bottom:none;border-top:3px double var(--ink);font-size:1.15rem;font-weight:800;padding-top:11px}
 .plus{color:var(--good)} .minus{color:var(--bad)}
 .x2{display:inline-block;background:var(--warm);color:#fff;border-radius:6px;padding:1px 7px;font-size:.8rem;margin-left:5px}
+/* The choice, shown inside the factor row it acted on. */
+.fixdelta{display:inline-block;border-radius:6px;padding:1px 7px;font-size:.85rem;margin-left:5px;
+  background:#e3f0f7;color:var(--teal);border:1px solid #c9e0eb}
+.fixdelta.minus{background:#fbe9e7;color:#b3402a;border-color:#eecfc8}
+.fixtag{margin-left:calc(1.5em + 4px);margin-top:3px;font-size:.8rem;font-weight:700;color:var(--teal)}
+.ledger tr.fixed td{background:#eef6fb;border-bottom-color:#c9e0eb}
+.ledger tr.fixed td:first-child{box-shadow:inset 5px 0 0 var(--teal);border-top-left-radius:6px;border-bottom-left-radius:6px}
+.ledger tr.fixed td:last-child{border-top-right-radius:6px;border-bottom-right-radius:6px}
+/* Counts twice AND your choice touched it: keep the crisis colour, flag the choice. */
+.ledger tr.doubled.fixed td{background:#fff6e2;border-bottom-color:#ebd7b5}
+.ledger tr.doubled.fixed td:first-child{box-shadow:inset 5px 0 0 var(--teal)}
 .popline{font-size:1.5rem;font-weight:800;margin:12px 0 0;text-align:center}
 .popline .arrow{color:var(--ink-soft);margin:0 .35em}
 .banner{border-radius:var(--r);padding:13px 18px;margin:0 0 16px;font-weight:700}
@@ -753,15 +762,15 @@ const ISLANDS = Object.freeze([
           {n:2,title:"The Big Wet",doubles:"humidity",headline:"Rain for weeks. Humidity counts twice."},
           {n:3,title:"Cyclone!",doubles:"shelter",headline:"A cyclone hits. Shelter counts twice."}],
    cards:[
-     {q:"How should we build our houses?", opts:[
+     {q:"How should we build our houses?", fix:"shelter", opts:[
        {t:"Thick mud walls", d:1, why:"Helps with heat, but holds the damp in."},
        {t:"On stilts, off the wet ground", d:3, why:"Stilts keep homes above the flood. Darwin houses do this."},
        {t:"Low on the ground", d:-2, why:"The wet season runs straight through them."}]},
-     {q:"Six weeks of rain. The food is going mouldy.", opts:[
+     {q:"Six weeks of rain. The food is going mouldy.", fix:"humidity", opts:[
        {t:"Cover it with palm leaves", d:1, why:"Keeps rain off. The air is still wet."},
        {t:"Bury it to keep it cool", d:-2, why:"Warm wet ground rots food even faster."},
        {t:"Lift the store up and dry food by the fire", d:3, why:"In wet air, food must stay up high and dry."}]},
-     {q:"A cyclone is coming!", opts:[
+     {q:"A cyclone is coming!", fix:"shelter", opts:[
        {t:"Shelter in the rock cave", d:3, why:"Solid rock, above the flood. The safest place."},
        {t:"Tie the roofs down and stay", d:1, why:"Cyclone winds still rip roofs off."},
        {t:"Go to the beach and watch", d:-2, why:"Cyclones push the sea onto the shore."}]}]},
@@ -795,15 +804,15 @@ const ISLANDS = Object.freeze([
           {n:2,title:"Heatwave",doubles:"temp",headline:"Two weeks over 45°C. Heat counts twice."},
           {n:3,title:"The Long Dry",doubles:"water",headline:"A whole year with no rain. Water counts twice."}],
    cards:[
-     {q:"Hot days, freezing nights. What do we build with?", opts:[
+     {q:"Hot days, freezing nights. What do we build with?", fix:"temp", opts:[
        {t:"A light shade shelter", d:1, why:"Good by day. Freezing by morning."},
        {t:"Timber huts", d:-2, why:"There are no trees in a desert."},
        {t:"Thick mud bricks", d:3, why:"Thick walls stay cool by day and warm at night."}]},
-     {q:"45°C for two weeks!", opts:[
+     {q:"45°C for two weeks!", fix:"temp", opts:[
        {t:"Work at dawn, rest at midday", d:1, why:"Smart. But the shade is still 45°C."},
        {t:"Dig cool rooms into the rock", d:3, why:"Underground stays cool. Coober Pedy really does this."},
        {t:"Keep working all day", d:-2, why:"People collapse in that heat."}]},
-     {q:"No rain for a year. The waterhole is shrinking.", opts:[
+     {q:"No rain for a year. The waterhole is shrinking.", fix:"water", opts:[
        {t:"Dig a deep well", d:3, why:"Water underground lasts longest. Deep water wells keep inland towns alive."},
        {t:"Carry water from the hills", d:1, why:"It works, but it takes all day."},
        {t:"Wait for rain", d:-2, why:"Rain may not come for another year."}]}]},
@@ -837,14 +846,14 @@ const ISLANDS = Object.freeze([
           {n:2,title:"Dry Summer",doubles:"water",headline:"Months with no rain. Water counts twice."},
           {n:3,title:"Grass Fire!",doubles:"shelter",headline:"Dry grass and hot wind. Shelter counts twice."}],
    cards:[
-     {q:"Grass everywhere. What do we do with it?", opts:[
+     {q:"Grass everywhere. What do we do with it?", fix:"plants", opts:[
        {t:"Fish instead", d:1, why:"There are fish. The real riches are on the plains."},
        {t:"Graze sheep and cattle", d:3, why:"Too dry for thirsty crops, but grass feeds animals. That is why inland Australia runs sheep and cattle."},
        {t:"Plough it for thirsty crops", d:-2, why:"Not enough rain. They dry up and die."}]},
-     {q:"The creek is low and summer has months to go.", opts:[
+     {q:"The creek is low and summer has months to go.", fix:"water", opts:[
        {t:"Build a dam to store water", d:3, why:"Save water in the wet, use it in the dry. Farm dams dot inland Australia."},
        {t:"Wait for rain", d:-2, why:"The dry spell can last for months."},{t:"Dig for water in the dry creek", d:1, why:"Finds a little water, then dries out."}]},
-     {q:"Smoke on the horizon!", opts:[
+     {q:"Smoke on the horizon!", fix:"shelter", opts:[
        {t:"Clear a bare strip", d:1, why:"It helps, but embers blow across."},
        {t:"Fight it when it comes", d:-2, why:"A grass fire moves faster than you can run."},
        {t:"Burn small patches early", d:3, why:"Small cool fires stop one big fire. Aboriginal peoples have done this for thousands of years."}]}]},
@@ -878,15 +887,15 @@ const ISLANDS = Object.freeze([
           {n:2,title:"Warm Summer",doubles:"temp",headline:"A long warm summer. Heat counts twice."},
           {n:3,title:"Winter Rain",doubles:"shelter",headline:"Rain all winter. Shelter counts twice."}],
    cards:[
-     {q:"Where do the houses go?", opts:[
+     {q:"Where do the houses go?", fix:"shelter", opts:[
        {t:"High on the windy hill", d:1, why:"Safe and dry, but a long walk to water."},
        {t:"Right on the riverbank", d:-2, why:"Winter rain lifts the river over the bank."},
        {t:"Near the river, above the flood line", d:3, why:"Water close by, and safe from winter floods."}]},
-     {q:"A long, warm summer.", opts:[
+     {q:"A long, warm summer.", fix:"plants", opts:[
        {t:"Plant grain and vegetables", d:3, why:"A long growing season. Temperate Australia grows most of our food."},
        {t:"Plant nothing yet", d:-2, why:"A whole growing season wasted."},
        {t:"Plant fruit trees only", d:1, why:"They do well, but take years to fruit."}]},
-     {q:"Rain all winter.", opts:[
+     {q:"Rain all winter.", fix:"shelter", opts:[
        {t:"Flat roofs to catch the rain", d:-2, why:"Flat roofs pool water and leak."},
        {t:"Sloped roofs and drains", d:3, why:"Steady rain needs somewhere to run."},
        {t:"Do nothing", d:1, why:"Gentle rain, but weeks of it soaks in."}]}]},
@@ -997,24 +1006,41 @@ const COPY = Object.freeze({
 /* ============================================================
    2. SIM
    ============================================================ */
-function yearLedger(scores, island, i){
+/* A card does not add a floating bonus to the year. It lands on the ONE factor
+   it is about (card.fix), and it lands BEFORE the year's x2. So a good decision
+   pays off biggest in the very crisis it answers - and a decision about heat
+   still cannot do anything about the water line above it. */
+function yearLedger(scores, island, i, cardFix, cardDelta){
   const y = island.years[i];
+  const d = cardDelta || 0;
   const rows = FACTORS.map(f=>{
     const base = CONTRIB[f.key][scores[f.key]];
+    const fix = (cardFix === f.key) ? d : 0;
     const doubled = y.doubles === f.key;
+    const adjusted = base + fix;
     return {key:f.key, label:f.label, emoji:f.emoji, score:scores[f.key],
-            word:f.words[scores[f.key]], base, doubled, value:doubled?base*2:base};
+            word:f.words[scores[f.key]], base, fix, doubled,
+            value: doubled ? adjusted*2 : adjusted};
   });
   return {year:y, rows, factorTotal:rows.reduce((a,b)=>a+b.value,0)};
+}
+/* What the choice was really worth this year - doubled too, if it hit the
+   doubled factor. This is the number the result screen reports back. */
+function cardEffect(L, cardFix, cardDelta){
+  const r = L.rows.find(x=>x.key===cardFix);
+  if(!r || !cardDelta) return 0;
+  return r.doubled ? cardDelta*2 : cardDelta;
 }
 function simulate(scores, island, cardDelta){
   let pop = START_POP; const out=[];
   for(let i=0;i<island.years.length;i++){
-    const L = yearLedger(scores, island, i);
-    const total = L.factorTotal + (cardDelta||0);
+    const fix = island.cards[i] ? island.cards[i].fix : null;
+    const L = yearLedger(scores, island, i, fix, cardDelta);
+    const total = L.factorTotal;
     const before = pop;
     pop = Math.max(0, pop + total);
-    out.push({...L, cardDelta:cardDelta||0, total, before, after:pop});
+    out.push({...L, cardDelta:cardDelta||0, cardFix:fix,
+              cardEffect:cardEffect(L, fix, cardDelta||0), total, before, after:pop});
     if(pop===0) break;
   }
   return out;
@@ -1047,6 +1073,7 @@ function validate(){
       [...row].forEach(ch=>{ if(!TERRAIN[ch]) p.push(`${isl.name} row ${i}: unknown terrain "${ch}"`); });
     });
     if(isl.cards.length!==isl.years.length) p.push(`${isl.name}: ${isl.cards.length} cards vs ${isl.years.length} years`);
+    isl.cards.forEach((c,i)=>{ if(!FKEYS.includes(c.fix)) p.push(`${isl.name} card ${i+1}: bad or missing fix "${c.fix}"`); });
     isl.years.forEach(y=>{ if(y.doubles && !FKEYS.includes(y.doubles)) p.push(`${isl.name} yr ${y.n}: bad doubles`); });
     isl.sites.forEach(s=>{
       const m = waterScoreFromMap(isl.map,s.c,s.r);
@@ -1238,6 +1265,27 @@ function climateBox(isl){
     <p style="margin:0 0 6px;font-weight:700"><span class="zone z-${isl.zone}">${isl.zone}</span> ${esc(isl.like)}</p>
     ${rainRow(isl)}${climateScores(isl,true)}</div>`;
 }
+/* The words on this screen and the words the voice says come from here, so they
+   cannot drift apart. Keep them in step with the arch_* entries in
+   scripts/generate_audio.js - those are what the pre-recorded .wav files say. */
+function archNote(n){
+  return n===0 ? `Settle any <strong>two</strong> islands. Do more if you want to.`
+    : n===1 ? `One island done! Settle <strong>one more</strong>, then you can go and think about Australia.`
+    : `${n} islands settled! Settle more if you want to, or tap <strong>I'm ready to think</strong>.`;
+}
+function archHow(n){
+  return n===0 ? `Tap <strong>🔊 Listen</strong> on an island to hear what it is like, then tap the island to explore it.`
+    : n===1 ? `Tap any island card to travel there.`
+    : "";
+}
+/* Tags out, and emoji too - a browser voice reads "speaker high volume" aloud. */
+const plainText = html => html
+  .replace(/<[^>]+>/g, " ")
+  .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, " ")
+  .replace(/\s+/g, " ")
+  .replace(/\s+([,.!?;:])/g, "$1")
+  .trim();
+
 const reflectBtn = () => canReflect()
   ? `<button class="btn big warmbtn" data-action="go" data-screen="australia">I'm ready to think →</button>` : "";
 
@@ -1293,14 +1341,13 @@ function screenArch(){
       ${rainRow(isl)}${climateScores(isl,false)}${variesRows(isl)}</div>`;
   }).join("");
   const n = state.completed.length;
-  const note = n===0 ? `Settle any <strong>two</strong> islands. Do more if you want to.`
-    : n===1 ? `One done. Settle <strong>one more</strong>, then you can go and think.`
-    : `${n} done. Settle more, or go and think about Australia.`;
+  const how = archHow(n);
   return `<div class="screen-topbar">
       <button class="btn secondary sm" data-action="go" data-screen="intro" title="Back to start screen">← Start</button>
       <h1 tabindex="-1">${COPY.archH}</h1>
     </div>
-    <p class="lede">${note}</p>
+    <p class="lede">${archNote(n)}</p>
+    ${how ? `<p class="lede how">${how}</p>` : ""}
     ${state.completed.length===0 ? `<div class="climate-hint">
       <span class="hint-ic">💡</span><p>${COPY.climateLine}</p></div>` : ""}
     <div class="isles">${cards}</div>
@@ -1395,13 +1442,24 @@ function screenYear(){
       <span>${esc(o.t)}</span>
       <span class="delta ${o.d>0?"plus":(o.d<0?"minus":"")}">${o.d>0?"+":""}${o.d}</span></div>`;
   }).join("");
+  const sgn = n => (n>0?"+":"")+n;
+  // The choice lands IN the row it is about, so the student can see both what it
+  // fixed and what it could not touch. The five rows now sum to Change on their own.
   const rows = rec.rows.map(r=>{
-    const calc = r.doubled ? `<span class="muted">${(r.base>0?"+":"")+r.base}</span><span class="x2">×2</span> ` : "";
-    return `<tr class="${r.doubled?"doubled":""}">
-      <td><span class="ledger-ic">${r.emoji}</span> <strong>${r.label}</strong> <span class="muted">${r.word}</span></td>
-      <td class="num">${calc}<span class="${r.value>=0?"plus":"minus"}">${(r.value>0?"+":"")+r.value}</span></td></tr>`;
+    let calc = "";
+    if(r.fix || r.doubled){
+      calc = `<span class="muted">${sgn(r.base)}</span>`;
+      if(r.fix) calc += `<span class="fixdelta ${r.fix>0?"plus":"minus"}">${sgn(r.fix)}</span>`;
+      if(r.doubled) calc += `<span class="x2">×2</span>`;
+      calc += " ";
+    }
+    const tag = r.fix ? `<div class="fixtag">${r.fix>0?"✓":"✕"} Your choice: ${esc(chosen.t)}</div>` : "";
+    const cls = [r.doubled?"doubled":"", r.fix?"fixed":""].filter(Boolean).join(" ");
+    return `<tr class="${cls}">
+      <td><span class="ledger-ic">${r.emoji}</span> <strong>${r.label}</strong> <span class="muted">${r.word}</span>${tag}</td>
+      <td class="num">${calc}<span class="${r.value>=0?"plus":"minus"}">${sgn(r.value)}</span></td></tr>`;
   }).join("");
-  const cd=rec.cardDelta, total=rec.total, gone=rec.after===0;
+  const total=rec.total, gone=rec.after===0;
   const more = i+1 < isl.years.length && !gone;
   return head + `
     <div class="year-result-grid">
@@ -1414,8 +1472,6 @@ function screenYear(){
         <table class="ledger">
           <thead><tr><th>This year</th><th style="text-align:right">People</th></tr></thead>
           <tbody>${rows}
-            <tr class="choicerow"><td><span class="ledger-ic">🤔</span> <strong>Your choice</strong> <span class="muted">${esc(chosen.t)}</span></td>
-              <td class="num"><span class="${cd>=0?"plus":"minus"}">${cd>0?"+":""}${cd}</span></td></tr>
             <tr class="sum"><td>Change</td><td class="num ${total>=0?"plus":"minus"}">${total>0?"+":""}${total}</td></tr>
           </tbody></table>
         <p class="popline" style="margin:8px 0 0">${rec.before}<span class="arrow">→</span>${rec.after}</p>
@@ -1878,12 +1934,11 @@ function getScreenSpeechText(){
   }
   if(s==="arch"){
     const n = state.completed.length;
-    const guide = n === 0
-      ? "Pick an island. Climate is the weather a place usually gets. Settle any two islands. Listen to each island to hear what it is like, then tap an island to explore!"
-      : (n === 1
-          ? "One island done! Settle one more, then you can go and think about Australia."
-          : `${n} islands settled! Settle more, or tap I am ready to think about Australia.`);
-    return [guide];
+    // Same order as the screen, top to bottom, so a student can follow along
+    // with a finger. The climate hint sits UNDER the instructions, so it is read last.
+    const head = n === 0 ? [COPY.archH + "."] : [];
+    const tail = n === 0 ? [plainText(COPY.climateLine)] : [];
+    return [...head, plainText(archNote(n)), plainText(archHow(n)), ...tail].filter(Boolean);
   }
   if(s==="island"){
     const isl = currentIsland();
@@ -2765,18 +2820,19 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeLightbox(); }
    ============================================================ */
 function chooseCard(idx){
   const isl=currentIsland(), s=siteById(isl,state.run.siteId), i=state.run.yearIndex;
-  const delta=isl.cards[i].opts[idx].d;
-  const L=yearLedger(s.scores,isl,i);
+  const card=isl.cards[i], delta=card.opts[idx].d;
+  const L=yearLedger(s.scores,isl,i,card.fix,delta);
   const before=state.run.history.length?state.run.history[state.run.history.length-1].after:START_POP;
-  const total=L.factorTotal+delta;
-  const rec={...L,cardIdx:idx,cardDelta:delta,total,before,after:Math.max(0,before+total)};
+  const total=L.factorTotal;
+  const rec={...L,cardIdx:idx,cardDelta:delta,cardFix:card.fix,
+             cardEffect:cardEffect(L,card.fix,delta),total,before,after:Math.max(0,before+total)};
   setState({run:{...state.run,cardChoice:idx,history:[...state.run.history,rec]}});
 }
 function finishRun(){
   const isl=currentIsland(), s=siteById(isl,state.run.siteId);
   const pops=[START_POP,...state.run.history.map(h=>h.after)];
   const final=pops[pops.length-1];
-  const cardTotal=state.run.history.reduce((a,h)=>a+h.cardDelta,0);
+  const cardTotal=state.run.history.reduce((a,h)=>a+(h.cardEffect||0),0);
   // Keep the actual decisions so the result screen can explain what they caused.
   const choices=state.run.history.map(h=>h.cardIdx);
   setState({completed:[...state.completed,{islandId:isl.id,siteId:s.id,siteName:s.name,

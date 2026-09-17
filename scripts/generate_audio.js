@@ -83,7 +83,8 @@ const AUDIO_TRACKS = [
   },
   {
     id: "arch_start",
-    text: "Pick an island. Climate is the weather a place usually gets. Settle any two islands. Do more if you want to. Tap the speaker on each island to hear what it is like, then tap an island to explore."
+    // Read in the order the words appear on screen, so a student can follow along.
+    text: "Pick an island. Settle any two islands. Do more if you want to. Tap Listen on an island to hear what it is like, then tap the island to explore it. Climate is the weather a place usually gets. Look at how hot it is, how humid it is (how wet the air is), and what plants grow."
   },
   {
     id: "arch_done1",
@@ -418,7 +419,13 @@ async function synthesize(track) {
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`HTTP ${res.status}: ${err}`);
+    const e = new Error(`HTTP ${res.status}: ${err}`);
+    e.status = res.status;
+    // Only a per-day violation is worth stopping for; per-minute throttling just needs a wait.
+    e.perDay = /PerDay|per_model_per_day|RequestsPerDay/i.test(err);
+    const m = err.match(/"retryDelay":\s*"(\d+(?:\.\d+)?)s"/);
+    e.retryAfter = m ? Math.ceil(parseFloat(m[1])) : null;
+    throw e;
   }
 
   const data = await res.json();
@@ -445,23 +452,39 @@ async function synthesize(track) {
   return true;
 }
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// Per-minute throttling is normal on a long run; wait it out rather than giving up.
+async function synthesizeWithRetry(track, attempts = 4) {
+  for (let n = 1; ; n++) {
+    try {
+      return await synthesize(track);
+    } catch (e) {
+      if (e.status !== 429 || e.perDay || n >= attempts) throw e;
+      const wait = Math.min(e.retryAfter ? e.retryAfter + 1 : 20 * n, 70);
+      console.log(`   ⏳ [${track.id}] rate limited - waiting ${wait}s (attempt ${n}/${attempts - 1})`);
+      await sleep(wait * 1000);
+    }
+  }
+}
+
 async function run() {
   console.log(`Starting audio check/generation for ${AUDIO_TRACKS.length} tracks...`);
   let count = 0;
   for (const track of AUDIO_TRACKS) {
     try {
-      const generated = await synthesize(track);
+      const generated = await synthesizeWithRetry(track);
       count++;
       if (generated && hasApiKey) {
         // Brief pause between Gemini API requests to respect rate limits
-        await new Promise(r => setTimeout(r, 1200));
+        await sleep(6000);
       }
     } catch (e) {
-      const daily = /RequestsPerDay/i.test(e.message) || /per_model_per_day/i.test(e.message);
+      const daily = e.perDay;
       console.error(`   ✕ Failed for [${track.id}]:`, e.message.split("\n")[0]);
       if (daily) {
         const left = AUDIO_TRACKS.length - count;
-        console.error(`\n🛑 Daily TTS quota reached (free tier: 100 requests/day).`);
+        console.error(`\n🛑 Daily TTS request quota reached for this project.`);
         console.error(`   ${left} track(s) not generated. Progress is saved - re-run tomorrow`);
         console.error(`   and only the missing tracks will be recorded.\n`);
         break;
