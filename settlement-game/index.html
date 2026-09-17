@@ -359,6 +359,27 @@ svg.map{width:100%;max-height:min(300px, 38vh);height:auto;display:block;touch-a
 .opt.best{border-color:var(--good);background:#e4f4ea}
 .opt.dim{opacity:.5}
 /* ranking */
+.rankwrap{display:grid;grid-template-columns:1fr minmax(210px,.8fr);gap:18px;margin-top:14px;align-items:start}
+.rankhead{font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;font-weight:800;
+  color:var(--ink-soft);margin:0 0 8px}
+.rankwrap .opts{margin-top:0}
+.allplaced{margin:0;padding:18px 16px;border:2px dashed var(--line);border-radius:14px;
+  background:#fdfaf2;color:var(--ink-soft);line-height:1.5}
+.slots{display:grid;gap:11px}
+.slot{display:flex;align-items:center;gap:10px;min-height:62px;padding:13px 14px;
+  border:2px dashed var(--line);border-radius:14px;background:#fdfaf2}
+.slot .slotno{font-weight:800;color:var(--ink-soft);flex:0 0 auto;font-size:1rem}
+.slot .slottext{font-weight:700;line-height:1.25}
+.slot .slottext.hint{font-weight:400;color:var(--ink-soft);font-size:.86rem;font-style:italic}
+.slot.next{border-style:solid;border-color:var(--teal);background:#eef6fb}
+.slot.next .slotno{color:var(--teal)}
+.slot.full{border-style:solid;border-color:var(--teal);background:#fff}
+.slot.full .slotno{color:var(--teal)}
+.slot.full{cursor:pointer;text-align:left;font:inherit;width:100%;transition:border-color .12s}
+.slot.full:hover{border-color:var(--warm)}
+.slot.full:hover .slotx{opacity:1}
+.slot .slotx{margin-left:auto;color:var(--ink-soft);font-size:.9rem;opacity:.35;flex:0 0 auto}
+@media (max-width:700px){.rankwrap{grid-template-columns:1fr;gap:14px}}
 .opt.placed{border-color:var(--teal);background:#eef6fb;cursor:default}
 .mark.rankno{font-size:.8rem;font-weight:800;color:var(--teal);flex:0 0 auto;min-width:2.9em;
   background:#fff;border:2px solid var(--teal);border-radius:999px;padding:2px 6px;line-height:1.45;
@@ -1454,7 +1475,9 @@ function screenYear(){
   if(!isl || !state.run) return screenArch();
   const siteName = s ? s.name : "Settlement";
   const i=state.run.yearIndex, y=isl.years[i], card=isl.cards[i];
-  const order=state.run.ranking||[], ranked=order.length===card.opts.length;
+  const order=state.run.ranking||[];
+  const full=order.length===card.opts.length;      // all three placed, not yet locked
+  const scored=state.run.history.length>i;         // locked in - this year has happened
   const popNow = state.run.history.length ? state.run.history[state.run.history.length-1].after : START_POP;
   const head = `<div class="year-topbar">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:4px">
@@ -1466,20 +1489,44 @@ function screenYear(){
     </div>`;
 
   const PLACE = ["1st","2nd","3rd"];
-  if(!ranked){
-    // Only two taps are ever needed - the last option places itself.
-    const nextWord = order.length===0 ? "best" : "next best";
+  if(!scored){
+    // Tapping, not dragging: drag needs a steady hand and does not work on a
+    // classroom iPad without a touch polyfill. The numbered slots give the same
+    // "put it there" picture, and an answer only ever needs one tap.
+    // Only two taps are ever needed - the last answer drops into #3 by itself.
+    const left = card.opts.map((o,idx)=>idx).filter(idx=>!order.includes(idx));
+    const answers = left.length
+      ? left.map(idx =>
+          `<button class="opt" data-action="rank" data-i="${idx}"><span class="mark">→</span><span>${esc(card.opts[idx].t)}</span></button>`
+        ).join("")
+      : `<p class="allplaced">All three placed.<br>Check your order, then lock it in.</p>`;
+    const slots = [0,1,2].map(k=>{
+      const idx = order[k];
+      if(idx !== undefined) return `<button class="slot full" data-action="rankclear" data-k="${k}"
+        title="Take this one out and try again"><span class="slotno">#${k+1}</span>
+        <span class="slottext">${esc(card.opts[idx].t)}</span><span class="slotx">✕</span></button>`;
+      const isNext = k === order.length;
+      const hint = isNext ? "tap an answer" : (k===2 && order.length===1 ? "fills itself" : "");
+      return `<div class="slot ${isNext?"next":"empty"}"><span class="slotno">#${k+1}</span>
+        <span class="slottext hint">${hint}</span></div>`;
+    }).join("");
+    const prompt = full
+      ? `Happy with this order? Tap a slot to change it, or lock it in.`
+      : `Tap the <strong>${order.length===0?"best":"next best"}</strong> answer. It goes into <strong>#${order.length+1}</strong>.`;
     return head + `<div class="decision"><h2>${esc(card.q)}</h2>
-      <p class="muted">Put them in order. Tap the <strong>${nextWord}</strong> one.</p>
-      <div class="opts">${card.opts.map((o,idx)=>{
-        const at = order.indexOf(idx);
-        return at > -1
-          ? `<div class="opt placed"><span class="mark rankno">${PLACE[at]}</span><span>${esc(o.t)}</span></div>`
-          : `<button class="opt" data-action="rank" data-i="${idx}"><span class="mark">→</span><span>${esc(o.t)}</span></button>`;
-      }).join("")}
-      </div>
-      ${order.length ? `<button class="btn secondary sm" data-action="rankreset" style="margin-top:10px">↺ Start again</button>` : ""}
-      </div>`;
+      <p class="muted">${prompt}</p>
+      <div class="rankwrap">
+        <div class="rankcol">
+          <p class="rankhead">Answers</p>
+          <div class="opts">${answers}</div>
+        </div>
+        <div class="rankcol">
+          <p class="rankhead">Your order</p>
+          <div class="slots">${slots}</div>
+          ${full ? `<button class="btn big" data-action="rankconfirm" style="width:100%;margin-top:12px">✓ Lock in my order</button>` : ""}
+          ${order.length ? `<button class="btn secondary sm" data-action="rankreset" style="margin-top:${full?"8":"12"}px">↺ Start again</button>` : ""}
+        </div>
+      </div></div>`;
   }
 
   const rec=state.run.history[state.run.history.length-1];
@@ -2041,7 +2088,7 @@ function getScreenSpeechText(){
     const site = siteById(isl, state.run.siteId);
     const siteName = site ? site.name : "";
     const i = state.run.yearIndex, y = isl.years[i], card = isl.cards[i];
-    const ranked = (state.run.ranking || []).length === card.opts.length;
+    const ranked = state.run.history.length > i;
     const popNow = state.run.history.length ? state.run.history[state.run.history.length-1].after : START_POP;
     if(!ranked){
       return [
@@ -2495,8 +2542,8 @@ function getPreRenderedAudioTrack(){
     const isl = currentIsland();
     if(!isl || !state.run) return null;
     const yr = state.run.yearIndex + 1, ord = state.run.ranking || [];
-    if(ord.length !== (isl.cards[state.run.yearIndex] || {opts:[]}).opts.length){
-      return `audio/${isl.id}_y${yr}.wav`;
+    if(state.run.history.length <= state.run.yearIndex){
+      return `audio/${isl.id}_y${yr}.wav`;   // still deciding
     }
     return ord.map(k => `audio/card_${isl.id}_y${yr}_${k}.wav`);
   }
@@ -2884,15 +2931,25 @@ function rankPick(idx){
   if(order.length===card.opts.length-1){
     order.push(card.opts.map((_,k)=>k).find(k=>!order.includes(k)));
   }
-  if(order.length<card.opts.length) return setState({run:{...state.run,ranking:order}});
-
+  return setState({run:{...state.run,ranking:order}});
+}
+/* Clearing a slot clears the ones below it too - otherwise #3 would be left
+   stranded under an empty #2. */
+function rankClear(k){
+  setState({run:{...state.run,ranking:(state.run.ranking||[]).slice(0,k)}});
+}
+/* Placing is provisional; this is where the year actually happens. */
+function rankConfirm(){
+  const isl=currentIsland(), s=siteById(isl,state.run.siteId), i=state.run.yearIndex;
+  const card=isl.cards[i], order=state.run.ranking||[];
+  if(order.length!==card.opts.length || state.run.history.length>i) return;
   const delta=rankScore(card,order);
   const L=yearLedger(s.scores,isl,i,card.fix,delta);
   const before=state.run.history.length?state.run.history[state.run.history.length-1].after:START_POP;
   const total=L.factorTotal;
   const rec={...L,ranking:order,cardIdx:order[0],cardDelta:delta,cardFix:card.fix,
              cardEffect:cardEffect(L,card.fix,delta),total,before,after:Math.max(0,before+total)};
-  setState({run:{...state.run,ranking:order,history:[...state.run.history,rec]}});
+  setState({run:{...state.run,history:[...state.run.history,rec]}});
 }
 function finishRun(){
   const isl=currentIsland(), s=siteById(isl,state.run.siteId);
@@ -2989,7 +3046,9 @@ function handle(el){
     return setState({screen:"island", openSite: siteId || (isl ? isl.sites[0].id : null)});
   }
   if(a==="predict"){ state.prediction=+el.dataset.v; return setState({screen:"year"}); }
-  if(a==="rank")     return rankPick(+el.dataset.i);
+  if(a==="rank")       return rankPick(+el.dataset.i);
+  if(a==="rankclear")  return rankClear(+el.dataset.k);
+  if(a==="rankconfirm")return rankConfirm();
   if(a==="nextyear") return setState({run:{...state.run,yearIndex:state.run.yearIndex+1,ranking:[]}});
   if(a==="rankreset") return setState({run:{...state.run,ranking:[]}});
   if(a==="finish")   return finishRun();
